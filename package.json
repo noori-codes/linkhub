@@ -6,8 +6,8 @@
   "author": "Imran Noori <imrannoori1919@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "",
-    "dev": "ts-node app.ts",
+    "start": "node ./dist/app.js",
+    "dev": "ts-node ./src/app.ts",
     "build": ""
   },
   "dependencies": {
@@ -16,5 +16,8 @@
   "devDependencies": {
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": "^24.0.0"
   }
 }
