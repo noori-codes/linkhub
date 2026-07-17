@@ -7,10 +7,14 @@
   "license": "MIT",
   "scripts": {
     "start": "",
-    "dev": "",
+    "dev": "ts-node app.ts",
     "build": ""
   },
   "dependencies": {
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
   }
 }
