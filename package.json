@@ -1,0 +1,16 @@
+{
+  "name": "linkhub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:noori-codes/linkhub.git",
+  "author": "Imran Noori <imrannoori1919@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "",
+    "dev": "",
+    "build": ""
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
