@@ -1,45 +1,30 @@
-import express from "express";
-
-const app = express();
-
-console.clear();
-
-app.listen(3000, () => {
-  console.log("Sever is app an running on port 3000");
-});
-
-console.log("hello world");
 import path from "path";
 import express, { Application, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
+// import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
-import hpp from "hpp";
-import cookieParser from "cookie-parser";
-import compression from "compression";
+// import mongoSanitize from "express-mongo-sanitize";
+// import xss from "xss-clean";
+// import hpp from "hpp";
+// import cookieParser from "cookie-parser";
+// import compression from "compression";
 import cors from "cors";
 
-import AppError from "./utils/appError";
+// import AppError from "./utils/appError";
 import globalErrorHandler from "./controllers/errorController";
 
-import tourRouter from "./routes/tourRoutes";
-import userRouter from "./routes/userRoutes";
-import reviewRouter from "./routes/reviewRoutes";
-import bookingRouter from "./routes/bookingRoutes";
-import viewRouter from "./routes/viewRoutes";
+// import tourRouter from "./routes/tourRoutes";
+// import userRouter from "./routes/userRoutes";
+// import reviewRouter from "./routes/reviewRoutes";
+// import bookingRouter from "./routes/bookingRoutes";
+// import viewRouter from "./routes/viewRoutes";
 
-import bookingController from "./controllers/bookingController";
+// import bookingController from "./controllers/bookingController";
 
 const app: Application = express();
 
 // Required behind Render / Heroku proxy
 app.set("trust proxy", 1);
-
-// View engine
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
 
 // ======================================
 // GLOBAL MIDDLEWARE
@@ -74,9 +59,6 @@ app.use(
         connectSrc: [
           "'self'",
           "https://unpkg.com",
-          "https://demotiles.maplibre.org",
-          "https://basemaps.cartocdn.com",
-          "https://js.stripe.com",
           "https://checkout.stripe.com",
         ],
         workerSrc: ["'self'", "blob:"],
@@ -106,13 +88,6 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-// Stripe webhook
-app.post(
-  "/webhook-checkout",
-  express.raw({ type: "application/json" }),
-  bookingController.webhookCheckout,
-);
-
 // Body parser
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
@@ -121,24 +96,24 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 // NoSQL Injection
-app.use(mongoSanitize());
+// app.use(mongoSanitize());
 
 // XSS
-app.use(xss());
+// app.use(xss());
 
 // HTTP Parameter Pollution
-app.use(
-  hpp({
-    whitelist: [
-      "duration",
-      "ratingQuantity",
-      "ratingAverage",
-      "maxGroupSize",
-      "difficulty",
-      "price",
-    ],
-  }),
-);
+// app.use(
+//   hpp({
+//     whitelist: [
+//       "duration",
+//       "ratingQuantity",
+//       "ratingAverage",
+//       "maxGroupSize",
+//       "difficulty",
+//       "price",
+//     ],
+//   }),
+// );
 
 // Compression
 app.use(compression());
@@ -153,11 +128,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ROUTES
 // ======================================
 
-app.use("/", viewRouter);
-app.use("/api/v1/tours", tourRouter);
-app.use("/api/v1/users", userRouter);
-app.use("/api/v1/reviews", reviewRouter);
-app.use("/api/v1/bookings", bookingRouter);
+// app.use("/", viewRouter);
+// app.use("/api/v1/tours", tourRouter);
+// app.use("/api/v1/users", userRouter);
+// app.use("/api/v1/reviews", reviewRouter);
+// app.use("/api/v1/bookings", bookingRouter);
 
 // 404
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
