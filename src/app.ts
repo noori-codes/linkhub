@@ -29,7 +29,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // 404 handler
-app.all("*", (req: Request, res: Response, next: NextFunction) => {
+app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 
