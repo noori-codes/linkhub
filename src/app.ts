@@ -6,6 +6,7 @@ import cors from "cors";
 
 import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/errorController.js";
+import userRouter from "./routes/user.routes.js";
 
 const app: Application = express();
 
@@ -20,13 +21,8 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(express.json({ limit: "10kb" }));
 
-// Test route
-app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({
-    status: "success",
-    message: "API is running 🚀",
-  });
-});
+// Routes
+app.use("/api/v1/users", userRouter);
 
 // 404 handler
 app.use((req, res, next) => {
