@@ -40,11 +40,13 @@ const handleJWTError = (): AppError =>
 const handleJWTExpiredError = (): AppError =>
   new AppError("Your token has expired! Please log in again.", 401);
 
-const sendErrorDev = (err: AppError, req: Request, res: Response) => {
-  return res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+const sendErrorDev = (err: any, req: Request, res: Response) => {
+  console.log("🔥 ERROR:", err);
+
+  res.status(err.statusCode || 500).json({
+    status: err.status || "error",
     message: err.message,
+    error: err,
     stack: err.stack,
   });
 };
@@ -72,15 +74,24 @@ const globalErrorHandler = (
   next: NextFunction,
 ) => {
   err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
 
+  // In development, send the original error (preserves message/stack/name)
+  if (process.env.NODE_ENV === "development") {
+    return sendErrorDev(err as any, req, res);
+  }
+
+  // Copy enumerable properties but keep original non-enumerable Error props
   const error = { ...err } as MongoError & {
     statusCode: number;
     isOperational?: boolean;
+    name?: string;
+    message?: string;
   };
 
-  if (process.env.NODE_ENV === "development") {
-    return sendErrorDev(error as AppError, req, res);
-  }
+  // Ensure message and name are available on the copied object
+  error.message = err.message ?? (error.message as any);
+  error.name = err.name ?? (error.name as any);
 
   let finalError = error as AppError;
 
