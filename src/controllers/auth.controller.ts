@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { promisify } from "node:util";
 import jwt from "jsonwebtoken";
 
 import User from "../models/user.model.js";
@@ -102,3 +103,56 @@ export const logout = (req: Request, res: Response) => {
     status: "success",
   });
 };
+
+export const protect = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // 1) Get token
+    let token: string | undefined;
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return next(
+        new AppError(
+          "You are not logged in! Please log in to get access.",
+          401,
+        ),
+      );
+    }
+
+    // 2) Verify token
+    const decoded = (await promisify(jwt.verify)(
+      token,
+      config.jwtSecret,
+    )) as JwtPayload;
+
+    // 3) Find user
+    const currentUser = await User.findById(decoded.id);
+
+    if (!currentUser) {
+      return next(
+        new AppError("The user belonging to this token no longer exists.", 401),
+      );
+    }
+
+    // 4) Check if password changed
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError(
+          "User recently changed password. Please log in again.",
+          401,
+        ),
+      );
+    }
+
+    // 5) Give access
+    req.user = currentUser;
+
+    next();
+  },
+);
