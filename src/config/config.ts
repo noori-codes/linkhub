@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 
-dotenv.config();
+import type { SignOptions } from "jsonwebtoken";
 
 export const config = {
-  jwtSecret: process.env.JWT_SECRET!,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN!,
+  jwtSecret: process.env.JWT_SECRET as string,
+
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"],
 };
