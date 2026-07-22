@@ -9,9 +9,12 @@ export interface IUser extends Document {
   password: string;
   photo: string;
 
-  passwordResetToken?: string;
-  passwordResetExpires?: Date;
-  passwordChangedAt?: Date;
+  passwordConfirm?: string;
+  active?: boolean;
+
+  passwordResetToken?: string | undefined;
+  passwordResetExpires?: Date | undefined;
+  passwordChangedAt?: Date | undefined;
 
   correctPassword(
     candidatePassword: string,
@@ -19,6 +22,8 @@ export interface IUser extends Document {
   ): Promise<boolean>;
 
   createPasswordResetToken(): string;
+
+  changedPasswordAfter?(JWTTimestamp: number): boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -67,13 +72,11 @@ const userSchema = new Schema<IUser>(
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   // Only run if password was modified
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 12);
-
-  next();
 });
 
 // Compare password
