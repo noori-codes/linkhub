@@ -9,12 +9,13 @@ export interface IUser extends Document {
   password: string;
   photo: string;
 
-  passwordConfirm?: string;
-  active?: boolean;
+  passwordConfirm: string | undefined;
 
-  passwordResetToken?: string | undefined;
-  passwordResetExpires?: Date | undefined;
-  passwordChangedAt?: Date | undefined;
+  passwordResetToken: string | undefined;
+
+  passwordResetExpires: Date | undefined;
+
+  passwordChangedAt: Date | undefined;
 
   correctPassword(
     candidatePassword: string,
@@ -23,7 +24,7 @@ export interface IUser extends Document {
 
   createPasswordResetToken(): string;
 
-  changedPasswordAfter?(JWTTimestamp: number): boolean;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -99,6 +100,18 @@ userSchema.methods.createPasswordResetToken = function (): string {
   this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
 
   return resetToken;
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp: number) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = Math.floor(
+      this.passwordChangedAt.getTime() / 1000,
+    );
+
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  return false;
 };
 
 const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);

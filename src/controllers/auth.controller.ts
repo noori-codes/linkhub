@@ -161,14 +161,14 @@ export const protect = catchAsync(
     }
 
     // 4) Check if password changed
-    // if (currentUser.changedPasswordAfter(decoded.iat)) {
-    //   return next(
-    //     new AppError(
-    //       "User recently changed password. Please log in again.",
-    //       401,
-    //     ),
-    //   );
-    // }
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError(
+          "User recently changed password. Please log in again.",
+          401,
+        ),
+      );
+    }
 
     // 5) Give access
     req.user = currentUser;
