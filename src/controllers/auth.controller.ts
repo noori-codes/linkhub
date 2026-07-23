@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import type { SignOptions } from "jsonwebtoken";
 
 import User, { type IUser } from "../models/user.model.js";
 import AppError from "../utils/appError.js";
@@ -16,10 +17,14 @@ interface JwtPayload {
   exp: number;
 }
 
-const signToken = (id: string) => {
-  return jwt.sign({ id }, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn,
-  });
+const signToken = (id: string): string => {
+  const options: SignOptions = {};
+
+  if (config.jwtExpiresIn) {
+    options.expiresIn = config.jwtExpiresIn;
+  }
+
+  return jwt.sign({ id }, config.jwtSecret, options);
 };
 
 // Send JWT token to client
@@ -41,7 +46,8 @@ const createSendToken = (
   });
 
   // Hide password from response
-  user.password = undefined;
+  const userObj = user.toObject();
+  delete userObj.password;
 
   res.status(statusCode).json({
     status: "success",
@@ -213,10 +219,9 @@ export const forgotPassword = catchAsync(
 export const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1) Hash token from URL
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(req.params.token)
-      .digest("hex");
+    const token = req.params.token as string;
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     // 2) Find user with token and valid expiration
     const user = await User.findOne({
