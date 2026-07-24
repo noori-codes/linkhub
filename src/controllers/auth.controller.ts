@@ -8,6 +8,7 @@ import catchAsync from "../utils/catchAsync.js";
 import { config } from "../config/config.js";
 import crypto from "crypto";
 import { promisify } from "node:util";
+import Email from "../config/email.js";
 
 // Create JWT token
 
@@ -203,11 +204,15 @@ export const forgotPassword = catchAsync(
 
     // For now we just send token in response
     // Later you can replace this with email service
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+
+    const email = new Email(user, resetURL);
+
+    await email.sendPasswordReset();
 
     res.status(200).json({
       status: "success",
-      message: "Token generated successfully",
-      resetToken,
+      message: "Password reset token sent to email!",
     });
   },
 );

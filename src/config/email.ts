@@ -1,8 +1,9 @@
-import path from "node:path";
 import nodemailer from "nodemailer";
-import pug from "pug";
-import { convert } from "html-to-text";
-import type { IUser } from "../models/user.model.js";
+
+interface EmailUser {
+  name: string;
+  email: string;
+}
 
 class Email {
   private to: string;
@@ -10,54 +11,81 @@ class Email {
   private url: string;
   private from: string;
 
-  constructor(user: IUser, url: string) {
+  constructor(user: EmailUser, url: string) {
     this.to = user.email;
-    this.firstName = user.name.split(" ")[0];
+    this.firstName = user.name.split(" ")[0] ?? user.name;
     this.url = url;
-    this.from = "Imran Noori <imran@noorullah.dev>";
+    this.from = `LinkHub <${process.env.EMAIL_FROM}>`;
   }
 
   private newTransport() {
     return nodemailer.createTransport({
-      host: "mail.noorullah.dev",
-      port: 587,
-      secure: false,
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: false, // true only for port 465
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
       tls: {
         rejectUnauthorized: false,
-      },
-      auth: {
-        user: "imran@noorullah.dev",
-        pass: process.env.EMAIL_PASSWORD,
       },
     });
   }
 
-  async send(template: string, subject: string) {
-    const html = pug.renderFile(
-      path.join(process.cwd(), "src", "views", "email", `${template}.pug`),
-      {
-        firstName: this.firstName,
-        url: this.url,
-        subject,
-      },
-    );
-
-    const mailOptions = {
+  private async send(subject: string, html: string) {
+    await this.newTransport().sendMail({
       from: this.from,
       to: this.to,
       subject,
       html,
-      text: convert(html),
-    };
-
-    await this.newTransport().sendMail(mailOptions);
+    });
   }
 
   async sendPasswordReset() {
-    await this.send(
-      "passwordReset",
-      "Your password reset token (valid for only 10 minutes)",
-    );
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+        <h2>Hello, ${this.firstName} 👋</h2>
+
+        <p>You requested to reset your LinkHub password.</p>
+
+        <p>
+          Click the button below to choose a new password.
+        </p>
+
+        <p style="margin: 30px 0;">
+          <a
+            href="${this.url}"
+            style="
+              background:#2563eb;
+              color:#fff;
+              text-decoration:none;
+              padding:12px 24px;
+              border-radius:6px;
+              display:inline-block;
+            "
+          >
+            Reset Password
+          </a>
+        </p>
+
+        <p>
+          This link is valid for <strong>10 minutes</strong>.
+        </p>
+
+        <p>
+          If you didn't request a password reset, you can safely ignore this email.
+        </p>
+
+        <hr>
+
+        <p style="color:#666;font-size:14px;">
+          LinkHub Team
+        </p>
+      </div>
+    `;
+
+    await this.send("Reset your LinkHub password", html);
   }
 }
 
