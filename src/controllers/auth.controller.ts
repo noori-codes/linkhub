@@ -54,7 +54,7 @@ const createSendToken = (
     status: "success",
     token,
     data: {
-      user,
+      user: userObj,
     },
   });
 };
