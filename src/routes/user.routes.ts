@@ -10,7 +10,12 @@ import {
   updatePassword,
 } from "../controllers/auth.controller.js";
 
-import { getMe, getUser } from "../controllers/user.controller.js";
+import {
+  getMe,
+  getUser,
+  updateMe,
+  deleteMe,
+} from "../controllers/user.controller.js";
 
 const router = Router();
 
@@ -26,6 +31,8 @@ router.use(protect);
 
 // Protected routes
 router.patch("/updateMyPassword", updatePassword);
+router.patch("/updateMe", updateMe);
+router.delete("/deleteMe", deleteMe);
 
 router.get("/me", getMe, getUser);
 
