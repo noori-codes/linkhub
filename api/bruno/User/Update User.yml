@@ -1,0 +1,54 @@
+info:
+  name: Update User
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/v1/users/updateMe
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Laura updated"
+      }
+  auth:
+    type: bearer
+    token: |-
+      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjM3NTQ1YTllYjZiMzUxMzBhMDY2OCIsImlhdCI6MTc4NDkwMzAxMSwiZXhwIjoxNzkyNjc5MDExfQ.jSxosTmGj-_VcHFotYyuy6RYo_JEVuKuCFDqiWGMf2I
+        "status": "success",
+        "data": {
+          "user": {
+            "_id": "6a5ca34c5277b21a0ba55925",
+            "name": "Laura updated",
+            "email": "imran@test.com",
+            "photo": "default.jpg",
+            "createdAt": "2026-07-19T10:13:32.487Z",
+            "updatedAt": "2026-07-24T14:37:36.258Z",
+            "__v": 0,
+            "passwordResetExpires": "2026-07-24T14:00:04.368Z",
+            "passwordResetToken": "d5ed0a1623c1110847e209a681d8d288568f06df78a310c54e566cd775d78103"
+          }
+        }
+      {
+        "status": "success",
+        "data": {
+          "user": {
+            "_id": "6a5ca34c5277b21a0ba55925",
+            "name": "Laura updated",
+            "email": "imran@test.com",
+            "photo": "default.jpg",
+            "createdAt": "2026-07-19T10:13:32.487Z",
+            "updatedAt": "2026-07-24T14:37:36.258Z",
+            "__v": 0,
+            "passwordResetExpires": "2026-07-24T14:00:04.368Z",
+            "passwordResetToken": "d5ed0a1623c1110847e209a681d8d288568f06df78a310c54e566cd775d78103"
+          }
+        }
+      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWNhMzRjNTI3N2IyMWEwYmE1NTkyNSIsImlhdCI6MTc4NDgxOTQ2OSwiZXhwIjoxNzkyNTk1NDY5fQ.yG6mI_rtPNGJZ3t0RpN0fpSB7YyWBUDG_XCYJ4VfwMY
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

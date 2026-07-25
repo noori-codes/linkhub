@@ -1,0 +1,18 @@
+info:
+  name: Delete User
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: http://localhost:3000/api/v1/users/deleteMe
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjM3NTQ1YTllYjZiMzUxMzBhMDY2OCIsImlhdCI6MTc4NDkwMzAxMSwiZXhwIjoxNzkyNjc5MDExfQ.jSxosTmGj-_VcHFotYyuy6RYo_JEVuKuCFDqiWGMf2I
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
