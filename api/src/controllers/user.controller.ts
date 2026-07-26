@@ -44,7 +44,8 @@ export const updateMe = catchAsync(
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
-        name: req.body.name,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         email: req.body.email,
       },
       {

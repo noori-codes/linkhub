@@ -3,19 +3,33 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 
+export type OnboardingStep =
+  | "profile"
+  | "socials"
+  | "theme"
+  | "links"
+  | "wallets"
+  | "tags"
+  | "done";
+
 export interface IUser extends Document {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  emailVerified: boolean;
+  emailVerifyToken: string | undefined;
+  emailVerifyExpires: Date | undefined;
   password: string;
   photo: string;
 
   passwordConfirm: string | undefined;
 
   passwordResetToken: string | undefined;
-
   passwordResetExpires: Date | undefined;
-
   passwordChangedAt: Date | undefined;
+
+  onboardingCompleted: boolean;
+  onboardingStep: OnboardingStep;
 
   correctPassword(
     candidatePassword: string,
@@ -23,15 +37,22 @@ export interface IUser extends Document {
   ): Promise<boolean>;
 
   createPasswordResetToken(): string;
+  createEmailVerifyToken(): string;
 
   changedPasswordAfter(JWTTimestamp: number): boolean;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
+    firstName: {
       type: String,
-      required: [true, "Please tell us your name."],
+      required: [true, "Please tell us your first name."],
+      trim: true,
+    },
+
+    lastName: {
+      type: String,
+      required: [true, "Please tell us your last name."],
       trim: true,
     },
 
@@ -41,6 +62,19 @@ const userSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email."],
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    emailVerifyToken: {
+      type: String,
+    },
+
+    emailVerifyExpires: {
+      type: Date,
     },
 
     photo: {
@@ -65,6 +99,17 @@ const userSchema = new Schema<IUser>(
 
     passwordResetExpires: {
       type: Date,
+    },
+
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    onboardingStep: {
+      type: String,
+      enum: ["profile", "socials", "theme", "links", "wallets", "tags", "done"],
+      default: "profile",
     },
   },
   {
@@ -100,6 +145,20 @@ userSchema.methods.createPasswordResetToken = function (): string {
   this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
 
   return resetToken;
+};
+
+// Create email verification token
+userSchema.methods.createEmailVerifyToken = function (): string {
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+
+  this.emailVerifyToken = crypto
+    .createHash("sha256")
+    .update(verifyToken)
+    .digest("hex");
+
+  this.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  return verifyToken;
 };
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp: number) {

@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 interface EmailUser {
-  name: string;
+  firstName: string;
   email: string;
 }
 
@@ -13,7 +13,7 @@ class Email {
 
   constructor(user: EmailUser, url: string) {
     this.to = user.email;
-    this.firstName = user.name.split(" ")[0] ?? user.name;
+    this.firstName = user.firstName;
     this.url = url;
     this.from = `LinkHub <${process.env.EMAIL_FROM}>`;
   }
