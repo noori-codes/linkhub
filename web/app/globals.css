@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
+/*
+  LinkHub brand tokens — Signal Amber on Ink
+  Use these everywhere (CSS + Tailwind theme below).
+  Later, per-profile Themes can override the same variable names.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --brand: #e8a317;
+  --brand-hover: #f0b429;
+  --brand-muted: #e8a31733;
+
+  /* Surfaces */
+  --bg: #0f1210;
+  --bg-elevated: #171c19;
+  --surface: #1c221e;
+
+  /* Text */
+  --text: #f3f0e8;
+  --text-muted: #a39e93;
+  --text-inverse: #0f1210;
+
+  /* Lines */
+  --border: #2a322c;
+
+  /* Feedback — use sparingly */
+  --success: #3d9a6a;
+  --danger: #d4544a;
+
+  /* Back-compat with the default Next template vars */
+  --background: var(--bg);
+  --foreground: var(--text);
 }
 
+/* Expose tokens to Tailwind utilities: bg-brand, text-muted, border-border, etc. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-muted: var(--brand-muted);
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }

@@ -7,5 +7,5 @@ variables:
     name: token
     description: JWT saved automatically after Login/Signup
   - name: linkId
-    value: 6a6cbbcd2d66e537e64ca606
+    value: 6a6cbd802d66e537e64ca607
     description: Last created link id (saved by Create Link)
