@@ -2,9 +2,7 @@
 
 - Select name, lastname, username, email(verify it),
 - Ask user which socials they have
-- Theme template selector, default if skipped.
 - Add link page
-- Look for alterntive profiles to add (advanced)
 - Select wallets to add.
 - Select tags
 
@@ -15,6 +13,24 @@
 - Reorder links
 - Links visibility toggle
 - Generate email signature for the user
+
+## Auth
+
+- Details
+  - name
+  - lastname
+  - username
+  - email(verify it)
+  - password
+  - tags
+  - description
+
+## UserImages
+
+- userId
+- backgroundImg
+- ProfileImg
+- ImageType (BackgroundImg, profileImg, normal)
 
 ## Shop
 
