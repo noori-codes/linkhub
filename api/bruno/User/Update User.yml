@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: http://localhost:3000/api/v1/users/updateMe
+  url: "{{baseUrl}}/api/v1/users/updateMe"
   body:
     type: json
     data: |-
@@ -13,10 +13,7 @@ http:
         "firstName": "Laura",
         "lastName": "Updated"
       }
-  auth:
-    type: bearer
-    token: |-
-      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjM3NTQ1YTllYjZiMzUxMzBhMDY2OCIsImlhdCI6MTc4NDkwMzAxMSwiZXhwIjoxNzkyNjc5MDExfQ.jSxosTmGj-_VcHFotYyuy6RYo_JEVuKuCFDqiWGMf2I
+  auth: inherit
 
 settings:
   encodeUrl: true

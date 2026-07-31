@@ -5,10 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:3000/api/v1/users/deleteMe
-  headers:
-    - name: Authorization
-      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNjM3NTQ1YTllYjZiMzUxMzBhMDY2OCIsImlhdCI6MTc4NDkwMzAxMSwiZXhwIjoxNzkyNjc5MDExfQ.jSxosTmGj-_VcHFotYyuy6RYo_JEVuKuCFDqiWGMf2I
+  url: "{{baseUrl}}/api/v1/users/deleteMe"
   auth: inherit
 
 settings:

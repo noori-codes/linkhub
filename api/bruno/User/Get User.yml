@@ -5,10 +5,8 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/v1/users/me
-  auth:
-    type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWNhMzRjNTI3N2IyMWEwYmE1NTkyNSIsImlhdCI6MTc4NDgxOTQ2OSwiZXhwIjoxNzkyNTk1NDY5fQ.yG6mI_rtPNGJZ3t0RpN0fpSB7YyWBUDG_XCYJ4VfwMY
+  url: "{{baseUrl}}/api/v1/users/me"
+  auth: inherit
 
 settings:
   encodeUrl: true

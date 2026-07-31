@@ -5,14 +5,13 @@ info:
 
 http:
   method: PATCH
-  url: http://localhost:3000/api/v1/links/reorder
+  url: "{{baseUrl}}/api/v1/links/reorder"
   body:
     type: json
     data: |-
       {
         "links": [
-          { "id": "LINK_ID_1", "order": 0 },
-          { "id": "LINK_ID_2", "order": 1 }
+          { "id": "{{linkId}}", "order": 0 }
         ]
       }
   auth:

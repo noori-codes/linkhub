@@ -1,1 +1,11 @@
 name: dev
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+    description: Local API base URL
+  - secret: true
+    name: token
+    description: JWT saved automatically after Login/Signup
+  - name: linkId
+    value: 6a6cbbcd2d66e537e64ca606
+    description: Last created link id (saved by Create Link)

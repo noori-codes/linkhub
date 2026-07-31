@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/v1/profiles/me
+  url: "{{baseUrl}}/api/v1/profiles/me"
   auth:
     type: bearer
     token: "{{token}}"

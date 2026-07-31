@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/users/login
+  url: "{{baseUrl}}/api/v1/users/login"
   body:
     type: json
     data: |-
@@ -13,7 +13,20 @@ http:
         "email": "noorullah.ahmadzai76@gmail.com",
         "password": "password123"
       }
-  auth: inherit
+  auth:
+    type: none
+
+# If this block doesn't show in Bruno → Scripts tab,
+# paste the same code manually (Post Response).
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        if (body.token) {
+          bru.setEnvVar("token", String(body.token));
+          bru.setVar("token", String(body.token));
+        }
 
 settings:
   encodeUrl: true

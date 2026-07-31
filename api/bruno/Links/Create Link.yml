@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/links
+  url: "{{baseUrl}}/api/v1/links"
   body:
     type: json
     data: |-
@@ -15,9 +15,22 @@ http:
         "type": "social",
         "platform": "github"
       }
+  # Prefer cookie from Login; Bearer is optional backup if {{token}} is set
   auth:
     type: bearer
     token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Save created link id for Update/Delete/Reorder
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        const linkId = body.data && body.data.link && body.data.link._id;
+        if (linkId) {
+          bru.setVar("linkId", linkId);
+          bru.setEnvVar("linkId", String(linkId));
+        }
 
 settings:
   encodeUrl: true

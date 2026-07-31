@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:3000/api/v1/links/LINK_ID_HERE
+  url: "{{baseUrl}}/api/v1/links/{{linkId}}"
   auth:
     type: bearer
     token: "{{token}}"

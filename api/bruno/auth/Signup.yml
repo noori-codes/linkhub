@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/users/signup
+  url: "{{baseUrl}}/api/v1/users/signup"
   body:
     type: json
     data: |-
@@ -16,7 +16,18 @@ http:
         "password": "password123",
         "passwordConfirm": "password123"
       }
-  auth: inherit
+  auth:
+    type: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        if (body.token) {
+          bru.setEnvVar("token", String(body.token));
+          bru.setVar("token", String(body.token));
+        }
 
 settings:
   encodeUrl: true

@@ -41,13 +41,20 @@ const createSendToken = (
 ) => {
   const token = signToken(user._id.toString());
 
+  // In development, keep cookie usable over plain http://localhost
+  // (Bruno/browser won't store/send Secure cookies on HTTP)
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.cookie("jwt", token, {
     expires: new Date(
       Date.now() +
         Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
-    secure: req.secure || req.headers["x-forwarded-proto"] === "https",
+    secure: isProduction
+      ? req.secure || req.headers["x-forwarded-proto"] === "https"
+      : false,
+    sameSite: "lax",
   });
 
   const userObject = user.toObject();
@@ -118,20 +125,34 @@ export const logout = (req: Request, res: Response) => {
 
 // =============================
 // PROTECT ROUTES
+// Accept JWT from Authorization header OR from the jwt cookie set on login
 // =============================
 
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let token: string | undefined;
 
+    // 1) Prefer Authorization: Bearer <token> (Bruno / SPA / mobile)
+    // Only use it when the token part is non-empty.
+    // Otherwise Bruno sending "Bearer {{token}}" with empty {{token}}
+    // would block the cookie fallback below.
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-      token = req.headers.authorization.split(" ")[1];
+      const headerToken = req.headers.authorization.split(" ")[1];
+      if (headerToken && headerToken !== "{{token}}") {
+        token = headerToken;
+      }
     }
 
-    if (!token) {
+    // 2) Fallback to cookie from login/signup (browser / Bruno cookie jar)
+    if (!token && req.cookies && req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    // No usable token in header or cookie
+    if (!token || token === "loggedout") {
       return next(
         new AppError(
           "You are not logged in! Please log in to get access.",
@@ -169,6 +190,7 @@ export const protect = catchAsync(
       );
     }
 
+    // Grant access — attach user for downstream controllers
     req.user = currentUser;
 
     next();

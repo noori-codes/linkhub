@@ -5,8 +5,9 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/v1/links/u/noori
-  auth: inherit
+  url: "{{baseUrl}}/api/v1/links/u/noori"
+  auth:
+    type: none
 
 settings:
   encodeUrl: true

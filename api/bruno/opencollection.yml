@@ -3,6 +3,13 @@ opencollection: 1.0.0
 info:
   name: linkhub
 bundled: false
+
+# Collection-level auth: all requests with "auth: inherit" use this token.
+# Login/Signup save the token automatically into {{token}}.
+auth:
+  type: bearer
+  token: "{{token}}"
+
 extensions:
   bruno:
     ignore:

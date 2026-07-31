@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/profiles
+  url: "{{baseUrl}}/api/v1/profiles"
   body:
     type: json
     data: |-
