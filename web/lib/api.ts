@@ -5,13 +5,22 @@ import type { ApiSuccess, PublicLink, PublicProfile } from "./types";
 const API_BASE =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3000";
+  "http://127.0.0.1:3000";
 
 async function getJson<T>(path: string): Promise<T | null> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    // Public profile data can refresh reasonably often while developing
-    next: { revalidate: 30 },
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      // Always fresh while building the public page in development
+      cache: "no-store",
+    });
+  } catch {
+    // Common when `cd api && yarn dev` is not running
+    throw new Error(
+      `Cannot reach API at ${API_BASE}${path}. Start the backend with: cd api && yarn dev`,
+    );
+  }
 
   if (res.status === 404) {
     return null;
