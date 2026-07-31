@@ -1,0 +1,24 @@
+info:
+  name: Update My Profile
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/v1/profiles/me
+  body:
+    type: json
+    data: |-
+      {
+        "bio": "Updated bio",
+        "status": "published"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

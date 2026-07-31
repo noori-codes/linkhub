@@ -1,0 +1,26 @@
+info:
+  name: Create Profile
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/profiles
+  body:
+    type: json
+    data: |-
+      {
+        "username": "noori",
+        "displayName": "Noori",
+        "bio": "Building LinkHub",
+        "tags": ["marketing", "affiliate"]
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
