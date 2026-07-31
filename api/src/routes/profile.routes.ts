@@ -10,10 +10,10 @@ import {
 
 const router = Router();
 
-// Public
+// Public — only published profiles
 router.get("/u/:username", getProfileByUsername);
 
-// Protect everything below
+// Everything below requires login (JWT → req.user)
 router.use(protect);
 
 router.post("/", createProfile);

@@ -1,0 +1,24 @@
+info:
+  name: Update Link
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/v1/links/LINK_ID_HERE
+  body:
+    type: json
+    data: |-
+      {
+        "title": "GitHub Profile",
+        "isVisible": true
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

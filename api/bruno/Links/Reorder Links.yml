@@ -1,0 +1,26 @@
+info:
+  name: Reorder Links
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/v1/links/reorder
+  body:
+    type: json
+    data: |-
+      {
+        "links": [
+          { "id": "LINK_ID_1", "order": 0 },
+          { "id": "LINK_ID_2", "order": 1 }
+        ]
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

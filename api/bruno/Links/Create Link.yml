@@ -1,0 +1,26 @@
+info:
+  name: Create Link
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/links
+  body:
+    type: json
+    data: |-
+      {
+        "title": "GitHub",
+        "url": "https://github.com/noori-codes",
+        "type": "social",
+        "platform": "github"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
