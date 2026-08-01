@@ -10,8 +10,7 @@ import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
 
 // NEXT_PUBLIC_* is baked into the browser bundle at build time —
 // that's why the client can call the API directly (different port = cross-origin).
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -41,6 +40,10 @@ export default function DashboardPage() {
   const [editUrl, setEditUrl] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [reordering, setReordering] = useState(false);
+  // Profile edit drafts — seeded from server profile when it loads/updates
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
   // Snapshot before a drag — if PATCH fails we restore this
   const linksBeforeDrag = useRef<PublicLink[]>([]);
   // Always-current links for commit (avoids stale closure on drag end)
@@ -113,6 +116,13 @@ export default function DashboardPage() {
     void loadDashboard();
   }, [router]);
 
+  // When profile arrives (or publish updates it), fill the edit form
+  useEffect(() => {
+    if (!profile) return;
+    setDisplayName(profile.displayName);
+    setBio(profile.bio);
+  }, [profile]);
+
   // PATCH = partial update. We only send { status }, not the whole profile.
   // Why read token again here? useEffect's token is scoped inside that function.
   // Click handlers run later — we re-read localStorage in case it changed (logout elsewhere).
@@ -125,8 +135,7 @@ export default function DashboardPage() {
       return;
     }
 
-    const nextStatus =
-      profile.status === "published" ? "draft" : "published";
+    const nextStatus = profile.status === "published" ? "draft" : "published";
 
     setSaving(true);
     setActionError("");
@@ -156,6 +165,50 @@ export default function DashboardPage() {
       setActionError("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
+    }
+  }
+
+  // Same endpoint as publish — different fields (displayName + bio)
+  async function onSaveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!profile || savingProfile) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setSavingProfile(true);
+    setActionError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/profiles/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          displayName: displayName.trim(),
+          bio: bio.trim(),
+        }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        profile: PublicProfile;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setActionError(data.message || "Could not update profile");
+        return;
+      }
+
+      setProfile(data.data.profile);
+    } catch {
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setSavingProfile(false);
     }
   }
 
@@ -260,9 +313,7 @@ export default function DashboardPage() {
     if (deletingId) return;
 
     // Browser confirm — cheap safety before a permanent action
-    const ok = window.confirm(
-      `Delete “${link.title}”? This cannot be undone.`,
-    );
+    const ok = window.confirm(`Delete “${link.title}”? This cannot be undone.`);
     if (!ok) return;
 
     const token = getToken();
@@ -468,35 +519,60 @@ export default function DashboardPage() {
       </header>
 
       <section className="rounded-md border border-border bg-surface p-5">
-        <dl className="flex flex-col gap-4 text-sm">
-          <div>
-            <dt className="text-text-muted">Display name</dt>
-            <dd className="mt-1 text-base text-text">
-              {profile.displayName || "—"}
-            </dd>
+        {/* Editable fields → PATCH /profiles/me (same route as Publish) */}
+        <form onSubmit={onSaveProfile} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Display name</span>
+            <input
+              type="text"
+              maxLength={60}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            />
+          </label>
+
+          <div className="text-sm">
+            <p className="text-text-muted">Username</p>
+            <p className="mt-1 text-base text-text">@{profile.username}</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Public URL: /u/{profile.username} (change later if you want)
+            </p>
           </div>
-          <div>
-            <dt className="text-text-muted">Username</dt>
-            <dd className="mt-1 text-base text-text">@{profile.username}</dd>
-          </div>
-          <div>
-            <dt className="text-text-muted">Bio</dt>
-            <dd className="mt-1 text-base text-text">{profile.bio || "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-text-muted">Status</dt>
-            <dd className="mt-1">
+
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Bio</span>
+            <textarea
+              maxLength={300}
+              rows={3}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              className="resize-y rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            />
+          </label>
+
+          <div className="text-sm">
+            <p className="text-text-muted">Status</p>
+            <p className="mt-1">
               <span className={isPublished ? "text-brand" : "text-text-muted"}>
                 {profile.status}
               </span>
-              <p className="mt-1 text-xs text-text-muted">
-                {isPublished
-                  ? "Anyone can open your public page."
-                  : "Public page returns 404 until you publish."}
-              </p>
-            </dd>
+            </p>
+            <p className="mt-1 text-xs text-text-muted">
+              {isPublished
+                ? "Anyone can open your public page."
+                : "Public page returns 404 until you publish."}
+            </p>
           </div>
-        </dl>
+
+          <button
+            type="submit"
+            disabled={savingProfile}
+            className="self-start rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          >
+            {savingProfile ? "Saving…" : "Save profile"}
+          </button>
+        </form>
       </section>
 
       <section className="flex flex-col gap-3">
@@ -504,9 +580,7 @@ export default function DashboardPage() {
           <h2 className="font-display text-xl font-semibold text-text">
             Your links
           </h2>
-          <span className="text-xs text-text-muted">
-            {links.length} total
-          </span>
+          <span className="text-xs text-text-muted">{links.length} total</span>
         </div>
 
         {/* Create form — same idea as login: controlled inputs → POST → update UI */}
@@ -540,9 +614,7 @@ export default function DashboardPage() {
               className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
             />
           </label>
-          {addError ? (
-            <p className="text-sm text-danger">{addError}</p>
-          ) : null}
+          {addError ? <p className="text-sm text-danger">{addError}</p> : null}
           <button
             type="submit"
             disabled={adding}
@@ -597,11 +669,7 @@ export default function DashboardPage() {
           disabled={saving}
           className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
-          {saving
-            ? "Saving…"
-            : isPublished
-              ? "Unpublish (draft)"
-              : "Publish"}
+          {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish"}
         </button>
         <Link
           href={`/u/${profile.username}`}
