@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
+
+import HomeAuthActions from "@/components/HomeAuthActions";
 
 export default function Home() {
   return (
@@ -24,20 +25,9 @@ export default function Home() {
             /u/username
           </code>
         </p>
-        <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-          <Link
-            href="/login"
-            className="rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/u/noori"
-            className="rounded-md border border-border px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-brand"
-          >
-            View demo profile
-          </Link>
-        </div>
+
+        {/* Client component: reads localStorage for login state */}
+        <HomeAuthActions />
       </div>
     </main>
   );
