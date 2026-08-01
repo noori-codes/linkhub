@@ -9,21 +9,22 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 type Props = {
   profile: PublicProfile;
-  // Parent keeps the latest profile (publish + this form both update it)
   onProfileChange: (profile: PublicProfile) => void;
-  onError: (message: string) => void;
 };
 
-// Owns displayName/bio drafts so the dashboard page stays thin
-export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
+// Owns displayName/username/bio drafts so the dashboard page stays thin
+export function ProfileEditor({ profile, onProfileChange }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(profile.displayName);
+  const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio);
   const [saving, setSaving] = useState(false);
+  // Local error — shown under this form, not at the bottom of the page
+  const [error, setError] = useState("");
 
-  // If parent updates profile (e.g. after publish), refresh the drafts
   useEffect(() => {
     setDisplayName(profile.displayName);
+    setUsername(profile.username);
     setBio(profile.bio);
   }, [profile]);
 
@@ -38,7 +39,7 @@ export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
     }
 
     setSaving(true);
-    onError("");
+    setError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -49,6 +50,7 @@ export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
         },
         body: JSON.stringify({
           displayName: displayName.trim(),
+          username: username.trim().toLowerCase(),
           bio: bio.trim(),
         }),
       });
@@ -58,13 +60,13 @@ export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
       }> & { message?: string };
 
       if (!res.ok) {
-        onError(data.message || "Could not update profile");
+        setError(data.message || "Could not update profile");
         return;
       }
 
       onProfileChange(data.data.profile);
     } catch {
-      onError("Cannot reach API. Is the backend running?");
+      setError("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
@@ -86,13 +88,26 @@ export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
           />
         </label>
 
-        <div className="text-sm">
-          <p className="text-text-muted">Username</p>
-          <p className="mt-1 text-base text-text">@{profile.username}</p>
-          <p className="mt-1 text-xs text-text-muted">
-            Public URL: /u/{profile.username} (change later if you want)
-          </p>
-        </div>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Username</span>
+          <input
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9._]+"
+            title="Lowercase letters, numbers, dots, and underscores only"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+          />
+          <span className="text-xs text-text-muted">
+            Public URL: /u/{username || "…"}
+            {username !== profile.username
+              ? " — old URL stops working after save"
+              : ""}
+          </span>
+        </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">Bio</span>
@@ -118,6 +133,12 @@ export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
               : "Public page returns 404 until you publish."}
           </p>
         </div>
+
+        {error ? (
+          <p className="text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <button
           type="submit"

@@ -11,17 +11,12 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 type Props = {
   profile: PublicProfile;
   onProfileChange: (profile: PublicProfile) => void;
-  onError: (message: string) => void;
 };
 
-// Publish toggle + navigation — separate from editing bio/name
-export function DashboardActions({
-  profile,
-  onProfileChange,
-  onError,
-}: Props) {
+export function DashboardActions({ profile, onProfileChange }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const isPublished = profile.status === "published";
 
@@ -37,7 +32,7 @@ export function DashboardActions({
     const nextStatus = isPublished ? "draft" : "published";
 
     setSaving(true);
-    onError("");
+    setError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -54,40 +49,47 @@ export function DashboardActions({
       }> & { message?: string };
 
       if (!res.ok) {
-        onError(data.message || "Could not update status");
+        setError(data.message || "Could not update status");
         return;
       }
 
       onProfileChange(data.data.profile);
     } catch {
-      onError("Cannot reach API. Is the backend running?");
+      setError("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="flex flex-wrap gap-3">
-      <button
-        type="button"
-        onClick={() => void togglePublish()}
-        disabled={saving}
-        className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
-      >
-        {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish"}
-      </button>
-      <Link
-        href={`/u/${profile.username}`}
-        className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
-      >
-        View public page
-      </Link>
-      <Link
-        href="/"
-        className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand"
-      >
-        Home
-      </Link>
+    <div className="flex flex-col gap-3">
+      {error ? (
+        <p className="text-sm text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => void togglePublish()}
+          disabled={saving}
+          className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+        >
+          {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish"}
+        </button>
+        <Link
+          href={`/u/${profile.username}`}
+          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+        >
+          View public page
+        </Link>
+        <Link
+          href="/"
+          className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand"
+        >
+          Home
+        </Link>
+      </div>
     </div>
   );
 }

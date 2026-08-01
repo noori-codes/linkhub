@@ -20,7 +20,6 @@ export default function DashboardPage() {
   const [links, setLinks] = useState<PublicLink[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -112,24 +111,13 @@ export default function DashboardPage() {
       <ProfileEditor
         profile={profile}
         onProfileChange={setProfile}
-        onError={setActionError}
       />
 
-      {/* key forces a fresh panel if you ever remount after reload */}
-      <LinksPanel
-        key={profile._id}
-        initialLinks={links}
-        onError={setActionError}
-      />
-
-      {actionError ? (
-        <p className="text-sm text-danger">{actionError}</p>
-      ) : null}
+      <LinksPanel key={profile._id} initialLinks={links} />
 
       <DashboardActions
         profile={profile}
         onProfileChange={setProfile}
-        onError={setActionError}
       />
     </main>
   );

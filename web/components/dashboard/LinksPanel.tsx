@@ -10,11 +10,10 @@ import type { ApiSuccess, PublicLink } from "@/lib/types";
 
 type Props = {
   initialLinks: PublicLink[];
-  onError: (message: string) => void;
 };
 
 // All link CRUD + reorder lives here so dashboard/page.tsx only loads data
-export function LinksPanel({ initialLinks, onError }: Props) {
+export function LinksPanel({ initialLinks }: Props) {
   const router = useRouter();
 
   const [links, setLinks] = useState(initialLinks);
@@ -22,6 +21,8 @@ export function LinksPanel({ initialLinks, onError }: Props) {
   const [newUrl, setNewUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
+  // Shown in this section (not at page bottom)
+  const [panelError, setPanelError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -92,7 +93,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
     if (!token) return;
 
     setTogglingId(link._id);
-    onError("");
+    setPanelError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/links/${link._id}`, {
@@ -109,7 +110,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
       }> & { message?: string };
 
       if (!res.ok) {
-        onError(data.message || "Could not update link");
+        setPanelError(data.message || "Could not update link");
         return;
       }
 
@@ -119,7 +120,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
         ),
       );
     } catch {
-      onError("Cannot reach API. Is the backend running?");
+      setPanelError("Cannot reach API. Is the backend running?");
     } finally {
       setTogglingId(null);
     }
@@ -135,7 +136,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
     if (!token) return;
 
     setDeletingId(link._id);
-    onError("");
+    setPanelError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/links/${link._id}`, {
@@ -151,13 +152,13 @@ export function LinksPanel({ initialLinks, onError }: Props) {
         } catch {
           // empty body
         }
-        onError(message);
+        setPanelError(message);
         return;
       }
 
       setLinks((prev) => prev.filter((item) => item._id !== link._id));
     } catch {
-      onError("Cannot reach API. Is the backend running?");
+      setPanelError("Cannot reach API. Is the backend running?");
     } finally {
       setDeletingId(null);
     }
@@ -167,7 +168,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
     setEditingId(link._id);
     setEditTitle(link.title);
     setEditUrl(link.url);
-    onError("");
+    setPanelError("");
   }
 
   function cancelEdit() {
@@ -184,7 +185,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
     if (!token) return;
 
     setSavingEdit(true);
-    onError("");
+    setPanelError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/links/${editingId}`, {
@@ -204,7 +205,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
       }> & { message?: string };
 
       if (!res.ok) {
-        onError(data.message || "Could not update link");
+        setPanelError(data.message || "Could not update link");
         return;
       }
 
@@ -215,7 +216,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
       );
       cancelEdit();
     } catch {
-      onError("Cannot reach API. Is the backend running?");
+      setPanelError("Cannot reach API. Is the backend running?");
     } finally {
       setSavingEdit(false);
     }
@@ -242,7 +243,7 @@ export function LinksPanel({ initialLinks, onError }: Props) {
     if (!token) return;
 
     setReordering(true);
-    onError("");
+    setPanelError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/links/reorder`, {
@@ -265,14 +266,14 @@ export function LinksPanel({ initialLinks, onError }: Props) {
 
       if (!res.ok) {
         setLinks(before);
-        onError(data.message || "Could not reorder links");
+        setPanelError(data.message || "Could not reorder links");
         return;
       }
 
       setLinks(data.data.links);
     } catch {
       setLinks(before);
-      onError("Cannot reach API. Is the backend running?");
+      setPanelError("Cannot reach API. Is the backend running?");
     } finally {
       setReordering(false);
     }
@@ -337,6 +338,11 @@ export function LinksPanel({ initialLinks, onError }: Props) {
             Drag rows by the handle to reorder. Order is saved when you drop.
             {reordering ? " Saving…" : ""}
           </p>
+          {panelError ? (
+            <p className="text-sm text-danger" role="alert">
+              {panelError}
+            </p>
+          ) : null}
           <SortableLinkList
             links={links}
             onMove={handleMove}
