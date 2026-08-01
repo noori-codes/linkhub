@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { getToken } from "@/lib/auth";
@@ -24,6 +24,13 @@ export default function DashboardPage() {
   // Separate flag so Publish doesn't blank the whole page — only that button feels busy
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+
+  // Controlled inputs: React owns the value; onChange writes back into state.
+  // Why not plain HTML? So we can clear the form after success, disable while saving, etc.
+  const [newTitle, setNewTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState("");
 
   // useEffect = "run this after paint, when deps change"
   // [] would mean once on mount; [router] means if router identity changes (rare).
@@ -137,6 +144,56 @@ export default function DashboardPage() {
     }
   }
 
+  // POST = create a new resource (unlike PATCH which updates an existing one).
+  // FormEvent: browser would normally reload the page on submit — we stop that.
+  async function onAddLink(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (adding) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setAdding(true);
+    setAddError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/links`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        // API sets profile from JWT + picks order if we omit it — send only what the user typed
+        body: JSON.stringify({
+          title: newTitle.trim(),
+          url: newUrl.trim(),
+        }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        link: PublicLink;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setAddError(data.message || "Could not create link");
+        return;
+      }
+
+      // Append the created link from the server (has _id, order, isVisible defaults)
+      // [...links, new] = copy old array + new item (never mutate state arrays in place)
+      setLinks((prev) => [...prev, data.data.link]);
+      setNewTitle("");
+      setNewUrl("");
+    } catch {
+      setAddError("Cannot reach API. Is the backend running?");
+    } finally {
+      setAdding(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
@@ -203,7 +260,6 @@ export default function DashboardPage() {
         </dl>
       </section>
 
-      {/* Links section: still read-only — next step is POST to add one */}
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="font-display text-xl font-semibold text-text">
@@ -214,9 +270,52 @@ export default function DashboardPage() {
           </span>
         </div>
 
+        {/* Create form — same idea as login: controlled inputs → POST → update UI */}
+        <form
+          onSubmit={onAddLink}
+          className="flex flex-col gap-3 rounded-md border border-border bg-surface p-4"
+        >
+          <p className="text-xs text-text-muted">
+            Title + URL only for now. The API assigns order and defaults type.
+          </p>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Title</span>
+            <input
+              type="text"
+              required
+              maxLength={100}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="My portfolio"
+              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">URL</span>
+            <input
+              type="url"
+              required
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            />
+          </label>
+          {addError ? (
+            <p className="text-sm text-danger">{addError}</p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={adding}
+            className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+          >
+            {adding ? "Adding…" : "Add link"}
+          </button>
+        </form>
+
         {links.length === 0 ? (
-          <p className="rounded-md border border-border bg-surface p-5 text-sm text-text-muted">
-            No links yet. Next step we&apos;ll add a form to create one.
+          <p className="text-sm text-text-muted">
+            No links yet — add your first one above.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
