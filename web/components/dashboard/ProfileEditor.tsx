@@ -21,6 +21,7 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio);
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl ?? "");
   const [saving, setSaving] = useState(false);
   // Local error — shown under this form, not at the bottom of the page
   const [error, setError] = useState("");
@@ -49,6 +50,8 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
           displayName: displayName.trim(),
           username: username.trim().toLowerCase(),
           bio: bio.trim(),
+          // Empty string clears the avatar; paste any https image URL for now (S3 later)
+          avatarUrl: avatarUrl.trim(),
         }),
       });
 
@@ -67,6 +70,7 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
       setDisplayName(saved.displayName);
       setUsername(saved.username);
       setBio(saved.bio);
+      setAvatarUrl(saved.avatarUrl ?? "");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -75,6 +79,8 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
   }
 
   const isPublished = profile.status === "published";
+  const previewRemote =
+    avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://");
 
   return (
     <section className="rounded-md border border-border bg-surface p-5">
@@ -109,6 +115,30 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
               ? " — old URL stops working after save"
               : ""}
           </span>
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Avatar URL</span>
+          <input
+            type="url"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            placeholder="https://…"
+            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+          />
+          <span className="text-xs text-text-muted">
+            Paste an image link for now. File upload (S3) comes later.
+          </span>
+          {previewRemote ? (
+            <span className="mt-1 flex h-16 w-16 overflow-hidden rounded-full border border-border bg-bg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={avatarUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </span>
+          ) : null}
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">

@@ -64,3 +64,50 @@ body {
   opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* Landing motion — presence, not noise */
+@keyframes lh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lh-wash {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.lh-rise {
+  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lh-rise-delay {
+  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.lh-rise-delay-2 {
+  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
+}
+
+.lh-wash {
+  animation: lh-wash 12s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lh-rise,
+  .lh-rise-delay,
+  .lh-rise-delay-2,
+  .lh-wash {
+    animation: none;
+  }
+}
