@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardActions } from "@/components/dashboard/DashboardActions";
+import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
 import { LinksPanel } from "@/components/dashboard/LinksPanel";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -112,6 +113,8 @@ export default function DashboardPage() {
         profile={profile}
         onProfileChange={setProfile}
       />
+
+      <ChangePasswordForm />
 
       <LinksPanel key={profile._id} initialLinks={links} />
 

@@ -236,12 +236,13 @@ export const forgotPassword = catchAsync(
     } catch (err) {
       // Local learning: email often isn't configured — still return the link
       if (process.env.NODE_ENV === "development") {
-        return res.status(200).json({
+        res.status(200).json({
           status: "success",
           message:
             "Email could not be sent (dev). Use the resetURL to continue.",
           resetURL,
         });
+        return;
       }
 
       user.passwordResetToken = undefined;
