@@ -1,0 +1,132 @@
+"use client";
+
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+
+import { CLIENT_API_BASE } from "@/lib/client-api";
+import { getToken } from "@/lib/auth";
+import type { ApiSuccess, PublicProfile } from "@/lib/types";
+
+type Props = {
+  profile: PublicProfile;
+  // Parent keeps the latest profile (publish + this form both update it)
+  onProfileChange: (profile: PublicProfile) => void;
+  onError: (message: string) => void;
+};
+
+// Owns displayName/bio drafts so the dashboard page stays thin
+export function ProfileEditor({ profile, onProfileChange, onError }: Props) {
+  const router = useRouter();
+  const [displayName, setDisplayName] = useState(profile.displayName);
+  const [bio, setBio] = useState(profile.bio);
+  const [saving, setSaving] = useState(false);
+
+  // If parent updates profile (e.g. after publish), refresh the drafts
+  useEffect(() => {
+    setDisplayName(profile.displayName);
+    setBio(profile.bio);
+  }, [profile]);
+
+  async function onSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setSaving(true);
+    onError("");
+
+    try {
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          displayName: displayName.trim(),
+          bio: bio.trim(),
+        }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        profile: PublicProfile;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        onError(data.message || "Could not update profile");
+        return;
+      }
+
+      onProfileChange(data.data.profile);
+    } catch {
+      onError("Cannot reach API. Is the backend running?");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const isPublished = profile.status === "published";
+
+  return (
+    <section className="rounded-md border border-border bg-surface p-5">
+      <form onSubmit={onSave} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Display name</span>
+          <input
+            type="text"
+            maxLength={60}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+          />
+        </label>
+
+        <div className="text-sm">
+          <p className="text-text-muted">Username</p>
+          <p className="mt-1 text-base text-text">@{profile.username}</p>
+          <p className="mt-1 text-xs text-text-muted">
+            Public URL: /u/{profile.username} (change later if you want)
+          </p>
+        </div>
+
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Bio</span>
+          <textarea
+            maxLength={300}
+            rows={3}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="resize-y rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+          />
+        </label>
+
+        <div className="text-sm">
+          <p className="text-text-muted">Status</p>
+          <p className="mt-1">
+            <span className={isPublished ? "text-brand" : "text-text-muted"}>
+              {profile.status}
+            </span>
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            {isPublished
+              ? "Anyone can open your public page."
+              : "Public page returns 404 until you publish."}
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="self-start rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save profile"}
+        </button>
+      </form>
+    </section>
+  );
+}
