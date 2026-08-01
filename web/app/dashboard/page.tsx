@@ -15,6 +15,9 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  // Separate from page load — only the toggle button should feel busy
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -55,6 +58,50 @@ export default function DashboardPage() {
     void loadProfile();
   }, [router]);
 
+  // PATCH /profiles/me with only { status } — same endpoint as editing bio later
+  async function togglePublish() {
+    if (!profile || saving) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    const nextStatus =
+      profile.status === "published" ? "draft" : "published";
+
+    setSaving(true);
+    setActionError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/profiles/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        profile: PublicProfile;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setActionError(data.message || "Could not update status");
+        return;
+      }
+
+      // Trust the server response so UI matches Mongo
+      setProfile(data.data.profile);
+    } catch {
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
@@ -78,10 +125,12 @@ export default function DashboardPage() {
     return null;
   }
 
+  const isPublished = profile.status === "published";
+
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-6 py-12">
       <header className="flex flex-col gap-2">
-        <p className="text-sm text-text-muted">Dashboard · read only for now</p>
+        <p className="text-sm text-text-muted">Dashboard</p>
         <h1 className="font-display text-3xl font-semibold text-text">
           Your profile
         </h1>
@@ -106,21 +155,36 @@ export default function DashboardPage() {
           <div>
             <dt className="text-text-muted">Status</dt>
             <dd className="mt-1">
-              <span
-                className={
-                  profile.status === "published"
-                    ? "text-brand"
-                    : "text-text-muted"
-                }
-              >
+              <span className={isPublished ? "text-brand" : "text-text-muted"}>
                 {profile.status}
               </span>
+              <p className="mt-1 text-xs text-text-muted">
+                {isPublished
+                  ? "Anyone can open your public page."
+                  : "Public page returns 404 until you publish."}
+              </p>
             </dd>
           </div>
         </dl>
       </section>
 
+      {actionError ? (
+        <p className="text-sm text-danger">{actionError}</p>
+      ) : null}
+
       <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => void togglePublish()}
+          disabled={saving}
+          className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+        >
+          {saving
+            ? "Saving…"
+            : isPublished
+              ? "Unpublish (draft)"
+              : "Publish"}
+        </button>
         <Link
           href={`/u/${profile.username}`}
           className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
