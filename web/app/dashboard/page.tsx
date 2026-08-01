@@ -31,6 +31,8 @@ export default function DashboardPage() {
   const [newUrl, setNewUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
+  // Which link id is mid-request — so only that row's button shows "…"
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   // useEffect = "run this after paint, when deps change"
   // [] would mean once on mount; [router] means if router identity changes (rare).
@@ -194,6 +196,52 @@ export default function DashboardPage() {
     }
   }
 
+  // PATCH one link by Mongo _id — same verb as publish, but URL includes :id
+  // Purpose: soft-hide (still in DB + dashboard) without deleting
+  async function toggleVisibility(link: PublicLink) {
+    if (togglingId) return; // ignore double-clicks while any toggle is in flight
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setTogglingId(link._id);
+    setActionError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/links/${link._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isVisible: !link.isVisible }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        link: PublicLink;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setActionError(data.message || "Could not update link");
+        return;
+      }
+
+      // Replace only the matching row — map returns a NEW array with one item swapped
+      setLinks((prev) =>
+        prev.map((item) =>
+          item._id === data.data.link._id ? data.data.link : item,
+        ),
+      );
+    } catch {
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
@@ -333,16 +381,30 @@ export default function DashboardPage() {
                       {link.url}
                     </p>
                   </div>
-                  {/* Owner sees hidden links too; public page filters them out */}
-                  <span
-                    className={
-                      link.isVisible
-                        ? "shrink-0 text-xs text-brand"
-                        : "shrink-0 text-xs text-text-muted"
-                    }
-                  >
-                    {link.isVisible ? "visible" : "hidden"}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <span
+                      className={
+                        link.isVisible
+                          ? "text-xs text-brand"
+                          : "text-xs text-text-muted"
+                      }
+                    >
+                      {link.isVisible ? "visible" : "hidden"}
+                    </span>
+                    {/* type="button" so this never accidentally submits the Add form */}
+                    <button
+                      type="button"
+                      disabled={togglingId === link._id}
+                      onClick={() => void toggleVisibility(link)}
+                      className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
+                    >
+                      {togglingId === link._id
+                        ? "…"
+                        : link.isVisible
+                          ? "Hide"
+                          : "Show"}
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
