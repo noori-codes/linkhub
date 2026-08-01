@@ -94,6 +94,10 @@ export default function DashboardPage() {
         // Check each response — one can fail while the other succeeds
         if (!profileRes.ok) {
           setError(profileData.message || "Could not load profile");
+          // New accounts without a Profile land here after login
+          if (profileRes.status === 404) {
+            router.replace("/onboarding");
+          }
           return;
         }
         if (!linksRes.ok) {

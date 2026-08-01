@@ -39,12 +39,20 @@ export default function HomeAuthActions() {
           </button>
         </>
       ) : (
-        <Link
-          href="/login"
-          className="rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
-        >
-          Log in
-        </Link>
+        <>
+          <Link
+            href="/signup"
+            className="rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+          >
+            Sign up
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-md border border-border px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-brand"
+          >
+            Log in
+          </Link>
+        </>
       )}
 
       <Link
