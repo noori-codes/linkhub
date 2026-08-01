@@ -5,60 +5,95 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { getToken } from "@/lib/auth";
-import type { ApiSuccess, PublicProfile } from "@/lib/types";
+import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
 
+// NEXT_PUBLIC_* is baked into the browser bundle at build time —
+// that's why the client can call the API directly (different port = cross-origin).
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // --- State: what React "remembers" between renders ---
+  // Each useState creates a box. Calling setX re-renders this component with the new value.
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [links, setLinks] = useState<PublicLink[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  // Separate from page load — only the toggle button should feel busy
+  // Separate flag so Publish doesn't blank the whole page — only that button feels busy
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
 
+  // useEffect = "run this after paint, when deps change"
+  // [] would mean once on mount; [router] means if router identity changes (rare).
+  // Purpose: gate the page + fetch owner data. Public /u/[username] never does this.
   useEffect(() => {
     const token = getToken();
 
-    // No token → must log in first
+    // JWT lives in localStorage (set at login). No token ⇒ not logged in.
+    // We redirect instead of showing a broken empty dashboard.
     if (!token) {
       router.replace("/login");
       return;
     }
 
-    async function loadProfile() {
+    async function loadDashboard() {
       try {
-        // Protected route: send JWT in Authorization header
-        const res = await fetch(`${API_BASE}/api/v1/profiles/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
-        });
+        // Same headers on both requests: "I am this user" (protect middleware on API).
+        const authHeaders = {
+          Authorization: `Bearer ${token}`,
+        };
 
-        const data = (await res.json()) as ApiSuccess<{
+        // Promise.all = fire both at once, wait for both.
+        // Why: profile and links don't depend on each other, so sequential would be slower.
+        const [profileRes, linksRes] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/profiles/me`, {
+            headers: authHeaders,
+            cache: "no-store", // always fresh — status may have just changed
+          }),
+          fetch(`${API_BASE}/api/v1/links/me`, {
+            headers: authHeaders,
+            cache: "no-store",
+          }),
+        ]);
+
+        const profileData = (await profileRes.json()) as ApiSuccess<{
           profile: PublicProfile;
         }> & { message?: string };
 
-        if (!res.ok) {
-          setError(data.message || "Could not load profile");
+        const linksData = (await linksRes.json()) as ApiSuccess<{
+          links: PublicLink[];
+        }> & { message?: string };
+
+        // Check each response — one can fail while the other succeeds
+        if (!profileRes.ok) {
+          setError(profileData.message || "Could not load profile");
+          return;
+        }
+        if (!linksRes.ok) {
+          setError(linksData.message || "Could not load links");
           return;
         }
 
-        setProfile(data.data.profile);
+        setProfile(profileData.data.profile);
+        // Owner endpoint returns ALL links (including hidden). Public page only shows visible ones.
+        setLinks(linksData.data.links);
       } catch {
+        // Network error (API down, CORS, etc.) — fetch throws before we get a status code
         setError("Cannot reach API. Is the backend running?");
       } finally {
+        // Always leave loading, success or fail — otherwise spinner forever
         setLoading(false);
       }
     }
 
-    void loadProfile();
+    void loadDashboard();
   }, [router]);
 
-  // PATCH /profiles/me with only { status } — same endpoint as editing bio later
+  // PATCH = partial update. We only send { status }, not the whole profile.
+  // Why read token again here? useEffect's token is scoped inside that function.
+  // Click handlers run later — we re-read localStorage in case it changed (logout elsewhere).
   async function togglePublish() {
     if (!profile || saving) return;
 
@@ -78,7 +113,7 @@ export default function DashboardPage() {
       const res = await fetch(`${API_BASE}/api/v1/profiles/me`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", // required when sending JSON body
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: nextStatus }),
@@ -93,7 +128,7 @@ export default function DashboardPage() {
         return;
       }
 
-      // Trust the server response so UI matches Mongo
+      // Server is source of truth (validators, defaults) — don't guess locally
       setProfile(data.data.profile);
     } catch {
       setActionError("Cannot reach API. Is the backend running?");
@@ -166,6 +201,54 @@ export default function DashboardPage() {
             </dd>
           </div>
         </dl>
+      </section>
+
+      {/* Links section: still read-only — next step is POST to add one */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold text-text">
+            Your links
+          </h2>
+          <span className="text-xs text-text-muted">
+            {links.length} total
+          </span>
+        </div>
+
+        {links.length === 0 ? (
+          <p className="rounded-md border border-border bg-surface p-5 text-sm text-text-muted">
+            No links yet. Next step we&apos;ll add a form to create one.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {links.map((link) => (
+              <li
+                key={link._id}
+                className="rounded-md border border-border bg-surface px-4 py-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text">
+                      {link.title}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-text-muted">
+                      {link.url}
+                    </p>
+                  </div>
+                  {/* Owner sees hidden links too; public page filters them out */}
+                  <span
+                    className={
+                      link.isVisible
+                        ? "shrink-0 text-xs text-brand"
+                        : "shrink-0 text-xs text-text-muted"
+                    }
+                  >
+                    {link.isVisible ? "visible" : "hidden"}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {actionError ? (
