@@ -24,6 +24,12 @@ export default function HomeAuthActions() {
       {loggedIn ? (
         <>
           <p className="text-sm text-brand">You’re logged in</p>
+          <Link
+            href="/dashboard"
+            className="rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+          >
+            Dashboard
+          </Link>
           <button
             type="button"
             onClick={logout}

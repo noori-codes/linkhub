@@ -41,8 +41,8 @@ export default function LoginPage() {
       // Store JWT so later pages can send Authorization: Bearer ...
       saveToken(data.token);
 
-      // Temporary: go home. Next step will be a dashboard.
-      router.push("/");
+      // After login, go to the read-only dashboard
+      router.push("/dashboard");
     } catch {
       setError("Cannot reach API. Is `cd api && yarn dev` running?");
     } finally {
