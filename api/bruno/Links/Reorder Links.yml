@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "links": [
-          { "id": "{{linkId}}", "order": 0 }
+          { "id": "{{linkId}}", "order": 1 }
         ]
       }
   auth:

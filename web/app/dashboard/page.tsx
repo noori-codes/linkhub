@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import { SortableLinkList } from "@/components/SortableLinkList";
 import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
 
@@ -39,6 +40,12 @@ export default function DashboardPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  // Snapshot before a drag — if PATCH fails we restore this
+  const linksBeforeDrag = useRef<PublicLink[]>([]);
+  // Always-current links for commit (avoids stale closure on drag end)
+  const linksRef = useRef(links);
+  linksRef.current = links;
 
   // useEffect = "run this after paint, when deps change"
   // [] would mean once on mount; [router] means if router identity changes (rare).
@@ -361,6 +368,71 @@ export default function DashboardPage() {
     }
   }
 
+  // During drag: only rearrange React state (no network yet)
+  function handleMove(next: PublicLink[]) {
+    // First move of this gesture — remember original order for revert
+    if (linksBeforeDrag.current.length === 0) {
+      linksBeforeDrag.current = linksRef.current;
+    }
+    setLinks(next);
+  }
+
+  // On drop: write new order indexes to Mongo via PATCH /links/reorder
+  async function handleDragEndCommit() {
+    const before = linksBeforeDrag.current;
+    linksBeforeDrag.current = [];
+
+    // Drag started but never crossed another row — nothing to save
+    if (before.length === 0) return;
+
+    const current = linksRef.current;
+    const unchanged = before.every((l, i) => l._id === current[i]?._id);
+    if (unchanged) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setReordering(true);
+    setActionError("");
+
+    try {
+      // order = index in the array (0 = top of public page)
+      const res = await fetch(`${API_BASE}/api/v1/links/reorder`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          links: current.map((link, index) => ({
+            id: link._id,
+            order: index,
+          })),
+        }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        links: PublicLink[];
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setLinks(before); // revert optimistic UI
+        setActionError(data.message || "Could not reorder links");
+        return;
+      }
+
+      setLinks(data.data.links);
+    } catch {
+      setLinks(before);
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setReordering(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
@@ -485,121 +557,32 @@ export default function DashboardPage() {
             No links yet — add your first one above.
           </p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {links.map((link) => {
-              const isEditing = editingId === link._id;
-
-              return (
-                <li
-                  key={link._id}
-                  className="rounded-md border border-border bg-surface px-4 py-3"
-                >
-                  {isEditing ? (
-                    // Inline form — only this row; other rows stay read-only
-                    <form
-                      onSubmit={saveEdit}
-                      className="flex flex-col gap-2"
-                    >
-                      <input
-                        type="text"
-                        required
-                        maxLength={100}
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-                      />
-                      <input
-                        type="url"
-                        required
-                        value={editUrl}
-                        onChange={(e) => setEditUrl(e.target.value)}
-                        className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-                      />
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="submit"
-                          disabled={savingEdit}
-                          className="text-xs font-medium text-brand hover:underline disabled:opacity-50"
-                        >
-                          {savingEdit ? "Saving…" : "Save"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={savingEdit}
-                          onClick={cancelEdit}
-                          className="text-xs text-text-muted hover:underline disabled:opacity-50"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-text">
-                          {link.title}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-text-muted">
-                          {link.url}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1.5">
-                        <span
-                          className={
-                            link.isVisible
-                              ? "text-xs text-brand"
-                              : "text-xs text-text-muted"
-                          }
-                        >
-                          {link.isVisible ? "visible" : "hidden"}
-                        </span>
-                        <button
-                          type="button"
-                          disabled={
-                            togglingId === link._id ||
-                            deletingId === link._id ||
-                            editingId !== null
-                          }
-                          onClick={() => startEdit(link)}
-                          className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          disabled={
-                            togglingId === link._id ||
-                            deletingId === link._id ||
-                            editingId !== null
-                          }
-                          onClick={() => void toggleVisibility(link)}
-                          className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
-                        >
-                          {togglingId === link._id
-                            ? "…"
-                            : link.isVisible
-                              ? "Hide"
-                              : "Show"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={
-                            deletingId === link._id ||
-                            togglingId === link._id ||
-                            editingId !== null
-                          }
-                          onClick={() => void deleteLink(link)}
-                          className="text-xs text-danger underline-offset-2 hover:underline disabled:opacity-50"
-                        >
-                          {deletingId === link._id ? "…" : "Delete"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <p className="text-xs text-text-muted">
+              Drag rows by the handle to reorder. Order is saved when you drop.
+              {reordering ? " Saving…" : ""}
+            </p>
+            <SortableLinkList
+              links={links}
+              onMove={handleMove}
+              onDragEndCommit={() => void handleDragEndCommit()}
+              reordering={reordering}
+              disabled={editingId !== null}
+              editingId={editingId}
+              editTitle={editTitle}
+              editUrl={editUrl}
+              savingEdit={savingEdit}
+              togglingId={togglingId}
+              deletingId={deletingId}
+              onEditTitleChange={setEditTitle}
+              onEditUrlChange={setEditUrl}
+              onSaveEdit={saveEdit}
+              onCancelEdit={cancelEdit}
+              onStartEdit={startEdit}
+              onToggleVisibility={(link) => void toggleVisibility(link)}
+              onDelete={(link) => void deleteLink(link)}
+            />
+          </>
         )}
       </section>
 

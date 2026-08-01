@@ -10,12 +10,11 @@ http:
     type: json
     data: |-
       {
-        "title": "GitHub",
-        "url": "https://github.com/noori-codes",
+        "title": "Youtbe",
+        "url": "https://www.youtube.com/@TechWithIMX",
         "type": "social",
-        "platform": "github"
+        "platform": "youtube"
       }
-  # Prefer cookie from Login; Bearer is optional backup if {{token}} is set
   auth:
     type: bearer
     token: "{{token}}"

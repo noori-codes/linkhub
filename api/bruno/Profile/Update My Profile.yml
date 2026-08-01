@@ -8,11 +8,7 @@ http:
   url: "{{baseUrl}}/api/v1/profiles/me"
   body:
     type: json
-    data: |-
-      {
-        "bio": "Updated bio",
-        "status": "published"
-      }
+    data: '{ "status": "published" }'
   auth:
     type: bearer
     token: "{{token}}"

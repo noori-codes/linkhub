@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "title": "GitHub Profile",
+        "title": "Youtube Profile",
         "isVisible": true
       }
   auth:
