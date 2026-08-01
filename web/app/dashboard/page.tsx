@@ -33,6 +33,12 @@ export default function DashboardPage() {
   const [addError, setAddError] = useState("");
   // Which link id is mid-request — so only that row's button shows "…"
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  // Edit mode: which row is open + draft values for that row's inputs
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // useEffect = "run this after paint, when deps change"
   // [] would mean once on mount; [router] means if router identity changes (rare).
@@ -242,6 +248,119 @@ export default function DashboardPage() {
     }
   }
 
+  // DELETE = remove the document from Mongo (unlike Hide, which only flips isVisible)
+  async function deleteLink(link: PublicLink) {
+    if (deletingId) return;
+
+    // Browser confirm — cheap safety before a permanent action
+    const ok = window.confirm(
+      `Delete “${link.title}”? This cannot be undone.`,
+    );
+    if (!ok) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setDeletingId(link._id);
+    setActionError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/links/${link._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // API returns 204 No Content on success — often no JSON body.
+      // So we must NOT always call res.json() (empty body throws).
+      if (!res.ok) {
+        let message = "Could not delete link";
+        try {
+          const data = (await res.json()) as { message?: string };
+          message = data.message || message;
+        } catch {
+          // ignore parse errors on empty/error bodies
+        }
+        setActionError(message);
+        return;
+      }
+
+      // filter = keep every item EXCEPT the deleted id → new array without that row
+      setLinks((prev) => prev.filter((item) => item._id !== link._id));
+    } catch {
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  // Enter edit mode for one row — copy current values into local draft state
+  function startEdit(link: PublicLink) {
+    setEditingId(link._id);
+    setEditTitle(link.title);
+    setEditUrl(link.url);
+    setActionError("");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditTitle("");
+    setEditUrl("");
+  }
+
+  // Same PATCH endpoint as Hide/Show — different body fields (title + url)
+  async function saveEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingId || savingEdit) return;
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setSavingEdit(true);
+    setActionError("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/links/${editingId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          url: editUrl.trim(),
+        }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        link: PublicLink;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setActionError(data.message || "Could not update link");
+        return;
+      }
+
+      setLinks((prev) =>
+        prev.map((item) =>
+          item._id === data.data.link._id ? data.data.link : item,
+        ),
+      );
+      cancelEdit(); // leave edit mode after success
+    } catch {
+      setActionError("Cannot reach API. Is the backend running?");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
@@ -367,47 +486,119 @@ export default function DashboardPage() {
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {links.map((link) => (
-              <li
-                key={link._id}
-                className="rounded-md border border-border bg-surface px-4 py-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text">
-                      {link.title}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-text-muted">
-                      {link.url}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <span
-                      className={
-                        link.isVisible
-                          ? "text-xs text-brand"
-                          : "text-xs text-text-muted"
-                      }
+            {links.map((link) => {
+              const isEditing = editingId === link._id;
+
+              return (
+                <li
+                  key={link._id}
+                  className="rounded-md border border-border bg-surface px-4 py-3"
+                >
+                  {isEditing ? (
+                    // Inline form — only this row; other rows stay read-only
+                    <form
+                      onSubmit={saveEdit}
+                      className="flex flex-col gap-2"
                     >
-                      {link.isVisible ? "visible" : "hidden"}
-                    </span>
-                    {/* type="button" so this never accidentally submits the Add form */}
-                    <button
-                      type="button"
-                      disabled={togglingId === link._id}
-                      onClick={() => void toggleVisibility(link)}
-                      className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
-                    >
-                      {togglingId === link._id
-                        ? "…"
-                        : link.isVisible
-                          ? "Hide"
-                          : "Show"}
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
+                      <input
+                        type="text"
+                        required
+                        maxLength={100}
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      />
+                      <input
+                        type="url"
+                        required
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      />
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="submit"
+                          disabled={savingEdit}
+                          className="text-xs font-medium text-brand hover:underline disabled:opacity-50"
+                        >
+                          {savingEdit ? "Saving…" : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={savingEdit}
+                          onClick={cancelEdit}
+                          className="text-xs text-text-muted hover:underline disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text">
+                          {link.title}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-text-muted">
+                          {link.url}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <span
+                          className={
+                            link.isVisible
+                              ? "text-xs text-brand"
+                              : "text-xs text-text-muted"
+                          }
+                        >
+                          {link.isVisible ? "visible" : "hidden"}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={
+                            togglingId === link._id ||
+                            deletingId === link._id ||
+                            editingId !== null
+                          }
+                          onClick={() => startEdit(link)}
+                          className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            togglingId === link._id ||
+                            deletingId === link._id ||
+                            editingId !== null
+                          }
+                          onClick={() => void toggleVisibility(link)}
+                          className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
+                        >
+                          {togglingId === link._id
+                            ? "…"
+                            : link.isVisible
+                              ? "Hide"
+                              : "Show"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            deletingId === link._id ||
+                            togglingId === link._id ||
+                            editingId !== null
+                          }
+                          onClick={() => void deleteLink(link)}
+                          className="text-xs text-danger underline-offset-2 hover:underline disabled:opacity-50"
+                        >
+                          {deletingId === link._id ? "…" : "Delete"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
