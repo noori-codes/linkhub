@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -15,18 +15,15 @@ type Props = {
 // Owns displayName/username/bio drafts so the dashboard page stays thin
 export function ProfileEditor({ profile, onProfileChange }: Props) {
   const router = useRouter();
+  // Initial values come from props once on mount.
+  // After a successful save we update drafts from the API response (below) —
+  // no useEffect needed (and ESLint flags setState-inside-effect as a smell).
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio);
   const [saving, setSaving] = useState(false);
   // Local error — shown under this form, not at the bottom of the page
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setDisplayName(profile.displayName);
-    setUsername(profile.username);
-    setBio(profile.bio);
-  }, [profile]);
 
   async function onSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,7 +61,12 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
         return;
       }
 
-      onProfileChange(data.data.profile);
+      const saved = data.data.profile;
+      onProfileChange(saved);
+      // Keep drafts in sync with what Mongo stored (trim/normalize, etc.)
+      setDisplayName(saved.displayName);
+      setUsername(saved.username);
+      setBio(saved.bio);
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {

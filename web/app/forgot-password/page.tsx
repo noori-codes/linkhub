@@ -2,47 +2,49 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  // Dev helper: API may return a clickable resetURL when email isn't set up
+  const [resetURL, setResetURL] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setMessage("");
+    setResetURL("");
     setLoading(true);
 
     try {
-      // Call Express login — same endpoint Bruno uses
-      const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/login`, {
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/forgotPassword`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim() }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as {
+        message?: string;
+        resetURL?: string;
+      };
 
       if (!res.ok) {
-        setError(data.message || "Login failed");
+        setError(data.message || "Could not start password reset");
         return;
       }
 
-      // Store JWT so later pages can send Authorization: Bearer ...
-      saveToken(data.token);
-
-      // After login, go to the read-only dashboard
-      router.push("/dashboard");
+      setMessage(data.message || "Check your email for a reset link.");
+      if (data.resetURL) {
+        setResetURL(data.resetURL);
+      }
     } catch {
-      setError("Cannot reach API. Is `cd api && yarn dev` running?");
+      setError("Cannot reach API. Is the backend running?");
     } finally {
       setLoading(false);
     }
@@ -59,10 +61,10 @@ export default function LoginPage() {
         <div className="mb-8 flex flex-col items-center text-center">
           <Image src="/logo.png" alt="LinkHub" width={48} height={48} />
           <h1 className="mt-4 font-display text-3xl font-semibold text-text">
-            Log in
+            Forgot password
           </h1>
           <p className="mt-2 text-sm text-text-muted">
-            Welcome back — use the email and password you signed up with.
+            Enter your email and we&apos;ll send a reset link (valid 10 minutes).
           </p>
         </div>
 
@@ -81,30 +83,27 @@ export default function LoginPage() {
             />
           </label>
 
-          <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Password</span>
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
-            />
-          </label>
-
-          <p className="-mt-2 text-right text-sm">
-            <Link
-              href="/forgot-password"
-              className="text-text-muted hover:text-brand"
-            >
-              Forgot password?
-            </Link>
-          </p>
-
           {error ? (
             <p className="text-sm text-danger" role="alert">
               {error}
+            </p>
+          ) : null}
+
+          {message ? (
+            <p className="text-sm text-[var(--success)]" role="status">
+              {message}
+            </p>
+          ) : null}
+
+          {resetURL ? (
+            <p className="text-sm text-text-muted">
+              Dev link:{" "}
+              <a
+                href={resetURL}
+                className="break-all text-brand hover:text-brand-hover"
+              >
+                {resetURL}
+              </a>
             </p>
           ) : null}
 
@@ -113,18 +112,13 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
           >
-            {loading ? "Logging in…" : "Log in"}
+            {loading ? "Sending…" : "Send reset link"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-text-muted">
-          No account?{" "}
-          <Link href="/signup" className="text-brand hover:text-brand-hover">
-            Sign up
-          </Link>
-          {" · "}
-          <Link href="/" className="text-brand hover:text-brand-hover">
-            Back home
+          <Link href="/login" className="text-brand hover:text-brand-hover">
+            Back to log in
           </Link>
         </p>
       </div>

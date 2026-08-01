@@ -219,18 +219,31 @@ export const forgotPassword = catchAsync(
       validateBeforeSave: false,
     });
 
-    try {
-      const resetURL = `${req.protocol}://${req.get(
-        "host",
-      )}/api/v1/users/resetPassword/${resetToken}`;
+    // Link must open the Next.js UI — not the PATCH API route
+    const frontendUrl =
+      process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+    const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
 
+    try {
       await new Email(user, resetURL).sendPasswordReset();
 
       res.status(200).json({
         status: "success",
         message: "Password reset token sent to email.",
+        // Dev only: open this URL without checking Mailtrap
+        ...(process.env.NODE_ENV === "development" ? { resetURL } : {}),
       });
     } catch (err) {
+      // Local learning: email often isn't configured — still return the link
+      if (process.env.NODE_ENV === "development") {
+        return res.status(200).json({
+          status: "success",
+          message:
+            "Email could not be sent (dev). Use the resetURL to continue.",
+          resetURL,
+        });
+      }
+
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
 
