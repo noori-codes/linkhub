@@ -10,14 +10,12 @@ http:
     type: json
     data: |-
       {
-        "firstName": "Noorullah",
-        "lastName": "Ahmadzai",
-        "email": "noorullah.ahmadzai76@gmail.com",
+        "firstName": "Imran",
+        "lastName": "Noori",
+        "email": "imrannoori1919@gmail.com",
         "password": "password123",
         "passwordConfirm": "password123"
       }
-  auth:
-    type: none
 
 runtime:
   scripts:

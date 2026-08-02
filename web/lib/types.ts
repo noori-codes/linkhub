@@ -8,7 +8,6 @@ export interface PublicProfile {
   displayName: string;
   bio: string;
   avatarUrl: string;
-  coverUrl?: string;
   location: string;
   website: string;
   status: ProfileStatus;
@@ -23,18 +22,6 @@ export interface PublicLink {
   platform: string;
   order: number;
   isVisible: boolean;
-}
-
-// Safe shape from GET /users/me
-export interface MeUser {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  emailVerified: boolean;
-  photo: string;
-  onboardingCompleted: boolean;
-  onboardingStep: string;
 }
 
 export interface ApiSuccess<T> {

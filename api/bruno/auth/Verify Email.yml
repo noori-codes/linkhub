@@ -5,9 +5,13 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/api/v1/users/verifyEmail/PASTE_TOKEN_FROM_VERIFY_URL"
-  auth:
-    type: none
+  url: "{{baseUrl}}/api/v1/users/verifyEmail/88dd7c8a0748356d68abd1bae7377a0f849ec9c7f997ddf5757aa8b2f3e37857"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
 
 docs: |
   1. Signup (dev) → copy the token from verifyURL

@@ -81,7 +81,11 @@ export function DashboardActions({ profile, onProfileChange }: Props) {
           disabled={saving}
           className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
-          {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish page"}
+          {saving
+            ? "Saving…"
+            : isPublished
+              ? "Unpublish (draft)"
+              : "Publish page"}
         </button>
         <Link
           href={`/u/${profile.username}`}
