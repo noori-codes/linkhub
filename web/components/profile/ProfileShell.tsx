@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ProfileHero } from "@/components/dashboard/ProfileHero";
+import { ProfileLinksPreview } from "@/components/profile/ProfileLinksPreview";
 import { useProfile } from "@/components/profile/ProfileProvider";
 
 const MENU = [
@@ -40,7 +41,7 @@ function sectionTitle(pathname: string) {
  */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, loading, error } = useProfile();
+  const { profile, links, loading, error } = useProfile();
   const isMenu = pathname === "/profile";
   const title = sectionTitle(pathname);
 
@@ -70,7 +71,10 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
         {isMenu ? (
           <>
-            <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Profile">
+            <nav
+              className="flex flex-1 flex-col gap-1 p-3"
+              aria-label="Profile"
+            >
               {MENU.map((item) => (
                 <Link
                   key={item.href}
@@ -131,7 +135,12 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
             <p className="text-sm text-text-muted">Loading preview…</p>
           ) : null}
           {error ? <p className="text-sm text-danger">{error}</p> : null}
-          {profile ? <ProfileHero profile={profile} /> : null}
+          {profile ? (
+            <>
+              <ProfileHero profile={profile} />
+              <ProfileLinksPreview links={links} />
+            </>
+          ) : null}
         </div>
       </div>
     </div>

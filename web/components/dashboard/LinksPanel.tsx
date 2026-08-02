@@ -10,12 +10,11 @@ import type { ApiSuccess, PublicLink } from "@/lib/types";
 
 type Props = {
   initialLinks: PublicLink[];
-  // Parent uses this for the first-run guide (has links? yes/no)
-  onLinkCountChange?: (count: number) => void;
+  onLinksChange?: (links: PublicLink[]) => void;
 };
 
-// All link CRUD + reorder lives here so dashboard/page.tsx only loads data
-export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
+// All link CRUD + reorder — used in the profile Links sidebar
+export function LinksPanel({ initialLinks, onLinksChange }: Props) {
   const router = useRouter();
 
   const [links, setLinks] = useState(initialLinks);
@@ -23,7 +22,7 @@ export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
   const [newUrl, setNewUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
-  // Shown in this section (not at page bottom)
+  const [showAddForm, setShowAddForm] = useState(false);
   const [panelError, setPanelError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -37,11 +36,10 @@ export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
   const linksRef = useRef(links);
   linksRef.current = links;
 
-  // Keep parent guide in sync whenever the list changes
   function commitLinks(next: PublicLink[]) {
     linksRef.current = next;
     setLinks(next);
-    onLinkCountChange?.(next.length);
+    onLinksChange?.(next);
   }
 
   function requireToken() {
@@ -88,6 +86,7 @@ export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
       commitLinks([...linksRef.current, data.data.link]);
       setNewTitle("");
       setNewUrl("");
+      setShowAddForm(false);
     } catch {
       setAddError("Cannot reach API. Is the backend running?");
     } finally {
@@ -289,75 +288,29 @@ export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold text-text">
-          Your links
-        </h2>
-        <span className="text-xs text-text-muted">{links.length} total</span>
-      </div>
-
-      <form
-        onSubmit={onAddLink}
-        className="flex flex-col gap-3 rounded-md border border-border bg-surface p-4"
-      >
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <p className="text-xs text-text-muted">
-          Start with one link — title + URL. You can reorder later.
+          {links.length} total
+          {links.length > 0 ? " · Drag the handle to reorder" : ""}
+          {reordering ? " · Saving…" : ""}
         </p>
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">Title</span>
-          <input
-            type="text"
-            required
-            maxLength={100}
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="My portfolio"
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
-          />
-        </label>
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">URL</span>
-          <input
-            type="url"
-            required
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="https://example.com"
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
-          />
-        </label>
-        {addError ? <p className="text-sm text-danger">{addError}</p> : null}
-        <button
-          type="submit"
-          disabled={adding}
-          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
-        >
-          {adding ? "Adding…" : "Add link"}
-        </button>
-      </form>
 
-      {links.length === 0 ? (
-          <p className="text-sm text-text-muted">
-            No links yet — that&apos;s step 1 in Getting started above.
+        {panelError ? (
+          <p className="text-sm text-danger" role="alert">
+            {panelError}
           </p>
-      ) : (
-        <>
-          <p className="text-xs text-text-muted">
-            Drag rows by the handle to reorder. Order is saved when you drop.
-            {reordering ? " Saving…" : ""}
-          </p>
-          {panelError ? (
-            <p className="text-sm text-danger" role="alert">
-              {panelError}
-            </p>
-          ) : null}
+        ) : null}
+
+        {links.length === 0 ? (
+          <p className="text-sm text-text-muted">No links yet.</p>
+        ) : (
           <SortableLinkList
             links={links}
             onMove={handleMove}
             onDragEndCommit={() => void handleDragEndCommit()}
             reordering={reordering}
-            disabled={editingId !== null}
+            disabled={editingId !== null || showAddForm}
             editingId={editingId}
             editTitle={editTitle}
             editUrl={editUrl}
@@ -372,7 +325,70 @@ export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
             onToggleVisibility={(link) => void toggleVisibility(link)}
             onDelete={(link) => void deleteLink(link)}
           />
-        </>
+        )}
+      </div>
+
+      {!showAddForm ? (
+        <button
+          type="button"
+          onClick={() => {
+            setShowAddForm(true);
+            setAddError("");
+          }}
+          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+        >
+          Add link
+        </button>
+      ) : (
+        <form onSubmit={onAddLink} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Title</span>
+            <input
+              type="text"
+              required
+              maxLength={100}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="My portfolio"
+              autoFocus
+              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">URL</span>
+            <input
+              type="url"
+              required
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+            />
+          </label>
+          {addError ? <p className="text-sm text-danger">{addError}</p> : null}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={adding}
+              className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+            >
+              {adding ? "Adding…" : "Save link"}
+            </button>
+            <button
+              type="button"
+              disabled={adding}
+              onClick={() => {
+                setShowAddForm(false);
+                setNewTitle("");
+                setNewUrl("");
+                setAddError("");
+              }}
+              className="rounded-md border border-border px-4 py-2.5 text-sm text-text-muted hover:border-brand hover:text-text disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       )}
     </section>
   );

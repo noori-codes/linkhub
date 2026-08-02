@@ -13,13 +13,15 @@ import { useRouter } from "next/navigation";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
-import type { ApiSuccess, PublicProfile } from "@/lib/types";
+import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
 
 type ProfileContextValue = {
   profile: PublicProfile | null;
+  links: PublicLink[];
   loading: boolean;
   error: string;
   setProfile: (profile: PublicProfile) => void;
+  setLinks: (links: PublicLink[]) => void;
   reload: () => Promise<void>;
 };
 
@@ -28,6 +30,7 @@ const ProfileContext = createContext<ProfileContextValue | null>(null);
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [links, setLinks] = useState<PublicLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -39,30 +42,46 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
+      const authHeaders = { Authorization: `Bearer ${token}` };
 
-      const data = (await res.json()) as ApiSuccess<{
+      const [profileRes, linksRes] = await Promise.all([
+        fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+          headers: authHeaders,
+          cache: "no-store",
+        }),
+        fetch(`${CLIENT_API_BASE}/api/v1/links/me`, {
+          headers: authHeaders,
+          cache: "no-store",
+        }),
+      ]);
+
+      const profileData = (await profileRes.json()) as ApiSuccess<{
         profile: PublicProfile;
       }> & { message?: string };
 
-      if (!res.ok) {
-        if (res.status === 401) {
+      const linksData = (await linksRes.json()) as ApiSuccess<{
+        links: PublicLink[];
+      }> & { message?: string };
+
+      if (!profileRes.ok) {
+        if (profileRes.status === 401) {
           clearToken();
           router.replace("/login");
           return;
         }
-        setError(data.message || "Could not load profile");
-        if (res.status === 404) {
+        setError(profileData.message || "Could not load profile");
+        if (profileRes.status === 404) {
           router.replace("/onboarding");
         }
         return;
       }
 
       setError("");
-      setProfile(data.data.profile);
+      setProfile(profileData.data.profile);
+
+      if (linksRes.ok) {
+        setLinks(linksData.data.links);
+      }
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -75,8 +94,16 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   }, [reload]);
 
   const value = useMemo(
-    () => ({ profile, loading, error, setProfile, reload }),
-    [profile, loading, error, reload],
+    () => ({
+      profile,
+      links,
+      loading,
+      error,
+      setProfile,
+      setLinks,
+      reload,
+    }),
+    [profile, links, loading, error, reload],
   );
 
   return (
