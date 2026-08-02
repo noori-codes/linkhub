@@ -5,35 +5,34 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
 // =============================
-// GET CURRENT USER
+// GET CURRENT USER (GET /users/me)
+// Safe shape only — no password, no verify/reset tokens
 // =============================
 
-export const getMe = (req: Request, res: Response, next: NextFunction) => {
-  req.params.id = req.user._id.toString();
+export const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = await User.findById(req.user._id);
 
-  next();
-};
+  if (!user) {
+    return next(new AppError("No user found with that ID", 404));
+  }
 
-// =============================
-// GET USER
-// =============================
-
-export const getUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return next(new AppError("No user found with that ID", 404));
-    }
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        user,
+  // Explicit fields so emailVerified is ready for the dashboard later
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        photo: user.photo,
+        onboardingCompleted: user.onboardingCompleted,
+        onboardingStep: user.onboardingStep,
       },
-    });
-  },
-);
+    },
+  });
+});
 
 // =============================
 // UPDATE CURRENT USER
