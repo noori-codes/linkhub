@@ -40,7 +40,7 @@ export default function LoginPage() {
       saveToken(data.token);
 
       // After login, go to the read-only dashboard
-      router.push("/dashboard");
+      router.push("/profile");
     } catch {
       setError("Cannot reach API. Is `cd api && yarn dev` running?");
     } finally {

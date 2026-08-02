@@ -106,7 +106,7 @@ export default function VerifyEmailPage() {
         <p className="mt-6 text-sm text-text-muted">
           {status === "success" ? (
             <Link
-              href="/dashboard"
+              href="/profile"
               className="text-brand hover:text-brand-hover"
             >
               Go to dashboard

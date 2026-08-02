@@ -24,7 +24,7 @@ export default function HomeAuthActions() {
         {loggedIn ? (
           <>
             <Link
-              href="/dashboard"
+              href="/profile"
               className="rounded-md bg-brand px-6 py-3 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
             >
               Open dashboard

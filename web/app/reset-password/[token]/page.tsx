@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
         saveToken(data.token);
       }
 
-      router.push("/dashboard");
+      router.push("/profile");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {

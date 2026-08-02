@@ -54,7 +54,7 @@ export default function OnboardingPage() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/profile");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-text-muted">
-          <Link href="/dashboard" className="text-brand hover:text-brand-hover">
+          <Link href="/profile" className="text-brand hover:text-brand-hover">
             Skip to dashboard
           </Link>
         </p>

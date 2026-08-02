@@ -17,12 +17,15 @@ export default function Home() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/40 to-transparent"
       />
-      <div aria-hidden className="page-grain pointer-events-none absolute inset-0" />
+      <div
+        aria-hidden
+        className="page-grain pointer-events-none absolute inset-0"
+      />
 
       {/* First viewport — brand, one line, CTAs only */}
-      <section className="relative flex min-h-[100svh] flex-col items-center justify-center px-6 pb-16 pt-20 text-center">
+      <section className="relative flex min-h-svh flex-col items-center justify-center px-6 pb-16 pt-20 text-center">
         <div className="relative flex max-w-xl flex-col items-center gap-7">
           <div className="lh-rise flex flex-col items-center gap-5">
             <Image
@@ -38,8 +41,8 @@ export default function Home() {
           </div>
 
           <p className="lh-rise-delay max-w-md text-base leading-relaxed text-text-muted sm:text-lg">
-            Your identity and links in one place — between a profile and a
-            link page.
+            Your identity and links in one place — between a profile and a link
+            page.
           </p>
 
           <div className="lh-rise-delay-2">

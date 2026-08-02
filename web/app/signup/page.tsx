@@ -109,7 +109,7 @@ export default function SignupPage() {
       const ok = await createProfile(token!);
       if (!ok) return;
 
-      router.push("/dashboard");
+      router.push("/profile");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
