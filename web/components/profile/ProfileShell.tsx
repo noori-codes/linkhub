@@ -46,12 +46,12 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const title = sectionTitle(pathname);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col lg:flex-row">
-      <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
+    <div className="relative flex min-h-full flex-1 flex-col lg:flex-row">
+      <aside className="relative z-10 flex w-full shrink-0 flex-col border-b border-border/80 bg-surface/90 backdrop-blur-md lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
         {/* Fixed brand header — same on menu and edit screens */}
-        <div className="flex items-center gap-2 border-b border-border px-4 py-4">
+        <div className="flex items-center gap-2 border-b border-border/80 px-4 py-4">
           <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
-          <span className="font-display text-sm font-semibold text-text">
+          <span className="font-display text-sm font-semibold tracking-wide text-text">
             LinkHub
           </span>
         </div>
@@ -79,7 +79,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center gap-3 rounded-md px-3 py-3 transition-colors hover:bg-bg-elevated"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-brand-muted"
                 >
                   <Image
                     src={item.icon}
@@ -129,8 +129,12 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         )}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col bg-bg-elevated">
-        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
+      <div className="relative flex min-w-0 flex-1 flex-col bg-transparent">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,var(--brand-muted),transparent_60%)]"
+        />
+        <div className="relative mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
           {loading ? (
             <p className="text-sm text-text-muted">Loading preview…</p>
           ) : null}

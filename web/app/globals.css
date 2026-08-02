@@ -1,40 +1,38 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Syne:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
 
 /*
-  LinkHub brand tokens — Signal Amber on Ink
-  Use these everywhere (CSS + Tailwind theme below).
-  Later, per-profile Themes can override the same variable names.
+  LinkHub — Obsidian & Sapphire
+  Cool ink canvas, soft ivory type, clear blue signal.
+  Tokens stay the same names so the whole app picks this up.
 */
 :root {
-  /* Brand */
-  --brand: #e8a317;
-  --brand-hover: #f0b429;
-  --brand-muted: #e8a31733;
+  /* Brand — clear sapphire (not purple, not cyan) */
+  --brand: #4d9fff;
+  --brand-hover: #6bb0ff;
+  --brand-muted: #4d9fff28;
 
-  /* Surfaces */
-  --bg: #0f1210;
-  --bg-elevated: #171c19;
-  --surface: #1c221e;
+  /* Surfaces — cool slate ink (no green cast) */
+  --bg: #080a0e;
+  --bg-elevated: #0f1218;
+  --surface: #161a22;
 
-  /* Text */
-  --text: #f3f0e8;
-  --text-muted: #a39e93;
-  --text-inverse: #0f1210;
+  /* Text — soft cool ivory */
+  --text: #f2f4f8;
+  --text-muted: #8b929e;
+  --text-inverse: #080a0e;
 
   /* Lines */
-  --border: #2a322c;
+  --border: #2a303c;
 
-  /* Feedback — use sparingly */
-  --success: #3d9a6a;
-  --danger: #d4544a;
+  /* Feedback */
+  --success: #4caf7a;
+  --danger: #e05a52;
 
-  /* Back-compat with the default Next template vars */
   --background: var(--bg);
   --foreground: var(--text);
 }
 
-/* Expose tokens to Tailwind utilities: bg-brand, text-muted, border-border, etc. */
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
@@ -50,22 +48,39 @@
   --color-border: var(--border);
   --color-success: var(--success);
   --color-danger: var(--danger);
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      ellipse 100% 80% at 50% -20%,
+      #4d9fff14,
+      transparent 55%
+    ),
+    radial-gradient(ellipse 60% 40% at 100% 50%, #4d9fff0a, transparent 50%),
+    radial-gradient(ellipse 50% 35% at 0% 80%, #121826, transparent 45%);
+  background-attachment: fixed;
   color: var(--text);
 }
 
-/* Subtle film grain so the page isn't a flat solid void */
+/* Soft film grain */
 .page-grain {
-  opacity: 0.045;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Landing motion — presence, not noise */
+/* Premium panel — used on profile cards / forms */
+.lh-panel {
+  border: 1px solid color-mix(in srgb, var(--border) 80%, var(--brand) 20%);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--brand) 6%, transparent),
+    0 24px 48px -24px rgba(0, 0, 0, 0.55);
+}
+
 @keyframes lh-rise {
   from {
     opacity: 0;
@@ -80,7 +95,7 @@ body {
 @keyframes lh-wash {
   0%,
   100% {
-    opacity: 0.7;
+    opacity: 0.65;
   }
   50% {
     opacity: 1;
@@ -100,7 +115,7 @@ body {
 }
 
 .lh-wash {
-  animation: lh-wash 12s ease-in-out infinite;
+  animation: lh-wash 14s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -57,7 +57,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <main className="relative flex min-h-full flex-1 flex-col overflow-hidden">
-      {/* Soft atmosphere — not a purple glow; warm amber wash + grain */}
+      {/* Soft atmosphere — sapphire wash + grain */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_55%)]"
@@ -70,7 +70,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
       <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-16 sm:pt-20">
         {/* Identity — brand-first: the person IS the hero */}
         <header className="mb-10 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-surface text-2xl font-semibold tracking-wide text-brand">
+          <div className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-surface text-2xl font-semibold tracking-wide text-brand ring-1 ring-brand/25">
             {showRemoteAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -119,7 +119,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block rounded-md border border-border bg-surface px-4 py-3.5 text-center text-base font-medium text-text transition-colors duration-200 hover:border-brand hover:bg-bg-elevated"
+                className="group block rounded-xl border border-border bg-surface/80 px-4 py-3.5 text-center text-base font-medium text-text backdrop-blur-sm transition-all duration-200 hover:border-brand hover:bg-surface hover:shadow-[0_0_0_1px_var(--brand-muted)]"
               >
                 <span className="transition-colors group-hover:text-brand">
                   {link.title}

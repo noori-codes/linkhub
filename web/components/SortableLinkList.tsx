@@ -103,7 +103,7 @@ export function SortableLinkList({
           <li
             key={link._id}
             onDragOver={(e) => onDragOver(e, link._id)}
-            className={`rounded-md border border-border bg-surface px-4 py-3 transition-opacity ${
+            className={`rounded-xl border border-border bg-surface/90 px-4 py-3 transition-opacity ${
               isDragging ? "opacity-50" : ""
             } ${reordering ? "pointer-events-none opacity-70" : ""}`}
           >

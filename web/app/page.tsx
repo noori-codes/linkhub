@@ -13,11 +13,11 @@ export default function Home() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,#e8a31712,transparent_45%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,#4d9fff12,transparent_45%)]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/40 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/50 to-transparent"
       />
       <div
         aria-hidden
@@ -31,11 +31,11 @@ export default function Home() {
             <Image
               src="/logo.png"
               alt="LinkHub"
-              width={48}
-              height={48}
+              width={52}
+              height={52}
               priority
             />
-            <h1 className="font-display text-5xl font-bold tracking-tight text-text sm:text-6xl">
+            <h1 className="font-display text-5xl font-bold tracking-tight text-text sm:text-7xl">
               LinkHub
             </h1>
           </div>
@@ -52,7 +52,7 @@ export default function Home() {
       </section>
 
       {/* Below fold — one job: explain the path */}
-      <section className="relative border-t border-border bg-bg-elevated/40 px-6 py-20">
+      <section className="relative border-t border-border/80 bg-bg-elevated/50 px-6 py-20 backdrop-blur-sm">
         <div className="mx-auto flex max-w-lg flex-col gap-10 text-center">
           <div className="flex flex-col gap-3">
             <h2 className="font-display text-2xl font-semibold text-text sm:text-3xl">

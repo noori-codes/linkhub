@@ -68,7 +68,7 @@ export default function LoginPage() {
 
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-md border border-border bg-surface p-5"
+          className="flex flex-col gap-4 rounded-xl lh-panel p-5"
         >
           <label className="flex flex-col gap-1.5 text-left text-sm">
             <span className="text-text-muted">Email</span>

@@ -28,8 +28,8 @@ export function ProfileHero({ profile }: Props) {
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
 
   return (
-    <section className="overflow-hidden rounded-md border border-border bg-surface shadow-sm">
-      <div className="relative h-36 w-full bg-bg sm:h-44">
+    <section className="lh-panel overflow-hidden rounded-xl">
+      <div className="relative h-40 w-full bg-bg sm:h-48">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cover} alt="" className="h-full w-full object-cover" />
@@ -41,8 +41,8 @@ export function ProfileHero({ profile }: Props) {
         )}
       </div>
 
-      <div className="relative px-5 pb-6 pt-0 sm:px-8">
-        <div className="-mt-14 mb-4 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-3xl font-semibold text-brand">
+      <div className="relative px-5 pb-7 pt-0 sm:px-8">
+        <div className="-mt-14 mb-4 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-3xl font-semibold text-brand ring-1 ring-brand/20">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -55,10 +55,12 @@ export function ProfileHero({ profile }: Props) {
           )}
         </div>
 
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
           {name}
         </h1>
-        <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
+        <p className="mt-1 text-sm tracking-wide text-text-muted">
+          @{profile.username}
+        </p>
 
         {profile.bio ? (
           <p className="mt-4 max-w-xl text-base leading-relaxed text-text-muted">
@@ -73,7 +75,7 @@ export function ProfileHero({ profile }: Props) {
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
             href={`/u/${profile.username}`}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:border-brand"
+            className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
           >
             View public page
           </Link>

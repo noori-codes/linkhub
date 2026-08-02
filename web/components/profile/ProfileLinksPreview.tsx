@@ -23,7 +23,7 @@ export function ProfileLinksPreview({ links }: Props) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group block rounded-md border border-border bg-surface px-4 py-3.5 text-center text-base font-medium text-text transition-colors duration-200 hover:border-brand hover:bg-bg"
+            className="group block rounded-xl border border-border bg-surface/80 px-4 py-3.5 text-center text-base font-medium text-text backdrop-blur-sm transition-colors duration-200 hover:border-brand hover:bg-surface"
           >
             <span className="transition-colors group-hover:text-brand">
               {link.title}

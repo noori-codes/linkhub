@@ -85,7 +85,7 @@ export default function VerifyEmailPage() {
           Verify email
         </h1>
 
-        <div className="mt-6 rounded-md border border-border bg-surface p-5">
+        <div className="mt-6 rounded-xl lh-panel p-5">
           {status === "loading" ? (
             <p className="text-sm text-text-muted">{message}</p>
           ) : null}

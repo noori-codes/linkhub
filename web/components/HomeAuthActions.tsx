@@ -25,14 +25,14 @@ export default function HomeAuthActions() {
           <>
             <Link
               href="/profile"
-              className="rounded-md bg-brand px-6 py-3 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+              className="rounded-lg bg-brand px-7 py-3.5 text-sm font-semibold tracking-wide text-text-inverse shadow-[0_8px_24px_-8px_var(--brand)] transition-colors hover:bg-brand-hover"
             >
               Open profile
             </Link>
             <button
               type="button"
               onClick={logout}
-              className="rounded-md border border-border px-6 py-3 text-sm font-medium text-text transition-colors hover:border-brand"
+              className="rounded-lg border border-border px-7 py-3.5 text-sm font-medium text-text transition-colors hover:border-brand"
             >
               Log out
             </button>
@@ -41,13 +41,13 @@ export default function HomeAuthActions() {
           <>
             <Link
               href="/signup"
-              className="rounded-md bg-brand px-6 py-3 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+              className="rounded-lg bg-brand px-7 py-3.5 text-sm font-semibold tracking-wide text-text-inverse shadow-[0_8px_24px_-8px_var(--brand)] transition-colors hover:bg-brand-hover"
             >
               Get your page
             </Link>
             <Link
               href="/login"
-              className="rounded-md border border-border px-6 py-3 text-sm font-medium text-text transition-colors hover:border-brand"
+              className="rounded-lg border border-border px-7 py-3.5 text-sm font-medium text-text transition-colors hover:border-brand"
             >
               Log in
             </Link>

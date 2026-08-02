@@ -137,7 +137,7 @@ export default function SignupPage() {
 
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-md border border-border bg-surface p-5"
+          className="flex flex-col gap-4 rounded-xl lh-panel p-5"
         >
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5 text-left text-sm">
