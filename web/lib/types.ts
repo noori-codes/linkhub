@@ -25,6 +25,18 @@ export interface PublicLink {
   isVisible: boolean;
 }
 
+// Safe shape from GET /users/me
+export interface MeUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+  photo: string;
+  onboardingCompleted: boolean;
+  onboardingStep: string;
+}
+
 export interface ApiSuccess<T> {
   status: string;
   results?: number;

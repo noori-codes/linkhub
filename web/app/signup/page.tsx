@@ -78,6 +78,7 @@ export default function SignupPage() {
         const signupData = (await signupRes.json()) as {
           token?: string;
           message?: string;
+          verifyURL?: string;
         };
 
         if (!signupRes.ok) {
@@ -93,6 +94,15 @@ export default function SignupPage() {
         saveToken(signupData.token);
         token = signupData.token;
         setAccountCreated(true);
+
+        // Dev helper for the dashboard banner — open without Mailtrap
+        if (signupData.verifyURL) {
+          try {
+            sessionStorage.setItem("linkhub_verifyURL", signupData.verifyURL);
+          } catch {
+            /* ignore */
+          }
+        }
       }
 
       // Step 2: create Profile — may fail if username is taken

@@ -11,9 +11,15 @@ import { LinksPanel } from "@/components/dashboard/LinksPanel";
 import { PhotosStrip } from "@/components/dashboard/PhotosStrip";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import { ProfileHero } from "@/components/dashboard/ProfileHero";
+import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import { getToken } from "@/lib/auth";
-import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
+import { clearToken, getToken } from "@/lib/auth";
+import type {
+  ApiSuccess,
+  MeUser,
+  PublicLink,
+  PublicProfile,
+} from "@/lib/types";
 
 // Layout: main column = profile like Gravatar/Facebook; right = tools
 export default function DashboardPage() {
@@ -22,6 +28,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [links, setLinks] = useState<PublicLink[]>([]);
   const [linkCount, setLinkCount] = useState(0);
+  const [me, setMe] = useState<MeUser | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -37,12 +44,16 @@ export default function DashboardPage() {
       try {
         const authHeaders = { Authorization: `Bearer ${token}` };
 
-        const [profileRes, linksRes] = await Promise.all([
+        const [profileRes, linksRes, meRes] = await Promise.all([
           fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
             headers: authHeaders,
             cache: "no-store",
           }),
           fetch(`${CLIENT_API_BASE}/api/v1/links/me`, {
+            headers: authHeaders,
+            cache: "no-store",
+          }),
+          fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
             headers: authHeaders,
             cache: "no-store",
           }),
@@ -56,7 +67,17 @@ export default function DashboardPage() {
           links: PublicLink[];
         }> & { message?: string };
 
+        const meData = (await meRes.json()) as ApiSuccess<{
+          user: MeUser;
+        }> & { message?: string };
+
         if (!profileRes.ok) {
+          // Stale JWT (e.g. switched localhost ↔ 127.0.0.1) — clear and re-login
+          if (profileRes.status === 401) {
+            clearToken();
+            router.replace("/login");
+            return;
+          }
           setError(profileData.message || "Could not load profile");
           if (profileRes.status === 404) {
             router.replace("/onboarding");
@@ -71,6 +92,11 @@ export default function DashboardPage() {
         setProfile(profileData.data.profile);
         setLinks(linksData.data.links);
         setLinkCount(linksData.data.links.length);
+
+        // Soft: if /me fails, still show dashboard — just no banner
+        if (meRes.ok) {
+          setMe(meData.data.user);
+        }
       } catch {
         setError("Cannot reach API. Is the backend running?");
       } finally {
@@ -112,6 +138,10 @@ export default function DashboardPage() {
           Your page
         </h1>
       </header>
+
+      {me && !me.emailVerified ? (
+        <VerifyEmailBanner email={me.email} />
+      ) : null}
 
       {/* Desktop: main left/center, tools on the RIGHT (as requested) */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
