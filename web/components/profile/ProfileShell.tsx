@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
 
 import { ProfileHero } from "@/components/dashboard/ProfileHero";
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -12,17 +11,17 @@ const MENU = [
   {
     href: "/profile/about",
     label: "About",
-    icon: IconUser,
+    icon: "/about.svg",
   },
   {
     href: "/profile/links",
     label: "Links",
-    icon: IconLink,
+    icon: "/link.svg",
   },
   {
     href: "/profile/settings",
     label: "Settings",
-    icon: IconGear,
+    icon: "/settings.svg",
   },
 ];
 
@@ -61,11 +60,9 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
           <div className="border-b border-border px-4 py-3">
             <Link
               href="/profile"
-              className="inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-brand"
+              className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-brand"
             >
-              <span aria-hidden className="text-base leading-none">
-                ‹
-              </span>
+              <Image src="/back.svg" alt="" width={18} height={18} />
               Back
             </Link>
           </div>
@@ -73,29 +70,25 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
         {isMenu ? (
           <>
-            <nav
-              className="flex flex-1 flex-col gap-1 p-3"
-              aria-label="Profile"
-            >
-              {MENU.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-start gap-3 rounded-md px-3 py-3 transition-colors hover:bg-bg-elevated"
-                  >
-                    <span className="mt-0.5 text-text-muted">
-                      <Icon />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-medium text-text">
-                        {item.label}
-                      </span>
-                    </span>
-                  </Link>
-                );
-              })}
+            <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Profile">
+              {MENU.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 rounded-md px-3 py-3 transition-colors hover:bg-bg-elevated"
+                >
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={18}
+                    height={18}
+                    className="opacity-80"
+                  />
+                  <span className="text-sm font-medium text-text">
+                    {item.label}
+                  </span>
+                </Link>
+              ))}
             </nav>
 
             <div className="mt-auto space-y-2 border-t border-border p-3">
@@ -142,50 +135,5 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function IconUser() {
-  return (
-    <Svg>
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
-      <path d="M4 20a8 8 0 0 1 16 0" />
-    </Svg>
-  );
-}
-
-function IconLink() {
-  return (
-    <Svg>
-      <path d="M9 12a4 4 0 0 1 0-5.7l1.4-1.4a4 4 0 0 1 5.7 5.7L15 12" />
-      <path d="M15 12a4 4 0 0 1 0 5.7l-1.4 1.4a4 4 0 0 1-5.7-5.7L9 12" />
-    </Svg>
-  );
-}
-
-function IconGear() {
-  return (
-    <Svg>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 3v2.1M12 18.9V21M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M3 12h2.1M18.9 12H21M4.9 19.1l1.5-1.5M17.6 6.4l1.5-1.5" />
-    </Svg>
-  );
-}
-
-function Svg({ children }: { children: ReactNode }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      {children}
-    </svg>
   );
 }
