@@ -4,21 +4,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { DashboardActions } from "@/components/dashboard/DashboardActions";
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
+import { DashboardActions } from "@/components/dashboard/DashboardActions";
+import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { LinksPanel } from "@/components/dashboard/LinksPanel";
+import { PhotosStrip } from "@/components/dashboard/PhotosStrip";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
+import { ProfileHero } from "@/components/dashboard/ProfileHero";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
 
-// Page job: auth gate + load data + compose sections.
-// Feature logic lives in components/dashboard/* so this file stays readable.
+// Layout: main column = profile like Gravatar/Facebook; right = tools
 export default function DashboardPage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [links, setLinks] = useState<PublicLink[]>([]);
+  const [linkCount, setLinkCount] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -67,6 +70,7 @@ export default function DashboardPage() {
 
         setProfile(profileData.data.profile);
         setLinks(linksData.data.links);
+        setLinkCount(linksData.data.links.length);
       } catch {
         setError("Cannot reach API. Is the backend running?");
       } finally {
@@ -101,27 +105,43 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-6 py-12">
-      <header className="flex flex-col gap-2">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header className="flex flex-col gap-1">
         <p className="text-sm text-text-muted">Dashboard</p>
-        <h1 className="font-display text-3xl font-semibold text-text">
-          Your profile
+        <h1 className="font-display text-2xl font-semibold text-text sm:text-3xl">
+          Your page
         </h1>
       </header>
 
-      <ProfileEditor
-        profile={profile}
-        onProfileChange={setProfile}
-      />
+      {/* Desktop: main left/center, tools on the RIGHT (as requested) */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <div className="flex min-w-0 flex-col gap-6">
+          <ProfileHero profile={profile} />
+          <LinksPanel
+            key={profile._id}
+            initialLinks={links}
+            onLinkCountChange={setLinkCount}
+          />
+          <PhotosStrip profile={profile} />
+        </div>
 
-      <ChangePasswordForm />
-
-      <LinksPanel key={profile._id} initialLinks={links} />
-
-      <DashboardActions
-        profile={profile}
-        onProfileChange={setProfile}
-      />
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
+          <FirstRunGuide
+            isDraft={profile.status === "draft"}
+            hasLinks={linkCount > 0}
+            username={profile.username}
+          />
+          <ProfileEditor
+            profile={profile}
+            onProfileChange={setProfile}
+          />
+          <DashboardActions
+            profile={profile}
+            onProfileChange={setProfile}
+          />
+          <ChangePasswordForm />
+        </aside>
+      </div>
     </main>
   );
 }

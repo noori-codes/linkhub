@@ -10,10 +10,12 @@ import type { ApiSuccess, PublicLink } from "@/lib/types";
 
 type Props = {
   initialLinks: PublicLink[];
+  // Parent uses this for the first-run guide (has links? yes/no)
+  onLinkCountChange?: (count: number) => void;
 };
 
 // All link CRUD + reorder lives here so dashboard/page.tsx only loads data
-export function LinksPanel({ initialLinks }: Props) {
+export function LinksPanel({ initialLinks, onLinkCountChange }: Props) {
   const router = useRouter();
 
   const [links, setLinks] = useState(initialLinks);
@@ -34,6 +36,13 @@ export function LinksPanel({ initialLinks }: Props) {
   const linksBeforeDrag = useRef<PublicLink[]>([]);
   const linksRef = useRef(links);
   linksRef.current = links;
+
+  // Keep parent guide in sync whenever the list changes
+  function commitLinks(next: PublicLink[]) {
+    linksRef.current = next;
+    setLinks(next);
+    onLinkCountChange?.(next.length);
+  }
 
   function requireToken() {
     const token = getToken();
@@ -76,7 +85,7 @@ export function LinksPanel({ initialLinks }: Props) {
         return;
       }
 
-      setLinks((prev) => [...prev, data.data.link]);
+      commitLinks([...linksRef.current, data.data.link]);
       setNewTitle("");
       setNewUrl("");
     } catch {
@@ -114,8 +123,8 @@ export function LinksPanel({ initialLinks }: Props) {
         return;
       }
 
-      setLinks((prev) =>
-        prev.map((item) =>
+      commitLinks(
+        linksRef.current.map((item) =>
           item._id === data.data.link._id ? data.data.link : item,
         ),
       );
@@ -156,7 +165,7 @@ export function LinksPanel({ initialLinks }: Props) {
         return;
       }
 
-      setLinks((prev) => prev.filter((item) => item._id !== link._id));
+      commitLinks(linksRef.current.filter((item) => item._id !== link._id));
     } catch {
       setPanelError("Cannot reach API. Is the backend running?");
     } finally {
@@ -209,8 +218,8 @@ export function LinksPanel({ initialLinks }: Props) {
         return;
       }
 
-      setLinks((prev) =>
-        prev.map((item) =>
+      commitLinks(
+        linksRef.current.map((item) =>
           item._id === data.data.link._id ? data.data.link : item,
         ),
       );
@@ -226,7 +235,7 @@ export function LinksPanel({ initialLinks }: Props) {
     if (linksBeforeDrag.current.length === 0) {
       linksBeforeDrag.current = linksRef.current;
     }
-    setLinks(next);
+    commitLinks(next);
   }
 
   async function handleDragEndCommit() {
@@ -265,14 +274,14 @@ export function LinksPanel({ initialLinks }: Props) {
       }> & { message?: string };
 
       if (!res.ok) {
-        setLinks(before);
+        commitLinks(before);
         setPanelError(data.message || "Could not reorder links");
         return;
       }
 
-      setLinks(data.data.links);
+      commitLinks(data.data.links);
     } catch {
-      setLinks(before);
+      commitLinks(before);
       setPanelError("Cannot reach API. Is the backend running?");
     } finally {
       setReordering(false);
@@ -293,7 +302,7 @@ export function LinksPanel({ initialLinks }: Props) {
         className="flex flex-col gap-3 rounded-md border border-border bg-surface p-4"
       >
         <p className="text-xs text-text-muted">
-          Title + URL only for now. The API assigns order and defaults type.
+          Start with one link — title + URL. You can reorder later.
         </p>
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">Title</span>
@@ -329,9 +338,9 @@ export function LinksPanel({ initialLinks }: Props) {
       </form>
 
       {links.length === 0 ? (
-        <p className="text-sm text-text-muted">
-          No links yet — add your first one above.
-        </p>
+          <p className="text-sm text-text-muted">
+            No links yet — that&apos;s step 1 in Getting started above.
+          </p>
       ) : (
         <>
           <p className="text-xs text-text-muted">

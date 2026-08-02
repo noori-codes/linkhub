@@ -8,6 +8,7 @@ export interface PublicProfile {
   displayName: string;
   bio: string;
   avatarUrl: string;
+  coverUrl?: string;
   location: string;
   website: string;
   status: ProfileStatus;

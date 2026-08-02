@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     default: "LinkHub",
     template: "%s · LinkHub",
   },
-  description: "Your links, identity, and affiliate hub in one place.",
+  description: "Your identity and links in one place — between a profile and a link page.",
   icons: {
     icon: "/logo.png",
   },

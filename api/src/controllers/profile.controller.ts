@@ -81,6 +81,7 @@ export const updateMyProfile = catchAsync(
       "displayName",
       "bio",
       "avatarUrl",
+      "coverUrl",
       "location",
       "website",
       "status", // draft | published

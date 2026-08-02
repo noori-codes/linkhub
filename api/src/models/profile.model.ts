@@ -8,6 +8,7 @@ export interface IProfile extends Document {
   displayName: string;
   bio: string;
   avatarUrl: string;
+  coverUrl: string;
   location: string;
   website: string;
   status: ProfileStatus;
@@ -56,6 +57,13 @@ const profileSchema = new Schema<IProfile>(
     avatarUrl: {
       type: String,
       default: "default.jpg",
+    },
+
+    // Banner behind the avatar — Facebook/Gravatar-style cover
+    coverUrl: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     location: {

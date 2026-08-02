@@ -62,34 +62,40 @@ export function DashboardActions({ profile, onProfileChange }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <section className="rounded-md border border-border bg-surface p-4">
+      <p className="mb-3 text-sm font-medium text-text">Page</p>
       {error ? (
-        <p className="text-sm text-danger" role="alert">
+        <p className="mb-2 text-sm text-danger" role="alert">
           {error}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-3">
+      {!isPublished ? (
+        <p className="mb-3 text-xs text-text-muted">
+          Draft pages return 404 for visitors until you publish.
+        </p>
+      ) : null}
+      <div className="flex flex-col gap-2">
         <button
           type="button"
           onClick={() => void togglePublish()}
           disabled={saving}
-          className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
-          {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish"}
+          {saving ? "Saving…" : isPublished ? "Unpublish (draft)" : "Publish page"}
         </button>
         <Link
           href={`/u/${profile.username}`}
-          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+          className="rounded-md bg-brand px-3 py-2 text-center text-sm font-medium text-text-inverse hover:bg-brand-hover"
         >
           View public page
         </Link>
         <Link
           href="/"
-          className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand"
+          className="rounded-md border border-border px-3 py-2 text-center text-sm font-medium text-text hover:border-brand"
         >
           Home
         </Link>
       </div>
-    </div>
+    </section>
   );
 }

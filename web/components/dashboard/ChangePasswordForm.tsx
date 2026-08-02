@@ -78,49 +78,46 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <section className="rounded-md border border-border bg-surface p-5">
-      <h2 className="font-display text-xl font-semibold text-text">
-        Change password
-      </h2>
+    <section className="rounded-md border border-border bg-surface p-4">
+      <h2 className="text-sm font-medium text-text">Change password</h2>
       <p className="mt-1 text-xs text-text-muted">
-        Requires your current password. Use Forgot password on the login page
-        if you lost it.
+        Needs your current password.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">Current password</span>
+      <form onSubmit={onSubmit} className="mt-3 flex flex-col gap-3">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-text-muted">Current</span>
           <input
             type="password"
             required
             minLength={8}
             value={passwordCurrent}
             onChange={(e) => setPasswordCurrent(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
           />
         </label>
 
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">New password</span>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-text-muted">New</span>
           <input
             type="password"
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
           />
         </label>
 
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">Confirm new password</span>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-text-muted">Confirm</span>
           <input
             type="password"
             required
             minLength={8}
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
           />
         </label>
 
@@ -131,7 +128,7 @@ export function ChangePasswordForm() {
         ) : null}
 
         {success ? (
-          <p className="text-sm text-[var(--success)]" role="status">
+          <p className="text-sm text-success" role="status">
             {success}
           </p>
         ) : null}
@@ -139,7 +136,7 @@ export function ChangePasswordForm() {
         <button
           type="submit"
           disabled={saving}
-          className="self-start rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
           {saving ? "Updating…" : "Update password"}
         </button>

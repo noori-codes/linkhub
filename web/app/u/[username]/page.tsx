@@ -54,6 +54,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   const name = profile.displayName || profile.username;
   const showRemoteAvatar = isRemoteAvatar(profile.avatarUrl);
+  const coverUrl =
+    profile.coverUrl && isRemoteAvatar(profile.coverUrl)
+      ? profile.coverUrl
+      : null;
 
   return (
     <main className="relative flex min-h-full flex-1 flex-col overflow-hidden">
@@ -62,55 +66,76 @@ export default async function PublicProfilePage({ params }: PageProps) {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_55%)]"
       />
-      <div aria-hidden className="page-grain pointer-events-none absolute inset-0" />
+      <div
+        aria-hidden
+        className="page-grain pointer-events-none absolute inset-0"
+      />
 
-      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-16 sm:pt-20">
-        {/* Identity — brand-first: the person IS the hero */}
-        <header className="mb-10 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-surface text-2xl font-semibold tracking-wide text-brand">
-            {showRemoteAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatarUrl}
-                alt={name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span>{initials(name) || "?"}</span>
-            )}
+      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-8 sm:pt-12">
+        {/* Cover + avatar — Gravatar/Facebook-style identity block */}
+        <header className="mb-10">
+          <div className="overflow-hidden rounded-md border border-border bg-surface">
+            <div className="relative h-36 w-full bg-bg-elevated sm:h-44">
+              {coverUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={coverUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="h-full w-full bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_70%)]"
+                />
+              )}
+            </div>
+
+            <div className="relative flex flex-col items-center px-5 pb-6 pt-0 text-center">
+              <div className="-mt-12 mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-2xl font-semibold tracking-wide text-brand">
+                {showRemoteAvatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatarUrl}
+                    alt={name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span>{initials(name) || "?"}</span>
+                )}
+              </div>
+
+              <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                {name}
+              </h1>
+              <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
+
+              {profile.bio ? (
+                <p className="mt-4 max-w-sm text-base leading-relaxed text-text-muted">
+                  {profile.bio}
+                </p>
+              ) : null}
+
+              {profile.tags.length > 0 ? (
+                <ul className="mt-4 flex flex-wrap justify-center gap-2">
+                  {profile.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-sm border border-border px-2 py-0.5 text-xs uppercase tracking-wider text-text-muted"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
           </div>
-
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-            {name}
-          </h1>
-          <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
-
-          {profile.bio ? (
-            <p className="mt-4 max-w-sm text-base leading-relaxed text-text-muted">
-              {profile.bio}
-            </p>
-          ) : null}
-
-          {profile.tags.length > 0 ? (
-            <ul className="mt-4 flex flex-wrap justify-center gap-2">
-              {profile.tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="rounded-sm border border-border px-2 py-0.5 text-xs uppercase tracking-wider text-text-muted"
-                >
-                  {tag}
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </header>
 
         {/* Links — full-width rows, not floating glass cards */}
         <section className="flex flex-col gap-3" aria-label="Links">
           {links.length === 0 ? (
-            <p className="text-center text-sm text-text-muted">
-              No links yet.
-            </p>
+            <p className="text-center text-sm text-text-muted">No links yet.</p>
           ) : (
             links.map((link) => (
               <a
