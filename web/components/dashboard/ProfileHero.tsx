@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { PublicProfile } from "@/lib/types";
 
 type Props = {
@@ -5,7 +7,9 @@ type Props = {
 };
 
 function isRemote(url: string | undefined) {
-  return Boolean(url && (url.startsWith("http://") || url.startsWith("https://")));
+  return Boolean(
+    url && (url.startsWith("http://") || url.startsWith("https://")),
+  );
 }
 
 function initials(name: string) {
@@ -17,23 +21,18 @@ function initials(name: string) {
     .join("");
 }
 
-// Center-column hero — cover + avatar overlapping (Gravatar/Facebook vibe)
+// Gravatar-like About header — cover, avatar, identity, primary actions
 export function ProfileHero({ profile }: Props) {
   const name = profile.displayName || profile.username;
   const cover = isRemote(profile.coverUrl) ? profile.coverUrl! : null;
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
 
   return (
-    <section className="overflow-hidden rounded-md border border-border bg-surface">
-      {/* Cover / background picture */}
-      <div className="relative h-40 w-full bg-bg-elevated sm:h-52">
+    <section className="overflow-hidden rounded-md border border-border bg-surface shadow-sm">
+      <div className="relative h-36 w-full bg-bg sm:h-44">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={cover}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={cover} alt="" className="h-full w-full object-cover" />
         ) : (
           <div
             aria-hidden
@@ -42,9 +41,8 @@ export function ProfileHero({ profile }: Props) {
         )}
       </div>
 
-      <div className="relative px-5 pb-5 pt-0">
-        {/* Avatar sits on the cover edge */}
-        <div className="-mt-12 mb-3 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-2xl font-semibold text-brand">
+      <div className="relative px-5 pb-6 pt-0 sm:px-8">
+        <div className="-mt-14 mb-4 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-3xl font-semibold text-brand">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -57,31 +55,32 @@ export function ProfileHero({ profile }: Props) {
           )}
         </div>
 
-        <h2 className="font-display text-2xl font-semibold text-text">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
           {name}
-        </h2>
-        <p className="text-sm text-text-muted">@{profile.username}</p>
+        </h1>
+        <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
 
         {profile.bio ? (
-          <p className="mt-3 text-sm leading-relaxed text-text-muted">
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-text-muted">
             {profile.bio}
           </p>
         ) : (
-          <p className="mt-3 text-sm text-text-muted">
-            Add a bio in the sidebar to introduce yourself.
+          <p className="mt-4 max-w-xl text-base text-text-muted">
+            Add a short bio. Tell the world who you are and what you do.
           </p>
         )}
 
-        <p className="mt-3 text-xs text-text-muted">
-          Status:{" "}
-          <span
-            className={
-              profile.status === "published" ? "text-brand" : "text-text-muted"
-            }
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link
+            href={`/u/${profile.username}`}
+            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:border-brand"
           >
-            {profile.status}
+            View public page
+          </Link>
+          <span className="rounded-md border border-border px-4 py-2 text-sm text-text-muted">
+            {profile.status === "published" ? "Published" : "Draft"}
           </span>
-        </p>
+        </div>
       </div>
     </section>
   );

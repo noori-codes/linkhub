@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -15,7 +15,7 @@ type Props = {
 const inputClass =
   "rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand";
 
-// Compact editor for the right sidebar
+// Full About form — lives under the hero on /profile
 export function ProfileEditor({ profile, onProfileChange }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(profile.displayName);
@@ -27,7 +27,6 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
   const [coverUrl, setCoverUrl] = useState(profile.coverUrl ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [open, setOpen] = useState(true);
 
   async function onSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,49 +81,53 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
   }
 
   return (
-    <SidebarBlock
-      title="Edit profile"
-      open={open}
-      onToggle={() => setOpen((v) => !v)}
-    >
-      <form onSubmit={onSave} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Display name</span>
-          <input
-            type="text"
-            maxLength={60}
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className={inputClass}
+    <section className="rounded-md border border-border bg-surface p-5 sm:p-6">
+      <h2 className="font-display text-xl font-semibold text-text">About</h2>
+      <p className="mt-1 text-sm text-text-muted">
+        Update how you appear on your public page.
+      </p>
+
+      <form onSubmit={onSave} className="mt-5 flex flex-col gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Display name</span>
+            <input
+              type="text"
+              maxLength={60}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className={inputClass}
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Username</span>
+            <input
+              type="text"
+              required
+              minLength={3}
+              maxLength={30}
+              pattern="[a-z0-9._]+"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase())}
+              className={inputClass}
+            />
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Bio</span>
+          <textarea
+            maxLength={300}
+            rows={4}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell the world who you are…"
+            className={`${inputClass} resize-y`}
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Username</span>
-          <input
-            type="text"
-            required
-            minLength={3}
-            maxLength={30}
-            pattern="[a-z0-9._]+"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
-            className={inputClass}
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Cover URL</span>
-          <input
-            type="url"
-            value={coverUrl}
-            onChange={(e) => setCoverUrl(e.target.value)}
-            placeholder="https://… (background)"
-            className={inputClass}
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">Avatar URL</span>
           <input
             type="url"
@@ -135,14 +138,14 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Bio</span>
-          <textarea
-            maxLength={300}
-            rows={3}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            className={`${inputClass} resize-y`}
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Cover URL</span>
+          <input
+            type="url"
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+            placeholder="https://… (background banner)"
+            className={inputClass}
           />
         </label>
 
@@ -155,37 +158,11 @@ export function ProfileEditor({ profile, onProfileChange }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          className="self-start rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
         >
-          {saving ? "Saving…" : "Save profile"}
+          {saving ? "Saving…" : "Save changes"}
         </button>
       </form>
-    </SidebarBlock>
-  );
-}
-
-function SidebarBlock({
-  title,
-  open,
-  onToggle,
-  children,
-}: {
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-md border border-border bg-surface">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-text"
-      >
-        {title}
-        <span className="text-text-muted">{open ? "−" : "+"}</span>
-      </button>
-      {open ? <div className="border-t border-border px-4 py-3">{children}</div> : null}
     </section>
   );
 }
