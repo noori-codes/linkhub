@@ -118,10 +118,11 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
         <footer className="mt-auto flex flex-col items-center gap-2 pt-14">
           <Image
-            src="/logo.png"
+            src="/linkhub-mark.png"
             alt="LinkHub"
             width={28}
             height={28}
+            unoptimized
             className="opacity-80"
           />
           <p className="text-xs tracking-wide text-text-muted">

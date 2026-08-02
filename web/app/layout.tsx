@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   },
   description: "Your identity and links in one place — between a profile and a link page.",
   icons: {
-    icon: "/logo.png",
+    icon: "/linkhub-mark.png",
   },
 };
 

@@ -48,10 +48,18 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
       <aside className="relative z-10 flex w-full shrink-0 flex-col border-b border-border bg-surface lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
         <div className="flex items-center gap-2 border-b border-border px-4 py-4">
-          <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
-          <span className="text-sm font-semibold tracking-wide text-text">
-            LinkHub
-          </span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/linkhub-mark.png"
+              alt="LinkHub"
+              width={28}
+              height={28}
+              unoptimized
+            />
+            <span className="text-sm font-semibold tracking-wide text-text">
+              LinkHub
+            </span>
+          </Link>
         </div>
 
         {!isMenu ? (

@@ -25,7 +25,13 @@ export function SiteHeader() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-5 sm:px-8">
       <Link href="/" className="flex items-center gap-2.5">
-        <Image src="/logo.png" alt="" width={22} height={22} />
+        <Image
+          src="/linkhub-mark.png"
+          alt=""
+          width={22}
+          height={22}
+          unoptimized
+        />
         <span className="text-sm font-semibold tracking-wide text-text">
           LinkHub
         </span>

@@ -72,7 +72,13 @@ export function ProfileSidebar() {
     <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface lg:w-56 lg:border-b-0 lg:border-r">
       <div className="flex items-center gap-2.5 px-4 py-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
+          <Image
+            src="/linkhub-mark.png"
+            alt="LinkHub"
+            width={28}
+            height={28}
+            unoptimized
+          />
           <span className="font-display text-sm font-semibold text-text">
             LinkHub
           </span>
