@@ -131,11 +131,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <p className="text-sm text-text-muted">Profile</p>
+        <p className="text-sm text-text-muted">About</p>
         <h1 className="font-display text-2xl font-semibold text-text sm:text-3xl">
-          Your page
+          Your profile
         </h1>
       </header>
 
@@ -143,7 +143,7 @@ export default function ProfilePage() {
         <VerifyEmailBanner email={me.email} />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
           <ProfileHero profile={profile} />
           <LinksPanel
@@ -176,6 +176,6 @@ export default function ProfilePage() {
           <ChangePasswordForm />
         </aside>
       </div>
-    </main>
+    </div>
   );
 }
