@@ -2,139 +2,131 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
-import { getToken } from "@/lib/auth";
-import type { ApiSuccess, PublicProfile } from "@/lib/types";
+import { ProfileHero } from "@/components/dashboard/ProfileHero";
+import { useProfile } from "@/components/profile/ProfileProvider";
 
-const NAV = [
-  { href: "/profile", label: "About", match: "exact" as const },
-  { href: "/profile/links", label: "Links", match: "prefix" as const },
-  { href: "/profile/settings", label: "Settings", match: "prefix" as const },
+const MENU = [
+  {
+    href: "/profile/about",
+    label: "About",
+    hint: "Name, bio, avatar, cover",
+  },
+  {
+    href: "/profile/links",
+    label: "Links",
+    hint: "Websites and socials",
+  },
+  {
+    href: "/profile/settings",
+    label: "Settings",
+    hint: "Publish, password, email",
+  },
 ];
 
-function isActive(pathname: string, href: string, match: "exact" | "prefix") {
-  if (match === "exact") return pathname === href;
-  return pathname === href || pathname.startsWith(`${href}/`);
+function sectionTitle(pathname: string) {
+  if (pathname.startsWith("/profile/links")) return "Links";
+  if (pathname.startsWith("/profile/settings")) return "Settings";
+  if (pathname.startsWith("/profile/about")) return "About";
+  return "Profile";
 }
 
-// Gravatar-style left nav — shared by all /profile/* pages
+/**
+ * Two sidebar modes (Gravatar-style):
+ * 1) /profile        → main menu (About / Links / Settings)
+ * 2) /profile/about… → section form + back to menu
+ * Right side is always the live preview.
+ */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [username, setUsername] = useState<string | null>(null);
-
-  useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-
-    async function loadUsername() {
-      try {
-        const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as ApiSuccess<{ profile: PublicProfile }>;
-        setUsername(data.data.profile.username);
-      } catch {
-        /* shell still works without the public URL chip */
-      }
-    }
-
-    void loadUsername();
-  }, []);
+  const { profile, loading, error } = useProfile();
+  const isMenu = pathname === "/profile";
+  const title = sectionTitle(pathname);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col md:flex-row">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-surface md:flex">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-4">
-          <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
-          <span className="font-display text-sm font-semibold text-text">
-            LinkHub
-          </span>
-        </div>
+    <div className="flex min-h-full flex-1 flex-col lg:flex-row">
+      <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
+        {isMenu ? (
+          <>
+            <div className="flex items-center gap-2 border-b border-border px-4 py-4">
+              <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
+              <span className="font-display text-sm font-semibold text-text">
+                LinkHub
+              </span>
+            </div>
 
-        <nav className="flex flex-1 flex-col gap-0.5 p-3" aria-label="Profile">
-          {NAV.map((item) => {
-            const active = isActive(pathname, item.href, item.match);
-            return (
+            <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Profile">
+              {MENU.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-3 py-3 transition-colors hover:bg-bg-elevated"
+                >
+                  <span className="block text-sm font-medium text-text">
+                    {item.label}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-text-muted">
+                    {item.hint}
+                  </span>
+                </Link>
+              ))}
+            </nav>
+
+            <div className="mt-auto space-y-2 border-t border-border p-3">
+              {profile ? (
+                <Link
+                  href={`/u/${profile.username}`}
+                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 py-2 text-xs text-text-muted transition-colors hover:border-brand hover:text-brand"
+                >
+                  <span className="truncate">/u/{profile.username}</span>
+                  <span aria-hidden>↗</span>
+                </Link>
+              ) : null}
               <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  active
-                    ? "rounded-md bg-brand-muted px-3 py-2 text-sm font-medium text-text"
-                    : "rounded-md px-3 py-2 text-sm text-text-muted transition-colors hover:bg-bg-elevated hover:text-text"
-                }
+                href="/"
+                className="block px-2 py-1.5 text-xs text-text-muted hover:text-brand"
               >
-                {item.label}
+                ← Home
               </Link>
-            );
-          })}
-        </nav>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Back returns to the main sidebar menu */}
+            <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+              <Link
+                href="/profile"
+                aria-label="Back to menu"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-lg leading-none text-text-muted transition-colors hover:border-brand hover:text-brand"
+              >
+                ‹
+              </Link>
+              <Image src="/logo.png" alt="" width={22} height={22} />
+            </div>
 
-        {username ? (
-          <div className="border-t border-border p-3">
-            <p className="mb-1 text-[10px] uppercase tracking-wider text-text-muted">
-              Public page
-            </p>
-            <Link
-              href={`/u/${username}`}
-              className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 py-2 text-xs text-text-muted transition-colors hover:border-brand hover:text-brand"
-            >
-              <span className="truncate">/u/{username}</span>
-              <span aria-hidden>↗</span>
-            </Link>
-          </div>
-        ) : null}
+            <div className="border-b border-border px-4 py-4">
+              <h1 className="font-display text-2xl font-semibold text-text">
+                {title}
+              </h1>
+              <p className="mt-1 text-xs text-text-muted">
+                Changes update the preview on the right.
+              </p>
+            </div>
 
-        <div className="border-t border-border p-3">
-          <Link
-            href="/"
-            className="block px-3 py-1.5 text-xs text-text-muted hover:text-brand"
-          >
-            ← Home
-          </Link>
-        </div>
+            <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
+          </>
+        )}
       </aside>
 
-      {/* Mobile top tabs */}
-      <div className="border-b border-border bg-surface md:hidden">
-        <div className="flex items-center gap-2 px-4 py-3">
-          <Image src="/logo.png" alt="LinkHub" width={24} height={24} />
-          <span className="font-display text-sm font-semibold text-text">
-            LinkHub
-          </span>
-        </div>
-        <nav
-          className="flex gap-1 overflow-x-auto px-3 pb-3"
-          aria-label="Profile"
-        >
-          {NAV.map((item) => {
-            const active = isActive(pathname, item.href, item.match);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  active
-                    ? "shrink-0 rounded-md bg-brand-muted px-3 py-1.5 text-sm font-medium text-text"
-                    : "shrink-0 rounded-md px-3 py-1.5 text-sm text-text-muted"
-                }
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Main canvas — soft elevated surface like Gravatar’s content area */}
       <div className="flex min-w-0 flex-1 flex-col bg-bg-elevated">
-        {children}
+        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
+          {loading ? (
+            <p className="text-sm text-text-muted">Loading preview…</p>
+          ) : null}
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
+          {profile ? <ProfileHero profile={profile} /> : null}
+        </div>
       </div>
     </div>
   );

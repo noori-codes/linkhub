@@ -1,3 +1,4 @@
+import { ProfileProvider } from "@/components/profile/ProfileProvider";
 import { ProfileShell } from "@/components/profile/ProfileShell";
 
 export default function ProfileLayout({
@@ -5,5 +6,9 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <ProfileShell>{children}</ProfileShell>;
+  return (
+    <ProfileProvider>
+      <ProfileShell>{children}</ProfileShell>
+    </ProfileProvider>
+  );
 }
