@@ -1,0 +1,18 @@
+info:
+  name: Verify Email
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/users/verifyEmail/PASTE_TOKEN_FROM_VERIFY_URL"
+  auth:
+    type: none
+
+docs: |
+  1. Signup (dev) → copy the token from verifyURL
+     e.g. http://127.0.0.1:3001/verify-email/THE_TOKEN
+  2. Paste THE_TOKEN into this URL
+  3. Then call User → Get Me — emailVerified should be true
+
+  The /verify-email page comes in Step 5; for now Bruno is enough.

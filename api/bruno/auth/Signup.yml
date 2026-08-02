@@ -28,6 +28,11 @@ runtime:
           bru.setEnvVar("token", String(body.token));
           bru.setVar("token", String(body.token));
         }
+        // Dev: keep verifyURL handy for Verify Email request
+        if (body.verifyURL) {
+          bru.setEnvVar("verifyURL", String(body.verifyURL));
+          bru.setVar("verifyURL", String(body.verifyURL));
+        }
 
 settings:
   encodeUrl: true

@@ -38,6 +38,8 @@ const createSendToken = (
   statusCode: number,
   req: Request,
   res: Response,
+  // Optional extras (e.g. verifyURL in development)
+  extras: Record<string, unknown> = {},
 ) => {
   const token = signToken(user._id.toString());
 
@@ -57,8 +59,13 @@ const createSendToken = (
     sameSite: "lax",
   });
 
-  const userObject = user.toObject();
+  const userObject = user.toObject() as Record<string, unknown>;
   delete userObject.password;
+  delete userObject.passwordConfirm;
+  delete userObject.passwordResetToken;
+  delete userObject.passwordResetExpires;
+  delete userObject.emailVerifyToken;
+  delete userObject.emailVerifyExpires;
 
   res.status(statusCode).json({
     status: "success",
@@ -66,15 +73,17 @@ const createSendToken = (
     data: {
       user: userObject,
     },
+    ...extras,
   });
 };
 
 // =============================
 // SIGNUP
+// Soft email verify: account works immediately; token emailed for later
 // =============================
 
 export const signup = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, _next: NextFunction) => {
     const newUser = await User.create({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -82,7 +91,27 @@ export const signup = catchAsync(
       password: req.body.password,
     });
 
-    createSendToken(newUser, 201, req, res);
+    // Same pattern as password reset — store hashed token, email raw token
+    const verifyToken = newUser.createEmailVerifyToken();
+    await newUser.save({ validateBeforeSave: false });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+    const verifyURL = `${frontendUrl}/verify-email/${verifyToken}`;
+
+    try {
+      await new Email(newUser, verifyURL).sendEmailVerify();
+    } catch {
+      // Soft verify: signup still succeeds if email isn't configured
+    }
+
+    createSendToken(
+      newUser,
+      201,
+      req,
+      res,
+      // Dev only: copy this into Bruno Verify Email (no need to open Mailtrap)
+      process.env.NODE_ENV === "development" ? { verifyURL } : {},
+    );
   },
 );
 
@@ -292,6 +321,45 @@ export const resetPassword = catchAsync(
     await user.save();
 
     createSendToken(user, 200, req, res);
+  },
+);
+
+// =============================
+// VERIFY EMAIL
+// Public — same idea as resetPassword, but only flips emailVerified
+// =============================
+
+export const verifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.params.token as string;
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      emailVerifyToken: hashedToken,
+      emailVerifyExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(new AppError("Token is invalid or has expired.", 400));
+    }
+
+    user.emailVerified = true;
+    user.emailVerifyToken = undefined;
+    user.emailVerifyExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: "success",
+      message: "Email verified.",
+      data: {
+        user: {
+          _id: user._id,
+          email: user.email,
+          emailVerified: user.emailVerified,
+        },
+      },
+    });
   },
 );
 

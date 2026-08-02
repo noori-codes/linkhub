@@ -87,6 +87,39 @@ class Email {
 
     await this.send("Reset your LinkHub password", html);
   }
+
+  // Soft verify — account works before clicking; this just marks emailVerified
+  async sendEmailVerify() {
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+        <h2>Welcome to LinkHub, ${this.firstName}</h2>
+
+        <p>Confirm your email so we know it’s really you.</p>
+
+        <p style="margin: 30px 0;">
+          <a
+            href="${this.url}"
+            style="
+              background:#c47a1a;
+              color:#fff;
+              text-decoration:none;
+              padding:12px 24px;
+              border-radius:6px;
+              display:inline-block;
+            "
+          >
+            Verify email
+          </a>
+        </p>
+
+        <p>This link is valid for <strong>24 hours</strong>.</p>
+
+        <p style="color:#666;font-size:14px;">LinkHub Team</p>
+      </div>
+    `;
+
+    await this.send("Verify your LinkHub email", html);
+  }
 }
 
 export default Email;

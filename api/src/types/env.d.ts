@@ -14,7 +14,7 @@ declare namespace NodeJS {
     EMAIL_USERNAME: string;
     EMAIL_PASSWORD: string;
 
-    // Next.js app origin — used in password-reset emails
+    // Next.js app origin — used in password-reset + email-verify links
     FRONTEND_URL?: string;
   }
 }

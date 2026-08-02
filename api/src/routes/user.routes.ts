@@ -8,6 +8,7 @@ import {
   forgotPassword,
   resetPassword,
   updatePassword,
+  verifyEmail,
 } from "../controllers/auth.controller.js";
 
 import {
@@ -24,6 +25,7 @@ router.post("/login", login);
 router.get("/logout", logout);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
+router.patch("/verifyEmail/:token", verifyEmail);
 
 // Protect everything below
 router.use(protect);
