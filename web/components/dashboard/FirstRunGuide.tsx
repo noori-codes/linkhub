@@ -1,13 +1,49 @@
 type Props = {
-  isDraft: boolean;
+  hasAvatar: boolean;
   hasLinks: boolean;
+  isPublished: boolean;
   username: string;
 };
 
-// Soft checklist for brand-new accounts — answers “what do I do next?”
-export function FirstRunGuide({ isDraft, hasLinks, username }: Props) {
-  // Once published and they already have links, the funnel is done
-  if (!isDraft && hasLinks) {
+type Step = {
+  id: string;
+  done: boolean;
+  label: string;
+  hint: string;
+};
+
+// Derived from live profile/links — no extra API. Answers “what do I do next?”
+export function FirstRunGuide({
+  hasAvatar,
+  hasLinks,
+  isPublished,
+  username,
+}: Props) {
+  const steps: Step[] = [
+    {
+      id: "avatar",
+      done: hasAvatar,
+      label: "Add an avatar",
+      hint: "Paste an image URL in Edit profile.",
+    },
+    {
+      id: "link",
+      done: hasLinks,
+      label: "Add your first link",
+      hint: "Use the Links form in the main column.",
+    },
+    {
+      id: "publish",
+      done: isPublished,
+      label: "Publish your page",
+      hint: `Hit Publish so /u/${username} goes live.`,
+    },
+  ];
+
+  const doneCount = steps.filter((s) => s.done).length;
+
+  // All three done — checklist can disappear
+  if (doneCount === steps.length) {
     return null;
   }
 
@@ -16,22 +52,36 @@ export function FirstRunGuide({ isDraft, hasLinks, username }: Props) {
       className="rounded-md border border-brand/40 bg-brand-muted px-4 py-4"
       aria-label="Getting started"
     >
-      <p className="text-sm font-medium text-text">Getting started</p>
-      <ol className="mt-3 flex flex-col gap-2 text-sm text-text-muted">
-        <li className={hasLinks ? "text-text" : undefined}>
-          <span className="text-brand">1.</span>{" "}
-          {hasLinks
-            ? "You’ve added a link — add more anytime below."
-            : "Add your first link in the main column."}
-        </li>
-        <li>
-          <span className="text-brand">2.</span>{" "}
-          {isDraft
-            ? "When you’re ready, hit Publish in this sidebar so /u/" +
-              username +
-              " goes live."
-            : "Your page is live at /u/" + username + "."}
-        </li>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-text">Getting started</p>
+        <p className="text-xs text-text-muted">
+          {doneCount}/{steps.length}
+        </p>
+      </div>
+
+      <ol className="mt-3 flex flex-col gap-2.5">
+        {steps.map((step, index) => (
+          <li key={step.id} className="flex gap-2.5 text-sm">
+            <span
+              className={
+                step.done
+                  ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-brand text-xs font-medium text-text-inverse"
+                  : "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border text-xs text-text-muted"
+              }
+              aria-hidden
+            >
+              {step.done ? "✓" : index + 1}
+            </span>
+            <div className="min-w-0">
+              <p className={step.done ? "text-text" : "font-medium text-text"}>
+                {step.label}
+              </p>
+              {!step.done ? (
+                <p className="mt-0.5 text-xs text-text-muted">{step.hint}</p>
+              ) : null}
+            </div>
+          </li>
+        ))}
       </ol>
     </section>
   );

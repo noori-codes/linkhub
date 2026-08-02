@@ -157,8 +157,13 @@ export default function DashboardPage() {
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
           <FirstRunGuide
-            isDraft={profile.status === "draft"}
+            hasAvatar={
+              Boolean(profile.avatarUrl) &&
+              (profile.avatarUrl.startsWith("http://") ||
+                profile.avatarUrl.startsWith("https://"))
+            }
             hasLinks={linkCount > 0}
+            isPublished={profile.status === "published"}
             username={profile.username}
           />
           <ProfileEditor
