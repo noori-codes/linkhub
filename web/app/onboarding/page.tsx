@@ -3,15 +3,13 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 
+import { AuthShell } from "@/components/AuthShell";
 import { getToken } from "@/lib/auth";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
-// Fallback if signup created a User but Profile creation failed
 export default function OnboardingPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -63,67 +61,54 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="relative flex flex-1 flex-col items-center justify-center px-6 py-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_55%)]"
-      />
-
-      <div className="relative w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <Image src="/logo.png" alt="LinkHub" width={48} height={48} />
-          <h1 className="mt-4 font-display text-3xl font-semibold text-text">
-            Claim your username
-          </h1>
-          <p className="mt-2 text-sm text-text-muted">
-            One more step — this becomes your public page URL.
-          </p>
-        </div>
-
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-xl lh-panel p-5"
-        >
-          <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Username</span>
-            <input
-              type="text"
-              required
-              minLength={3}
-              maxLength={30}
-              pattern="[a-z0-9._]+"
-              title="Lowercase letters, numbers, dots, and underscores only"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase())}
-              placeholder="yourname"
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
-            />
-            <span className="text-xs text-text-muted">
-              /u/{username || "…"}
-            </span>
-          </label>
-
-          {error ? (
-            <p className="text-sm text-danger" role="alert">
-              {error}
-            </p>
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
-          >
-            {loading ? "Saving…" : "Continue"}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-text-muted">
+    <AuthShell
+      title="Claim your username"
+      description="One more step — this becomes your public page URL."
+      footer={
+        <p className="text-center text-sm text-text-muted">
           <Link href="/profile" className="text-brand hover:text-brand-hover">
-            Skip to dashboard
+            Skip to profile
           </Link>
         </p>
-      </div>
-    </main>
+      }
+    >
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+      >
+        <label className="flex flex-col gap-1.5 text-left text-sm">
+          <span className="text-text-muted">Username</span>
+          <input
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9._]+"
+            title="Lowercase letters, numbers, dots, and underscores only"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            placeholder="yourname"
+            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+          />
+          <span className="text-xs text-text-muted">
+            /u/{username || "…"}
+          </span>
+        </label>
+
+        {error ? (
+          <p className="text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
+        >
+          {loading ? "Saving…" : "Continue"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

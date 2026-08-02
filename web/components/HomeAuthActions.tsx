@@ -6,8 +6,13 @@ import { useEffect, useState } from "react";
 import { getToken } from "@/lib/auth";
 import { LANDING_DEMO_USERNAME } from "@/lib/demo";
 
+type Props = {
+  /** Hide the secondary “live example” link (e.g. below-fold CTA). */
+  primaryOnly?: boolean;
+};
+
 /** Primary hero action — respects login state (header has the rest). */
-export default function HomeAuthActions() {
+export default function HomeAuthActions({ primaryOnly = false }: Props) {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -31,12 +36,14 @@ export default function HomeAuthActions() {
           Get your page
         </Link>
       )}
-      <Link
-        href={`/u/${LANDING_DEMO_USERNAME}`}
-        className="rounded-md px-3 py-2.5 text-sm font-medium text-text-muted transition-colors hover:text-brand"
-      >
-        See a live example →
-      </Link>
+      {!primaryOnly ? (
+        <Link
+          href={`/u/${LANDING_DEMO_USERNAME}`}
+          className="rounded-md px-3 py-2.5 text-sm font-medium text-text-muted transition-colors hover:text-brand"
+        >
+          See a live example →
+        </Link>
+      ) : null}
     </div>
   );
 }

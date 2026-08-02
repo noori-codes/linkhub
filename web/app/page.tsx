@@ -1,23 +1,30 @@
 import HomeAuthActions from "@/components/HomeAuthActions";
 import { LandingProfilePreview } from "@/components/LandingProfilePreview";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { getAppHost } from "@/lib/app-host";
 
-/**
- * Landing: real product site shell + live demo profile in the hero.
- */
 export default function Home() {
+  const productUrl = `${getAppHost()}/u/you`;
+
   return (
     <main className="flex flex-1 flex-col">
       <SiteHeader />
 
-      {/* Hero — one composition: brand + line + CTA | product */}
       <section className="grid flex-1 lg:min-h-[calc(100svh-3.5rem)] lg:grid-cols-2">
         <div className="flex flex-col justify-center px-6 py-16 sm:px-10 lg:px-14 xl:px-20">
-          <p className="font-display text-5xl font-bold tracking-tight text-text sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-5xl font-bold tracking-tight text-text sm:text-6xl">
             LinkHub
+          </h1>
+
+          <p
+            className="mt-5 inline-flex w-fit items-center rounded-md border border-border bg-surface px-3 py-1.5 font-mono text-sm text-text-muted"
+            title="Your public page URL"
+          >
+            {productUrl}
           </p>
 
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-text-muted">
+          <p className="mt-5 max-w-md text-base leading-relaxed text-text-muted sm:text-lg">
             One public page for your bio and links. Edit in draft, publish when
             you&apos;re ready.
           </p>
@@ -32,29 +39,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Below fold — short path, not a marketing essay */}
-      <section className="border-t border-border px-6 py-16 sm:px-10">
-        <div className="mx-auto grid max-w-4xl gap-10 sm:grid-cols-3 sm:gap-8">
-          <div>
-            <p className="text-sm font-medium text-text">Claim a username</p>
-            <p className="mt-2 text-sm leading-relaxed text-text-muted">
-              Your page lives at <span className="text-text">/u/you</span>.
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text">Add your links</p>
-            <p className="mt-2 text-sm leading-relaxed text-text-muted">
-              Reorder, hide, and update anytime.
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text">Publish when ready</p>
-            <p className="mt-2 text-sm leading-relaxed text-text-muted">
-              Stay private in draft until you go live.
-            </p>
-          </div>
+      <section className="border-t border-border px-6 py-14 sm:px-10">
+        <div className="mx-auto flex max-w-xl flex-col items-start gap-5 sm:items-center sm:text-center">
+          <p className="text-base text-text-muted sm:text-lg">
+            Draft privately. Publish when ready.
+          </p>
+          <HomeAuthActions primaryOnly />
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }

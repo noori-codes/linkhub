@@ -2,32 +2,31 @@
 @import "tailwindcss";
 
 /*
-  LinkHub — Obsidian & Sapphire
-  Cool ink canvas, soft ivory type, clear blue signal.
-  Tokens stay the same names so the whole app picks this up.
+  LinkHub — Paper & Ink
+  Light product UI, quiet surfaces, blue only for actions.
 */
 :root {
-  /* Brand — clear sapphire (not purple, not cyan) */
-  --brand: #4d9fff;
-  --brand-hover: #6bb0ff;
-  --brand-muted: #4d9fff28;
+  /* Brand — blue for buttons / text links only */
+  --brand: #2f6fed;
+  --brand-hover: #1f5ad6;
+  --brand-muted: #2f6fed12;
 
-  /* Surfaces — cool slate ink (no green cast) */
-  --bg: #080a0e;
-  --bg-elevated: #0f1218;
-  --surface: #161a22;
+  /* Surfaces — paper, not dark startup chrome */
+  --bg: #f3f4f6;
+  --bg-elevated: #ffffff;
+  --surface: #ffffff;
 
-  /* Text — soft cool ivory */
-  --text: #f2f4f8;
-  --text-muted: #8b929e;
-  --text-inverse: #080a0e;
+  /* Text */
+  --text: #12141a;
+  --text-muted: #5c6470;
+  --text-inverse: #ffffff;
 
   /* Lines */
-  --border: #2a303c;
+  --border: #dde1e8;
 
   /* Feedback */
-  --success: #4caf7a;
-  --danger: #e05a52;
+  --success: #1f8a54;
+  --danger: #d1433b;
 
   --background: var(--bg);
   --foreground: var(--text);
@@ -54,75 +53,12 @@
 
 body {
   background-color: var(--bg);
-  background-image:
-    radial-gradient(
-      ellipse 100% 80% at 50% -20%,
-      #4d9fff14,
-      transparent 55%
-    ),
-    radial-gradient(ellipse 60% 40% at 100% 50%, #4d9fff0a, transparent 50%),
-    radial-gradient(ellipse 50% 35% at 0% 80%, #121826, transparent 45%);
-  background-attachment: fixed;
   color: var(--text);
 }
 
-/* Soft film grain */
-.page-grain {
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Premium panel — used on profile cards / forms */
+/* Quiet panel — border + soft depth, no colored glow */
 .lh-panel {
-  border: 1px solid color-mix(in srgb, var(--border) 80%, var(--brand) 20%);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--brand) 6%, transparent),
-    0 24px 48px -24px rgba(0, 0, 0, 0.55);
-}
-
-@keyframes lh-rise {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes lh-wash {
-  0%,
-  100% {
-    opacity: 0.65;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.lh-rise {
-  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.lh-rise-delay {
-  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
-}
-
-.lh-rise-delay-2 {
-  animation: lh-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
-}
-
-.lh-wash {
-  animation: lh-wash 14s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lh-rise,
-  .lh-rise-delay,
-  .lh-rise-delay-2,
-  .lh-wash {
-    animation: none;
-  }
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 12px 32px -20px rgba(18, 20, 26, 0.18);
 }

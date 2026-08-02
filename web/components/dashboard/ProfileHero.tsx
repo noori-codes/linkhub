@@ -21,7 +21,6 @@ function initials(name: string) {
     .join("");
 }
 
-// Gravatar-like About header — cover, avatar, identity, primary actions
 export function ProfileHero({ profile }: Props) {
   const name = profile.displayName || profile.username;
   const cover = isRemote(profile.coverUrl) ? profile.coverUrl! : null;
@@ -34,15 +33,12 @@ export function ProfileHero({ profile }: Props) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cover} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div
-            aria-hidden
-            className="h-full w-full bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_70%)]"
-          />
+          <div aria-hidden className="h-full w-full bg-bg" />
         )}
       </div>
 
       <div className="relative px-5 pb-7 pt-0 sm:px-8">
-        <div className="-mt-14 mb-4 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-3xl font-semibold text-brand ring-1 ring-brand/20">
+        <div className="-mt-14 mb-4 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-3xl font-semibold text-text-muted">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -55,12 +51,10 @@ export function ProfileHero({ profile }: Props) {
           )}
         </div>
 
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
           {name}
         </h1>
-        <p className="mt-1 text-sm tracking-wide text-text-muted">
-          @{profile.username}
-        </p>
+        <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
 
         {profile.bio ? (
           <p className="mt-4 max-w-xl text-base leading-relaxed text-text-muted">

@@ -47,7 +47,6 @@ export default async function PublicProfilePage({ params }: PageProps) {
     getPublicLinks(username),
   ]);
 
-  // Draft or missing profiles are not public
   if (!profile) {
     notFound();
   }
@@ -56,21 +55,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const showRemoteAvatar = isRemoteAvatar(profile.avatarUrl);
 
   return (
-    <main className="relative flex min-h-full flex-1 flex-col overflow-hidden">
-      {/* Soft atmosphere — sapphire wash + grain */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_55%)]"
-      />
-      <div
-        aria-hidden
-        className="page-grain pointer-events-none absolute inset-0"
-      />
-
-      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-16 sm:pt-20">
-        {/* Identity — brand-first: the person IS the hero */}
+    <main className="flex min-h-full flex-1 flex-col bg-bg">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-16 sm:pt-20">
         <header className="mb-10 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-surface text-2xl font-semibold tracking-wide text-brand ring-1 ring-brand/25">
+          <div className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border bg-surface text-2xl font-semibold tracking-wide text-text-muted">
             {showRemoteAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -83,7 +71,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
             )}
           </div>
 
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
             {name}
           </h1>
           <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
@@ -108,7 +96,6 @@ export default async function PublicProfilePage({ params }: PageProps) {
           ) : null}
         </header>
 
-        {/* Links — full-width rows, not floating glass cards */}
         <section className="flex flex-col gap-3" aria-label="Links">
           {links.length === 0 ? (
             <p className="text-center text-sm text-text-muted">No links yet.</p>
@@ -119,7 +106,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block rounded-xl border border-border bg-surface/80 px-4 py-3.5 text-center text-base font-medium text-text backdrop-blur-sm transition-all duration-200 hover:border-brand hover:bg-surface hover:shadow-[0_0_0_1px_var(--brand-muted)]"
+                className="group block rounded-lg border border-border bg-surface px-4 py-3.5 text-center text-base font-medium text-text transition-colors duration-200 hover:bg-bg-elevated"
               >
                 <span className="transition-colors group-hover:text-brand">
                   {link.title}
@@ -133,8 +120,8 @@ export default async function PublicProfilePage({ params }: PageProps) {
           <Image
             src="/logo.png"
             alt="LinkHub"
-            width={36}
-            height={36}
+            width={28}
+            height={28}
             className="opacity-80"
           />
           <p className="text-xs tracking-wide text-text-muted">

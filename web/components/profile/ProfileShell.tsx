@@ -37,7 +37,6 @@ function sectionTitle(pathname: string) {
  * Two sidebar modes (Gravatar-style):
  * 1) /profile        → main menu (About / Links / Settings)
  * 2) /profile/about… → section form + back to menu
- * Logo header stays fixed; back sits under it on edit screens.
  */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -46,22 +45,20 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const title = sectionTitle(pathname);
 
   return (
-    <div className="relative flex min-h-full flex-1 flex-col lg:flex-row">
-      <aside className="relative z-10 flex w-full shrink-0 flex-col border-b border-border/80 bg-surface/90 backdrop-blur-md lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
-        {/* Fixed brand header — same on menu and edit screens */}
-        <div className="flex items-center gap-2 border-b border-border/80 px-4 py-4">
+    <div className="flex min-h-full flex-1 flex-col lg:flex-row">
+      <aside className="relative z-10 flex w-full shrink-0 flex-col border-b border-border bg-surface lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-4">
           <Image src="/logo.png" alt="LinkHub" width={28} height={28} />
-          <span className="font-display text-sm font-semibold tracking-wide text-text">
+          <span className="text-sm font-semibold tracking-wide text-text">
             LinkHub
           </span>
         </div>
 
-        {/* Back only when editing a section — below the logo */}
         {!isMenu ? (
           <div className="border-b border-border px-4 py-3">
             <Link
               href="/profile"
-              className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-brand"
+              className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-text"
             >
               <Image src="/back.svg" alt="" width={18} height={18} />
               Back
@@ -79,7 +76,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-brand-muted"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-bg"
                 >
                   <Image
                     src={item.icon}
@@ -99,7 +96,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               {profile ? (
                 <Link
                   href={`/u/${profile.username}`}
-                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 py-2 text-xs text-text-muted transition-colors hover:border-brand hover:text-brand"
+                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 py-2 text-xs text-text-muted transition-colors hover:text-text"
                 >
                   <span className="truncate">/u/{profile.username}</span>
                   <span aria-hidden>↗</span>
@@ -107,7 +104,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               ) : null}
               <Link
                 href="/"
-                className="block px-2 py-1.5 text-xs text-text-muted hover:text-brand"
+                className="block px-2 py-1.5 text-xs text-text-muted hover:text-text"
               >
                 ← Home
               </Link>
@@ -116,9 +113,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         ) : (
           <>
             <div className="border-b border-border px-4 py-4">
-              <h1 className="font-display text-2xl font-semibold text-text">
-                {title}
-              </h1>
+              <h1 className="text-xl font-semibold text-text">{title}</h1>
               <p className="mt-1 text-xs text-text-muted">
                 Changes update the preview on the right.
               </p>
@@ -129,12 +124,8 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         )}
       </aside>
 
-      <div className="relative flex min-w-0 flex-1 flex-col bg-transparent">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,var(--brand-muted),transparent_60%)]"
-        />
-        <div className="relative mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
+      <div className="flex min-w-0 flex-1 flex-col bg-bg">
+        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
           {loading ? (
             <p className="text-sm text-text-muted">Loading preview…</p>
           ) : null}

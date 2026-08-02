@@ -3,9 +3,9 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 
+import { AuthShell } from "@/components/AuthShell";
 import { getToken, saveToken } from "@/lib/auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
@@ -118,27 +118,22 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="relative flex flex-1 flex-col items-center justify-center px-6 py-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--brand-muted),transparent_55%)]"
-      />
-
-      <div className="relative w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <Image src="/logo.png" alt="LinkHub" width={48} height={48} />
-          <h1 className="mt-4 font-display text-3xl font-semibold text-text">
-            Sign up
-          </h1>
-          <p className="mt-2 text-sm text-text-muted">
-            Create an account and claim your public username.
-          </p>
-        </div>
-
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-xl lh-panel p-5"
-        >
+    <AuthShell
+      title="Sign up"
+      description="Create an account and claim your public username."
+      footer={
+        <p className="text-center text-sm text-text-muted">
+          Already have an account?{" "}
+          <Link href="/login" className="text-brand hover:text-brand-hover">
+            Log in
+          </Link>
+        </p>
+      }
+    >
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+      >
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5 text-left text-sm">
               <span className="text-text-muted">First name</span>
@@ -238,19 +233,7 @@ export default function SignupPage() {
                 ? "Try username again"
                 : "Create account"}
           </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-text-muted">
-          Already have an account?{" "}
-          <Link href="/login" className="text-brand hover:text-brand-hover">
-            Log in
-          </Link>
-          {" · "}
-          <Link href="/" className="text-brand hover:text-brand-hover">
-            Home
-          </Link>
-        </p>
-      </div>
-    </main>
+      </form>
+    </AuthShell>
   );
 }
