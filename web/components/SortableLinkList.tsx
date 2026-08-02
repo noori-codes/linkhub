@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   useState,
   type DragEvent,
@@ -123,11 +124,11 @@ export function SortableLinkList({
                   onChange={(e) => onEditUrlChange(e.target.value)}
                   className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
                 />
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-2 pt-1">
                   <button
                     type="submit"
                     disabled={savingEdit}
-                    className="text-xs font-medium text-brand hover:underline disabled:opacity-50"
+                    className="rounded-md bg-brand px-3 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
                   >
                     {savingEdit ? "Saving…" : "Save"}
                   </button>
@@ -135,14 +136,14 @@ export function SortableLinkList({
                     type="button"
                     disabled={savingEdit}
                     onClick={onCancelEdit}
-                    className="text-xs text-text-muted hover:underline disabled:opacity-50"
+                    className="rounded-md border border-border px-3 py-2 text-sm text-text-muted hover:border-brand hover:text-text disabled:opacity-50"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 {/* Only the handle is draggable — buttons stay clickable */}
                 <button
                   type="button"
@@ -150,7 +151,7 @@ export function SortableLinkList({
                   onDragStart={(e) => onDragStart(e, link._id)}
                   onDragEnd={onDragEnd}
                   aria-label={`Drag to reorder ${link.title}`}
-                  className="mt-0.5 cursor-grab select-none px-1 text-text-muted active:cursor-grabbing"
+                  className="shrink-0 cursor-grab select-none px-1 text-text-muted active:cursor-grabbing"
                 >
                   ⋮⋮
                 </button>
@@ -161,32 +162,30 @@ export function SortableLinkList({
                   <p className="mt-0.5 truncate text-xs text-text-muted">
                     {link.url}
                   </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  <span
+                  <p
                     className={
                       link.isVisible
-                        ? "text-xs text-brand"
-                        : "text-xs text-text-muted"
+                        ? "mt-1 text-[10px] uppercase tracking-wide text-brand"
+                        : "mt-1 text-[10px] uppercase tracking-wide text-text-muted"
                     }
                   >
                     {link.isVisible ? "visible" : "hidden"}
-                  </span>
-                  <RowActions
-                    link={link}
-                    busy={
-                      togglingId === link._id ||
-                      deletingId === link._id ||
-                      disabled ||
-                      reordering
-                    }
-                    toggling={togglingId === link._id}
-                    deleting={deletingId === link._id}
-                    onStartEdit={onStartEdit}
-                    onToggleVisibility={onToggleVisibility}
-                    onDelete={onDelete}
-                  />
+                  </p>
                 </div>
+                <RowActions
+                  link={link}
+                  busy={
+                    togglingId === link._id ||
+                    deletingId === link._id ||
+                    disabled ||
+                    reordering
+                  }
+                  toggling={togglingId === link._id}
+                  deleting={deletingId === link._id}
+                  onStartEdit={onStartEdit}
+                  onToggleVisibility={onToggleVisibility}
+                  onDelete={onDelete}
+                />
               </div>
             )}
           </li>
@@ -214,41 +213,54 @@ function RowActions({
   onDelete: (link: PublicLink) => void;
 }): ReactNode {
   return (
-    <>
+    <div className="flex shrink-0 items-center gap-1">
       <button
         type="button"
         disabled={busy}
-        // stopPropagation so a click doesn't start a weird drag
+        title="Edit"
+        aria-label={`Edit ${link.title}`}
         onClick={(e) => {
           e.stopPropagation();
           onStartEdit(link);
         }}
-        className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
+        className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg-elevated hover:opacity-100 disabled:opacity-40"
       >
-        Edit
+        <Image src="/edit.svg" alt="" width={16} height={16} />
       </button>
       <button
         type="button"
         disabled={busy}
+        title={link.isVisible ? "Hide" : "Show"}
+        aria-label={
+          toggling
+            ? "Updating visibility…"
+            : link.isVisible
+              ? `Hide ${link.title}`
+              : `Show ${link.title}`
+        }
         onClick={(e) => {
           e.stopPropagation();
           onToggleVisibility(link);
         }}
-        className="text-xs text-text-muted underline-offset-2 hover:text-brand hover:underline disabled:opacity-50"
+        className={`rounded-md p-1.5 transition-opacity hover:bg-bg-elevated disabled:opacity-40 ${
+          link.isVisible ? "opacity-70 hover:opacity-100" : "opacity-40 hover:opacity-70"
+        }`}
       >
-        {toggling ? "…" : link.isVisible ? "Hide" : "Show"}
+        <Image src="/hide.svg" alt="" width={16} height={16} />
       </button>
       <button
         type="button"
         disabled={busy}
+        title="Delete"
+        aria-label={deleting ? "Deleting…" : `Delete ${link.title}`}
         onClick={(e) => {
           e.stopPropagation();
           onDelete(link);
         }}
-        className="text-xs text-danger underline-offset-2 hover:underline disabled:opacity-50"
+        className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg-elevated hover:opacity-100 disabled:opacity-40"
       >
-        {deleting ? "…" : "Delete"}
+        <Image src="/delete.svg" alt="" width={16} height={16} />
       </button>
-    </>
+    </div>
   );
 }
