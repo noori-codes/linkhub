@@ -48,3 +48,25 @@ export async function getPublicLinks(username: string) {
 
   return json?.data.links ?? [];
 }
+
+/**
+ * Soft fetch for marketing surfaces — never throws.
+ * Returns null when the API is down or the profile is missing/unpublished.
+ */
+export async function getLandingDemo(username: string): Promise<{
+  profile: PublicProfile;
+  links: PublicLink[];
+} | null> {
+  try {
+    const [profile, links] = await Promise.all([
+      getPublicProfile(username),
+      getPublicLinks(username),
+    ]);
+
+    if (!profile) return null;
+
+    return { profile, links };
+  } catch {
+    return null;
+  }
+}
