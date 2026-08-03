@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import type { PublicLink, PublicProfile } from "@/lib/types";
 
 function initials(name: string) {
@@ -111,17 +111,10 @@ export function PublicProfileView({ profile, links, variant }: Props) {
       ) : null}
 
       {variant === "preview" ? (
-        <div className="mt-7 flex flex-wrap gap-2">
-          <Link
-            href={`/u/${profile.username}`}
-            className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
-          >
-            View public page
-          </Link>
-          <span className="rounded-md border border-border px-4 py-2 text-sm text-text-muted">
-            {profile.status === "published" ? "Published" : "Draft"}
-          </span>
-        </div>
+        <PreviewShareActions
+          username={profile.username}
+          status={profile.status}
+        />
       ) : null}
     </header>
   );

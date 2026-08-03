@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 
+import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import type { PublicProfile } from "@/lib/types";
 
 type Props = {
@@ -84,25 +85,22 @@ export function EmailSignaturePanel({ profile }: Props) {
   }
 
   return (
-    <section className="rounded-md border border-border bg-surface p-4">
-      <p className="mb-1 text-sm font-medium text-text">Email signature</p>
-      <p className="mb-3 text-xs text-text-muted">
-        Built from your profile. Copy into Gmail or Outlook → Settings →
-        Signature.
-      </p>
-
+    <SettingsCard
+      title="Email signature"
+      description="Built from your profile. Paste into Gmail or Outlook → Signature."
+    >
       <div
-        className="mb-3 overflow-x-auto rounded-md border border-border bg-bg p-3"
+        className="overflow-x-auto rounded-md border border-border bg-bg p-3"
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
       <button
         type="button"
         onClick={() => void onCopy()}
-        className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand"
+        className="mt-3 rounded-md border border-border px-4 py-2 text-sm font-medium text-text hover:border-brand"
       >
         Copy HTML
       </button>
-    </section>
+    </SettingsCard>
   );
 }

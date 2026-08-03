@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
 
@@ -75,15 +76,13 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <section className="rounded-md border border-border bg-surface p-4">
-      <h2 className="text-sm font-medium text-text">Change password</h2>
-      <p className="mt-1 text-xs text-text-muted">
-        Needs your current password.
-      </p>
-
-      <form onSubmit={onSubmit} className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Current</span>
+    <SettingsCard
+      title="Password"
+      description="Update the password for your account."
+    >
+      <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Current password</span>
           <input
             type="password"
             required
@@ -94,8 +93,8 @@ export function ChangePasswordForm() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">New</span>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">New password</span>
           <input
             type="password"
             required
@@ -106,8 +105,8 @@ export function ChangePasswordForm() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-text-muted">Confirm</span>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-text-muted">Confirm new password</span>
           <input
             type="password"
             required
@@ -121,11 +120,11 @@ export function ChangePasswordForm() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          className="mt-1 rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
           {saving ? "Updating…" : "Update password"}
         </button>
       </form>
-    </section>
+    </SettingsCard>
   );
 }
