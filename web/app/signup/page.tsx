@@ -109,7 +109,7 @@ export default function SignupPage() {
       const ok = await createProfile(token!);
       if (!ok) return;
 
-      router.push("/profile");
+      router.push("/onboarding/about");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -120,7 +120,7 @@ export default function SignupPage() {
   return (
     <AuthShell
       title="Sign up"
-      description="Create an account and claim your public username."
+      description="Create an account and claim your public username — then a short bio and socials."
       footer={
         <p className="text-center text-sm text-text-muted">
           Already have an account?{" "}

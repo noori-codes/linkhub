@@ -52,7 +52,7 @@ export default function OnboardingPage() {
         return;
       }
 
-      router.push("/profile");
+      router.push("/onboarding/about");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -63,11 +63,14 @@ export default function OnboardingPage() {
   return (
     <AuthShell
       title="Claim your username"
-      description="One more step — this becomes your public page URL."
+      description="This becomes your public page URL. Next you’ll add a bio and socials."
       footer={
         <p className="text-center text-sm text-text-muted">
-          <Link href="/profile" className="text-brand hover:text-brand-hover">
-            Skip to profile
+          <Link
+            href="/onboarding/about"
+            className="text-brand hover:text-brand-hover"
+          >
+            I already have a username
           </Link>
         </p>
       }
@@ -90,9 +93,7 @@ export default function OnboardingPage() {
             placeholder="yourname"
             className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
           />
-          <span className="text-xs text-text-muted">
-            /u/{username || "…"}
-          </span>
+          <span className="text-xs text-text-muted">/u/{username || "…"}</span>
         </label>
 
         {error ? (

@@ -40,23 +40,53 @@ export const getMe = catchAsync(async (req: Request, res: Response, next: NextFu
 
 export const updateMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    // Whitelist — never accept password here (use updateMyPassword)
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "onboardingStep",
+      "onboardingCompleted",
+    ] as const;
+
+    const updates: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return next(new AppError("No valid fields to update.", 400));
+    }
+
+    // Completing the wizard should flip both flags together
+    if (updates.onboardingCompleted === true) {
+      updates.onboardingStep = "done";
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user) {
+      return next(new AppError("No user found with that ID", 404));
+    }
 
     res.status(200).json({
       status: "success",
       data: {
-        user,
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          photo: user.photo,
+          onboardingCompleted: user.onboardingCompleted,
+          onboardingStep: user.onboardingStep,
+        },
       },
     });
   },

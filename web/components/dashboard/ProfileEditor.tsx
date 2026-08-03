@@ -19,6 +19,7 @@ export function ProfileEditor() {
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [tagsText, setTagsText] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,6 +29,7 @@ export function ProfileEditor() {
     setDisplayName(profile.displayName);
     setUsername(profile.username);
     setBio(profile.bio);
+    setTagsText((profile.tags ?? []).join(", "));
   }, [profile]);
 
   if (!profile) {
@@ -58,6 +60,11 @@ export function ProfileEditor() {
           displayName: displayName.trim(),
           username: username.trim().toLowerCase(),
           bio: bio.trim(),
+          tags: tagsText
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+            .slice(0, 8),
         }),
       });
 
@@ -115,6 +122,20 @@ export function ProfileEditor() {
           placeholder="Tell the world who you are…"
           className={`${inputClass} resize-y`}
         />
+      </label>
+
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="text-text-muted">Tags</span>
+        <input
+          type="text"
+          value={tagsText}
+          onChange={(e) => setTagsText(e.target.value)}
+          placeholder="Developer, Designer, Creator"
+          className={inputClass}
+        />
+        <span className="text-xs text-text-muted">
+          Comma-separated, up to 8. Shown in your editor preview.
+        </span>
       </label>
 
       {error ? (
