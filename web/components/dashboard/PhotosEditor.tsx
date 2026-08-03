@@ -159,7 +159,7 @@ export function PhotosEditor() {
   return (
     <form onSubmit={onSave} className="flex flex-col gap-5">
       <div className="overflow-hidden rounded-lg border border-border bg-bg">
-        <div className="relative h-24 w-full bg-bg-elevated">
+        <div className="relative z-0 h-24 w-full bg-bg-elevated">
           {coverPreview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -174,7 +174,7 @@ export function PhotosEditor() {
           )}
         </div>
         <div className="relative px-4 pb-4">
-          <div className="-mt-8 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-surface bg-surface text-sm font-semibold text-text-muted">
+          <div className="relative z-10 -mt-8 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-surface bg-surface text-sm font-semibold text-text-muted">
             {avatarPreview ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

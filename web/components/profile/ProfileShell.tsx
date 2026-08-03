@@ -5,8 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
-import { ProfileHero } from "@/components/dashboard/ProfileHero";
-import { ProfileLinksPreview } from "@/components/profile/ProfileLinksPreview";
+import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
 
 const MENU = [
@@ -174,10 +173,11 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
           ) : null}
           {error ? <p className="text-sm text-danger">{error}</p> : null}
           {profile ? (
-            <>
-              <ProfileHero profile={profile} />
-              <ProfileLinksPreview links={links} />
-            </>
+            <PublicProfileView
+              profile={profile}
+              links={links}
+              variant="preview"
+            />
           ) : null}
         </div>
       </div>
