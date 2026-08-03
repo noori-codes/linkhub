@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -21,7 +22,6 @@ export function ProfileEditor() {
   const [bio, setBio] = useState("");
   const [tagsText, setTagsText] = useState("");
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   // Sync local form when profile loads / updates from elsewhere
   useEffect(() => {
@@ -47,7 +47,6 @@ export function ProfileEditor() {
     }
 
     setSaving(true);
-    setError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -73,13 +72,14 @@ export function ProfileEditor() {
       }> & { message?: string };
 
       if (!res.ok) {
-        setError(data.message || "Could not update profile");
+        toast.error(data.message || "Could not update profile");
         return;
       }
 
       setProfile(data.data.profile);
+      toast.success("Profile saved");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
@@ -137,12 +137,6 @@ export function ProfileEditor() {
           Comma-separated, up to 8. Shown in your editor preview.
         </span>
       </label>
-
-      {error ? (
-        <p className="text-sm text-danger" role="alert">
-          {error}
-        </p>
-      ) : null}
 
       <button
         type="submit"

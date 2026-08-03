@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -27,8 +28,6 @@ export function PhotosEditor() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!profile) return;
@@ -58,8 +57,6 @@ export function PhotosEditor() {
     const path = kind === "avatar" ? "avatar" : "cover";
 
     setUploading(true);
-    setError("");
-    setMessage("");
 
     try {
       const body = new FormData();
@@ -81,21 +78,21 @@ export function PhotosEditor() {
       }> & { message?: string };
 
       if (!res.ok) {
-        setError(data.message || `Could not upload ${kind}`);
+        toast.error(data.message || `Could not upload ${kind}`);
         return;
       }
 
       setProfile(data.data.profile);
       if (kind === "avatar" && data.data.avatarUrl) {
         setAvatarUrl(data.data.avatarUrl);
-        setMessage("Avatar uploaded.");
+        toast.success("Avatar uploaded");
       }
       if (kind === "cover" && data.data.coverUrl) {
         setCoverUrl(data.data.coverUrl);
-        setMessage("Cover uploaded.");
+        toast.success("Cover uploaded");
       }
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setUploading(false);
       if (kind === "avatar" && avatarInputRef.current) {
@@ -118,8 +115,6 @@ export function PhotosEditor() {
     }
 
     setSaving(true);
-    setError("");
-    setMessage("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -139,14 +134,14 @@ export function PhotosEditor() {
       }> & { message?: string };
 
       if (!res.ok) {
-        setError(data.message || "Could not update photos");
+        toast.error(data.message || "Could not update photos");
         return;
       }
 
       setProfile(data.data.profile);
-      setMessage("Photos saved.");
+      toast.success("Photos saved");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
@@ -248,17 +243,6 @@ export function PhotosEditor() {
           className={inputClass}
         />
       </div>
-
-      {error ? (
-        <p className="text-sm text-danger" role="alert">
-          {error}
-        </p>
-      ) : null}
-      {message ? (
-        <p className="text-sm text-success" role="status">
-          {message}
-        </p>
-      ) : null}
 
       <button
         type="submit"

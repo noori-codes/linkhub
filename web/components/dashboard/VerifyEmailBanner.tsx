@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
@@ -26,8 +27,6 @@ function toSameOriginVerifyPath(verifyURL: string): string | null {
 export function VerifyEmailBanner({ email }: Props) {
   const [devPath, setDevPath] = useState("");
   const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     try {
@@ -45,13 +44,11 @@ export function VerifyEmailBanner({ email }: Props) {
 
     const token = getToken();
     if (!token) {
-      setError("Please log in again.");
+      toast.error("Please log in again.");
       return;
     }
 
     setSending(true);
-    setError("");
-    setMessage("");
 
     try {
       const res = await fetch(
@@ -68,11 +65,11 @@ export function VerifyEmailBanner({ email }: Props) {
       };
 
       if (!res.ok) {
-        setError(data.message || "Could not resend verification email");
+        toast.error(data.message || "Could not resend verification email");
         return;
       }
 
-      setMessage(data.message || "Verification email sent.");
+      toast.success(data.message || "Verification email sent");
 
       if (data.verifyURL) {
         try {
@@ -84,7 +81,7 @@ export function VerifyEmailBanner({ email }: Props) {
         }
       }
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setSending(false);
     }
@@ -102,15 +99,6 @@ export function VerifyEmailBanner({ email }: Props) {
       <p className="mt-1 text-xs text-text-muted">
         You can keep editing in draft. Publishing requires a confirmed email.
       </p>
-
-      {error ? (
-        <p className="mt-2 text-xs text-danger" role="alert">
-          {error}
-        </p>
-      ) : null}
-      {message ? (
-        <p className="mt-2 text-xs text-success">{message}</p>
-      ) : null}
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button

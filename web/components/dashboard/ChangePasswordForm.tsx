@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
@@ -12,17 +13,13 @@ export function ChangePasswordForm() {
   const [passwordCurrent, setPasswordCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (password !== passwordConfirm) {
-      setError("New passwords do not match.");
+      toast.error("New passwords do not match.");
       return;
     }
 
@@ -57,7 +54,7 @@ export function ChangePasswordForm() {
       };
 
       if (!res.ok) {
-        setError(data.message || "Could not update password");
+        toast.error(data.message || "Could not update password");
         return;
       }
 
@@ -69,9 +66,9 @@ export function ChangePasswordForm() {
       setPasswordCurrent("");
       setPassword("");
       setPasswordConfirm("");
-      setSuccess("Password updated.");
+      toast.success("Password updated");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
@@ -120,18 +117,6 @@ export function ChangePasswordForm() {
             className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
           />
         </label>
-
-        {error ? (
-          <p className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        {success ? (
-          <p className="text-sm text-success" role="status">
-            {success}
-          </p>
-        ) : null}
 
         <button
           type="submit"

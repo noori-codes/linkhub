@@ -39,7 +39,7 @@ export function DashboardActions({
     if (saving) return;
 
     if (!isPublished && !canPublish) {
-      setError("First confirm your email before you can publish.");
+      toast.error("First confirm your email before you can publish.");
       return;
     }
 
@@ -69,13 +69,20 @@ export function DashboardActions({
       }> & { message?: string };
 
       if (!res.ok) {
-        setError(data.message || "Could not update status");
+        const msg = data.message || "Could not update status";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
       onProfileChange(data.data.profile);
+      toast.success(
+        nextStatus === "published" ? "Page published" : "Page unpublished",
+      );
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      const msg = "Cannot reach API. Is the backend running?";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
