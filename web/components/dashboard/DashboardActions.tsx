@@ -11,17 +11,29 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 type Props = {
   profile: PublicProfile;
   onProfileChange: (profile: PublicProfile) => void;
+  /** When false, Publish is blocked (API also enforces this). */
+  emailVerified?: boolean;
 };
 
-export function DashboardActions({ profile, onProfileChange }: Props) {
+export function DashboardActions({
+  profile,
+  onProfileChange,
+  emailVerified = true,
+}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const isPublished = profile.status === "published";
+  const canPublish = emailVerified;
 
   async function togglePublish() {
     if (saving) return;
+
+    if (!isPublished && !canPublish) {
+      setError("First confirm your email before you can publish.");
+      return;
+    }
 
     const token = getToken();
     if (!token) {
@@ -69,7 +81,7 @@ export function DashboardActions({ profile, onProfileChange }: Props) {
           {error}
         </p>
       ) : null}
-      {!isPublished ? (
+      {!isPublished && !canPublish ? null : !isPublished ? (
         <p className="mb-3 text-xs text-text-muted">
           Draft pages return 404 for visitors until you publish.
         </p>

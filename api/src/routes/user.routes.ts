@@ -9,6 +9,7 @@ import {
   resetPassword,
   updatePassword,
   verifyEmail,
+  resendVerifyEmail,
 } from "../controllers/auth.controller.js";
 
 import {
@@ -31,6 +32,7 @@ router.patch("/verifyEmail/:token", verifyEmail);
 router.use(protect);
 
 // Protected routes
+router.post("/resendVerifyEmail", resendVerifyEmail);
 router.patch("/updateMyPassword", updatePassword);
 router.patch("/updateMe", updateMe);
 router.delete("/deleteMe", deleteMe);

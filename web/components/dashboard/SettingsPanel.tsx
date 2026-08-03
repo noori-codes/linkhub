@@ -51,7 +51,11 @@ export function SettingsPanel() {
         <VerifyEmailBanner email={me.email} />
       ) : null}
 
-      <DashboardActions profile={profile} onProfileChange={setProfile} />
+      <DashboardActions
+        profile={profile}
+        onProfileChange={setProfile}
+        emailVerified={me?.emailVerified ?? true}
+      />
 
       <ChangePasswordForm />
     </div>

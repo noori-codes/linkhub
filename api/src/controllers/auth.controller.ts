@@ -364,6 +364,63 @@ export const verifyEmail = catchAsync(
 );
 
 // =============================
+// RESEND VERIFY EMAIL
+// Protected — mint a fresh token for the logged-in user
+// =============================
+
+export const resendVerifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return next(new AppError("User not found.", 404));
+    }
+
+    if (user.emailVerified) {
+      return next(new AppError("Email is already verified.", 400));
+    }
+
+    const verifyToken = user.createEmailVerifyToken();
+    await user.save({ validateBeforeSave: false });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+    const verifyURL = `${frontendUrl}/verify-email/${verifyToken}`;
+
+    try {
+      await new Email(user, verifyURL).sendEmailVerify();
+
+      res.status(200).json({
+        status: "success",
+        message: "Verification email sent.",
+        ...(process.env.NODE_ENV === "development" ? { verifyURL } : {}),
+      });
+    } catch {
+      // Local learning: email often isn't configured — still return the link
+      if (process.env.NODE_ENV === "development") {
+        res.status(200).json({
+          status: "success",
+          message:
+            "Email could not be sent (dev). Use the verifyURL to continue.",
+          verifyURL,
+        });
+        return;
+      }
+
+      user.emailVerifyToken = undefined;
+      user.emailVerifyExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(
+        new AppError(
+          "There was an error sending the email. Try again later.",
+          500,
+        ),
+      );
+    }
+  },
+);
+
+// =============================
 // UPDATE PASSWORD
 // =============================
 

@@ -1,0 +1,22 @@
+info:
+  name: Resend Verify Email
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/users/resendVerifyEmail"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Requires login (Bearer token).
+  Mints a fresh verify token and emails it (or returns verifyURL in development).
+  If emailVerified is already true → 400.

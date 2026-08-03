@@ -99,6 +99,16 @@ export const updateMyProfile = catchAsync(
       }
     }
 
+    // Soft verify with a real limit: must confirm email before going live
+    if (updates.status === "published" && !req.user.emailVerified) {
+      return next(
+        new AppError(
+          "First confirm your email before you can publish.",
+          403,
+        ),
+      );
+    }
+
     // Scope by user so you can only update YOUR profile
     const profile = await Profile.findOneAndUpdate(
       { user: req.user._id },
