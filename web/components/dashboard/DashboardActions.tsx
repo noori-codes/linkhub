@@ -15,6 +15,10 @@ type Props = {
   emailVerified?: boolean;
 };
 
+function publicPageUrl(username: string) {
+  return `${window.location.origin}/u/${username}`;
+}
+
 export function DashboardActions({
   profile,
   onProfileChange,
@@ -23,9 +27,11 @@ export function DashboardActions({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const isPublished = profile.status === "published";
   const canPublish = emailVerified;
+  const pathLabel = `/u/${profile.username}`;
 
   async function togglePublish() {
     if (saving) return;
@@ -73,6 +79,17 @@ export function DashboardActions({
     }
   }
 
+  async function onCopyLink() {
+    setError("");
+    try {
+      await navigator.clipboard.writeText(publicPageUrl(profile.username));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Could not copy. Select the URL and copy manually.");
+    }
+  }
+
   return (
     <section className="rounded-md border border-border bg-surface p-4">
       <p className="mb-3 text-sm font-medium text-text">Page</p>
@@ -86,7 +103,17 @@ export function DashboardActions({
           Draft pages return 404 for visitors until you publish.
         </p>
       ) : null}
+
+      <p className="mb-3 font-mono text-xs text-text-muted">{pathLabel}</p>
+
       <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => void onCopyLink()}
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand"
+        >
+          {copied ? "Copied" : "Copy link"}
+        </button>
         <button
           type="button"
           onClick={() => void togglePublish()}

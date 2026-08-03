@@ -12,7 +12,7 @@ const MENU = [
   {
     href: "/profile/avatar",
     label: "Avatar",
-    icon: "/photos.svg",
+    icon: "/avatar.svg",
   },
   {
     href: "/profile/about",
