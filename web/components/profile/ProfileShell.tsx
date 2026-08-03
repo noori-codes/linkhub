@@ -10,8 +10,8 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 
 const MENU = [
   {
-    href: "/profile/photos",
-    label: "Photos",
+    href: "/profile/avatar",
+    label: "Avatar",
     icon: "/photos.svg",
   },
   {
@@ -32,7 +32,8 @@ const MENU = [
 ];
 
 function sectionTitle(pathname: string) {
-  if (pathname.startsWith("/profile/photos")) return "Photos";
+  if (pathname.startsWith("/profile/avatar") || pathname.startsWith("/profile/photos"))
+    return "Avatar";
   if (pathname.startsWith("/profile/links")) return "Links";
   if (pathname.startsWith("/profile/settings")) return "Settings";
   if (pathname.startsWith("/profile/about")) return "About";

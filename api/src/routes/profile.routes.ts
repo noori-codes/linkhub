@@ -7,8 +7,8 @@ import {
   updateMyProfile,
   getProfileByUsername,
 } from "../controllers/profile.controller.js";
-import { uploadMyAvatar } from "../controllers/upload.controller.js";
-import { avatarUpload } from "../middleware/upload.js";
+import { uploadMyAvatar, uploadMyCover } from "../controllers/upload.controller.js";
+import { avatarUpload, coverUpload } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -22,6 +22,7 @@ router.post("/", createProfile);
 router.get("/me", getMyProfile);
 router.patch("/me", updateMyProfile);
 router.post("/me/avatar", avatarUpload.single("avatar"), uploadMyAvatar);
+router.post("/me/cover", coverUpload.single("cover"), uploadMyCover);
 
 export default router;
 

@@ -9,22 +9,36 @@ const ALLOWED = new Set([
   "image/gif",
 ]);
 
-/** Memory storage — buffer goes straight to S3 (no disk write). */
-export const avatarUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 2 * 1024 * 1024, // 2 MB
-  },
-  fileFilter(_req, file, cb) {
-    if (!ALLOWED.has(file.mimetype)) {
-      cb(
-        new AppError(
-          "Avatar must be a JPEG, PNG, WebP, or GIF image.",
-          400,
-        ) as unknown as Error,
-      );
-      return;
-    }
-    cb(null, true);
-  },
+function imageUpload(options: {
+  maxBytes: number;
+  label: string;
+}) {
+  return multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: options.maxBytes },
+    fileFilter(_req, file, cb) {
+      if (!ALLOWED.has(file.mimetype)) {
+        cb(
+          new AppError(
+            `${options.label} must be a JPEG, PNG, WebP, or GIF image.`,
+            400,
+          ) as unknown as Error,
+        );
+        return;
+      }
+      cb(null, true);
+    },
+  });
+}
+
+/** Avatar — smaller, square-ish profile photo */
+export const avatarUpload = imageUpload({
+  maxBytes: 2 * 1024 * 1024,
+  label: "Avatar",
+});
+
+/** Cover / header — wider banner, allow a bit more size */
+export const coverUpload = imageUpload({
+  maxBytes: 5 * 1024 * 1024,
+  label: "Cover",
 });

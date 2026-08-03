@@ -1,0 +1,28 @@
+info:
+  name: Upload Cover
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/profiles/me/cover"
+  body:
+    type: multipart-form
+    data:
+      - name: cover
+        type: file
+        value: ""
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Same flow as Upload Avatar.
+  Field name must be "cover".
+  Stored under covers/{userId}/… and saved as profile.coverUrl.

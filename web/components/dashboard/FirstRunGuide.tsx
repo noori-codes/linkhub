@@ -24,7 +24,7 @@ export function FirstRunGuide({
       id: "avatar",
       done: hasAvatar,
       label: "Add an avatar",
-      hint: "Open Photos and paste an image URL.",
+      hint: "Open Avatar and upload a photo.",
     },
     {
       id: "link",

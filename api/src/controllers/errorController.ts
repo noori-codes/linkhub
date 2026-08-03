@@ -90,7 +90,10 @@ const globalErrorHandler = (
   // Multer (file upload) — oversized / unexpected field, etc.
   if (err.name === "MulterError") {
     if (err.code === "LIMIT_FILE_SIZE") {
-      finalError = new AppError("Image is too large. Max size is 2 MB.", 400);
+      finalError = new AppError(
+        "Image is too large. Avatars max 2 MB, covers max 5 MB.",
+        400,
+      );
     } else {
       finalError = new AppError(err.message || "Upload failed.", 400);
     }

@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { PhotosEditor } from "@/components/dashboard/PhotosEditor";
-
-export default function ProfilePhotosPage() {
-  return <PhotosEditor />;
+/** Old Photos URL → Avatar */
+export default function ProfilePhotosRedirect() {
+  redirect("/profile/avatar");
 }
