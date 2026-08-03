@@ -1,5 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 
+import AnalyticsEvent from "../models/analyticsEvent.model.js";
+import Collection from "../models/collection.model.js";
+import Link from "../models/link.model.js";
+import Product from "../models/product.model.js";
+import ProductLink from "../models/productLink.model.js";
+import Profile from "../models/profile.model.js";
 import User from "../models/user.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
@@ -94,13 +100,35 @@ export const updateMe = catchAsync(
 
 // =============================
 // DELETE CURRENT USER
+// Hard delete — frees email + username for reuse
 // =============================
 
 export const deleteMe = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await User.findByIdAndUpdate(req.user._id, {
-      active: false,
-    });
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const userId = req.user._id;
+    const profile = await Profile.findOne({ user: userId });
+
+    if (profile) {
+      const profileId = profile._id;
+
+      // Profile-owned rows first (username unique index lives on Profile)
+      await Promise.all([
+        Link.deleteMany({ profile: profileId }),
+        AnalyticsEvent.deleteMany({ profile: profileId }),
+        Collection.deleteMany({ profile: profileId }),
+      ]);
+
+      const products = await Product.find({ profile: profileId }).select("_id");
+      const productIds = products.map((p) => p._id);
+      if (productIds.length > 0) {
+        await ProductLink.deleteMany({ product: { $in: productIds } });
+        await Product.deleteMany({ profile: profileId });
+      }
+
+      await Profile.findByIdAndDelete(profileId);
+    }
+
+    await User.findByIdAndDelete(userId);
 
     res.status(204).json({
       status: "success",

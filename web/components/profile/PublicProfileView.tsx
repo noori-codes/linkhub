@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import type { PublicLink, PublicProfile } from "@/lib/types";
@@ -121,21 +122,27 @@ export function PublicProfileView({ profile, links, variant }: Props) {
 
   const linkList = (
     <section
-      className={`flex flex-col gap-2 ${
-        variant === "preview" ? "px-5 pb-7 sm:px-8" : ""
+      className={`flex flex-col gap-2.5 ${
+        variant === "preview"
+          ? "mx-5 border-t border-border px-0 pb-7 pt-8 sm:mx-8"
+          : "mt-2"
       }`}
       aria-label="Links"
     >
       {visible.length === 0 ? (
-        <p
-          className={`text-sm text-text-muted ${
-            variant === "page" ? "text-center" : ""
-          }`}
-        >
-          {variant === "preview"
-            ? "No visible links yet. Add some in the Links sidebar."
-            : "No links yet."}
-        </p>
+        variant === "preview" ? (
+          <div className="flex flex-col items-start gap-2 py-1">
+            <p className="text-sm text-text-muted">No visible links yet.</p>
+            <Link
+              href="/profile/links"
+              className="text-sm font-medium text-brand hover:text-brand-hover"
+            >
+              Add your first link
+            </Link>
+          </div>
+        ) : (
+          <p className="text-center text-sm text-text-muted">No links yet.</p>
+        )
       ) : (
         visible.map((link) => (
           <a
@@ -143,7 +150,7 @@ export function PublicProfileView({ profile, links, variant }: Props) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block rounded-md border border-border bg-transparent px-4 py-3.5 text-center text-[15px] font-medium text-text transition-colors hover:bg-black/[0.03] hover:text-brand"
+            className="block rounded-md border border-border bg-transparent px-4 py-3.5 text-center text-[15px] font-medium text-text transition-colors hover:bg-bg hover:text-brand"
           >
             {link.title}
           </a>

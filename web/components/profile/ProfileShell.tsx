@@ -129,15 +129,6 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
             <div className="mt-auto space-y-3 border-t border-border p-3">
               {gettingStarted}
-              {profile ? (
-                <Link
-                  href={`/u/${profile.username}`}
-                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 py-2 text-xs text-text-muted transition-colors hover:text-text"
-                >
-                  <span className="truncate">/u/{profile.username}</span>
-                  <span aria-hidden>↗</span>
-                </Link>
-              ) : null}
               <Link
                 href="/"
                 className="block px-2 py-1.5 text-xs text-text-muted hover:text-text"

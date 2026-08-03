@@ -4,15 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { getToken } from "@/lib/auth";
-import { LANDING_DEMO_USERNAME } from "@/lib/demo";
 
-type Props = {
-  /** Hide the secondary “live example” link (e.g. below-fold CTA). */
-  primaryOnly?: boolean;
-};
-
-/** Primary hero action — respects login state (header has the rest). */
-export default function HomeAuthActions({ primaryOnly = false }: Props) {
+/** Primary hero CTA — header already has Log in / Sign up. */
+export default function HomeAuthActions() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -36,14 +30,6 @@ export default function HomeAuthActions({ primaryOnly = false }: Props) {
           Get your page
         </Link>
       )}
-      {!primaryOnly ? (
-        <Link
-          href={`/u/${LANDING_DEMO_USERNAME}`}
-          className="rounded-md px-3 py-2.5 text-sm font-medium text-text-muted transition-colors hover:text-brand"
-        >
-          See a live example →
-        </Link>
-      ) : null}
     </div>
   );
 }

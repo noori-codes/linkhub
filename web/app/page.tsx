@@ -17,16 +17,10 @@ export default function Home() {
             LinkHub
           </h1>
 
-          <p
-            className="mt-5 inline-flex w-fit items-center rounded-md border border-border bg-surface px-3 py-1.5 font-mono text-sm text-text-muted"
-            title="Your public page URL"
-          >
-            {productUrl}
-          </p>
-
           <p className="mt-5 max-w-md text-base leading-relaxed text-text-muted sm:text-lg">
-            One public page for your bio and links. Edit in draft, publish when
-            you&apos;re ready.
+            One public page for your bio and links at{" "}
+            <span className="font-mono text-sm text-text">{productUrl}</span>.
+            Edit in draft, publish when you&apos;re ready.
           </p>
 
           <div className="mt-8">
@@ -36,15 +30,6 @@ export default function Home() {
 
         <div className="flex items-center justify-center border-t border-border bg-bg-elevated px-6 py-14 lg:border-l lg:border-t-0">
           <LandingProfilePreview />
-        </div>
-      </section>
-
-      <section className="border-t border-border px-6 py-14 sm:px-10">
-        <div className="mx-auto flex max-w-xl flex-col items-start gap-5 sm:items-center sm:text-center">
-          <p className="text-base text-text-muted sm:text-lg">
-            Draft privately. Publish when ready.
-          </p>
-          <HomeAuthActions primaryOnly />
         </div>
       </section>
 

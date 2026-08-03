@@ -19,46 +19,10 @@ function isRemote(url: string | undefined) {
   );
 }
 
-const EDITOR_ITEMS = ["Avatar", "About", "Links", "Settings"] as const;
-
-function EditorStrip() {
-  return (
-    <div
-      className="hidden w-[9.5rem] shrink-0 flex-col rounded-xl border border-border bg-surface p-2 sm:flex"
-      aria-hidden
-    >
-      <p className="px-2 pb-2 pt-1 text-[10px] font-medium uppercase tracking-wider text-text-muted">
-        Edit
-      </p>
-      <div className="mb-2 px-2">
-        <div className="flex items-center gap-1.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/linkhub-mark.png" alt="" width={14} height={14} />
-          <span className="text-[11px] font-medium text-text">LinkHub</span>
-        </div>
-      </div>
-      <ul className="flex flex-col gap-0.5">
-        {EDITOR_ITEMS.map((label, i) => (
-          <li
-            key={label}
-            className={`rounded-md px-2 py-1.5 text-[11px] ${
-              i === 0
-                ? "bg-bg font-medium text-text"
-                : "text-text-muted"
-            }`}
-          >
-            {label}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function PhoneChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[1.75rem] border border-border bg-bg p-2.5 shadow-[0_20px_40px_-24px_rgba(18,20,26,0.35)]">
-      <div className="overflow-hidden rounded-[1.35rem] border border-border bg-surface px-5 pb-8 pt-10">
+    <div className="w-full max-w-[280px] rounded-[1.75rem] border border-border bg-bg p-2.5 shadow-[0_20px_40px_-24px_rgba(18,20,26,0.35)]">
+      <div className="overflow-hidden rounded-[1.35rem] border border-border bg-surface">
         {children}
       </div>
     </div>
@@ -74,58 +38,64 @@ function LiveProfile({
 }) {
   const name = profile.displayName || profile.username;
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
-  const visible = links.slice(0, 4);
+  const cover = isRemote(profile.coverUrl) ? profile.coverUrl : null;
+  const visible = links.slice(0, 3);
 
   return (
     <Link
       href={`/u/${profile.username}`}
-      className="block w-full max-w-[260px] outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-text/20"
+      className="block outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-text/20"
       aria-label={`See ${name}'s live profile`}
     >
-      <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-muted sm:hidden">
-        Preview
-      </p>
       <PhoneChrome>
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-border bg-bg text-lg font-semibold text-text-muted">
-          {avatar ? (
+        <div className="relative h-24 w-full bg-bg">
+          {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt="" className="h-full w-full object-cover" />
+            <img src={cover} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span>{initials(name) || "?"}</span>
+            <div
+              aria-hidden
+              className="h-full w-full bg-[linear-gradient(180deg,#e8ebf0_0%,#f3f4f6_100%)]"
+            />
           )}
         </div>
 
-        <p className="text-center text-lg font-semibold tracking-tight text-text">
-          {name}
-        </p>
-        <p className="mt-0.5 text-center text-xs text-text-muted">
-          @{profile.username}
-        </p>
+        <div className="px-5 pb-7">
+          <div className="relative z-10 -mt-8 mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-surface bg-bg text-lg font-semibold text-text-muted">
+            {avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatar} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span>{initials(name) || "?"}</span>
+            )}
+          </div>
 
-        {profile.bio ? (
-          <p className="mt-3 line-clamp-3 text-center text-sm leading-relaxed text-text-muted">
-            {profile.bio}
+          <p className="text-lg font-semibold tracking-tight text-text">
+            {name}
           </p>
-        ) : null}
+          <p className="mt-0.5 text-xs text-text-muted">@{profile.username}</p>
 
-        <ul className="mt-6 flex flex-col gap-2">
-          {visible.length === 0 ? (
-            <li className="text-center text-xs text-text-muted">No links yet</li>
-          ) : (
-            visible.map((link) => (
-              <li
-                key={link._id}
-                className="truncate rounded-md border border-border bg-bg px-3 py-2.5 text-center text-sm font-medium text-text"
-              >
-                {link.title}
-              </li>
-            ))
-          )}
-        </ul>
+          {profile.bio ? (
+            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-muted">
+              {profile.bio}
+            </p>
+          ) : null}
 
-        <p className="mt-8 text-center text-[10px] tracking-wide text-text-muted">
-          Live · /u/{profile.username}
-        </p>
+          <ul className="mt-5 flex flex-col gap-2">
+            {visible.length === 0 ? (
+              <li className="text-center text-xs text-text-muted">No links yet</li>
+            ) : (
+              visible.map((link) => (
+                <li
+                  key={link._id}
+                  className="truncate rounded-md border border-border px-3 py-2.5 text-center text-sm font-medium text-text"
+                >
+                  {link.title}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
       </PhoneChrome>
     </Link>
   );
@@ -133,8 +103,8 @@ function LiveProfile({
 
 function OfflineFallback() {
   return (
-    <div className="w-full max-w-[260px]">
-      <PhoneChrome>
+    <PhoneChrome>
+      <div className="px-5 py-10">
         <p className="text-center text-sm text-text-muted">
           Live demo needs the API and a published profile at{" "}
           <span className="text-text">/u/{LANDING_DEMO_USERNAME}</span>.
@@ -145,37 +115,18 @@ function OfflineFallback() {
         >
           Open /u/{LANDING_DEMO_USERNAME} →
         </Link>
-      </PhoneChrome>
-    </div>
+      </div>
+    </PhoneChrome>
   );
 }
 
-/**
- * Product shot: editor strip + live public preview.
- * Shows LinkHub’s real differentiator vs a links-only page.
- */
+/** Product shot: phone preview of a live public page. */
 export async function LandingProfilePreview() {
   const demo = await getLandingDemo(LANDING_DEMO_USERNAME);
 
-  return (
-    <div className="flex items-center gap-3">
-      <EditorStrip />
-      <span
-        className="hidden text-sm text-text-muted sm:inline"
-        aria-hidden
-      >
-        →
-      </span>
-      <div className="flex flex-col">
-        <p className="mb-2 hidden text-[10px] font-medium uppercase tracking-wider text-text-muted sm:block">
-          Preview
-        </p>
-        {demo ? (
-          <LiveProfile profile={demo.profile} links={demo.links} />
-        ) : (
-          <OfflineFallback />
-        )}
-      </div>
-    </div>
+  return demo ? (
+    <LiveProfile profile={demo.profile} links={demo.links} />
+  ) : (
+    <OfflineFallback />
   );
 }
