@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -15,15 +15,18 @@ function isRemote(url: string) {
   return url.startsWith("http://") || url.startsWith("https://");
 }
 
-/** Avatar + cover image URLs — sidebar form under Photos. */
+/** Avatar upload (S3) + cover URL for now. */
 export function PhotosEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!profile) return;
@@ -33,6 +36,48 @@ export function PhotosEditor() {
 
   if (!profile) {
     return <p className="text-sm text-text-muted">Loading…</p>;
+  }
+
+  async function onAvatarFile(file: File) {
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const body = new FormData();
+      body.append("avatar", file);
+
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me/avatar`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        profile: PublicProfile;
+        avatarUrl: string;
+      }> & { message?: string };
+
+      if (!res.ok) {
+        setError(data.message || "Could not upload avatar");
+        return;
+      }
+
+      setProfile(data.data.profile);
+      setAvatarUrl(data.data.avatarUrl);
+      setMessage("Avatar uploaded.");
+    } catch {
+      setError("Cannot reach API. Is the backend running?");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   async function onSave(event: FormEvent<HTMLFormElement>) {
@@ -47,6 +92,7 @@ export function PhotosEditor() {
 
     setSaving(true);
     setError("");
+    setMessage("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -71,6 +117,7 @@ export function PhotosEditor() {
       }
 
       setProfile(data.data.profile);
+      setMessage("Photos saved.");
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -114,8 +161,33 @@ export function PhotosEditor() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-text-muted">Avatar</span>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void onAvatarFile(file);
+          }}
+        />
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+          className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-bg disabled:opacity-50"
+        >
+          {uploading ? "Uploading…" : "Upload from computer"}
+        </button>
+        <p className="text-xs text-text-muted">
+          JPEG, PNG, WebP, or GIF · max 2 MB. Stored in S3.
+        </p>
+      </div>
+
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Avatar URL</span>
+        <span className="text-text-muted">Or paste avatar URL</span>
         <input
           type="url"
           value={avatarUrl}
@@ -123,9 +195,6 @@ export function PhotosEditor() {
           placeholder="https://…"
           className={inputClass}
         />
-        <span className="text-xs text-text-muted">
-          Paste an image link for now. File uploads come later.
-        </span>
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
@@ -134,7 +203,7 @@ export function PhotosEditor() {
           type="url"
           value={coverUrl}
           onChange={(e) => setCoverUrl(e.target.value)}
-          placeholder="https://…"
+          placeholder="https://… (file upload next)"
           className={inputClass}
         />
       </label>
@@ -144,10 +213,15 @@ export function PhotosEditor() {
           {error}
         </p>
       ) : null}
+      {message ? (
+        <p className="text-sm text-success" role="status">
+          {message}
+        </p>
+      ) : null}
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={saving || uploading}
         className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
       >
         {saving ? "Saving…" : "Save photos"}

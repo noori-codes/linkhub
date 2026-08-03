@@ -4,7 +4,7 @@ import AppError from "../utils/appError.js";
 interface MongoError extends Error {
   path?: string;
   value?: unknown;
-  code?: number;
+  code?: number | string;
   keyValue?: Record<string, unknown>;
   errors?: Record<string, { message: string }>;
 
@@ -87,7 +87,14 @@ const globalErrorHandler = (
   // Turn ugly Mongo/JWT errors into clear AppErrors (dev AND prod)
   let finalError = err as AppError;
 
-  if (err.name === "CastError") {
+  // Multer (file upload) — oversized / unexpected field, etc.
+  if (err.name === "MulterError") {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      finalError = new AppError("Image is too large. Max size is 2 MB.", 400);
+    } else {
+      finalError = new AppError(err.message || "Upload failed.", 400);
+    }
+  } else if (err.name === "CastError") {
     finalError = handleCastErrorDB(err);
   } else if (err.code === 11000) {
     finalError = handleDuplicateFieldsDB(err);

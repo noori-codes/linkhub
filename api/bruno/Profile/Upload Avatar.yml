@@ -1,0 +1,28 @@
+info:
+  name: Upload Avatar
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/profiles/me/avatar"
+  body:
+    type: multipart-form
+    data:
+      - name: avatar
+        type: file
+        value: ""
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  1. Set S3_* vars in api/.env (see .env.example)
+  2. Pick a local image for the "avatar" file field
+  3. Response includes data.avatarUrl and updated profile
