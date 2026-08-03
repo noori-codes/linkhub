@@ -21,8 +21,8 @@ function isRemote(url: string | undefined) {
 
 function PhoneChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full max-w-[280px] rounded-[1.75rem] border border-border bg-bg p-2.5 shadow-[0_20px_40px_-24px_rgba(18,20,26,0.35)]">
-      <div className="overflow-hidden rounded-[1.35rem] border border-border bg-surface">
+    <div className="w-[min(100%,22rem)] rounded-[2rem] border border-border bg-bg p-3 shadow-[0_28px_56px_-28px_rgba(18,20,26,0.45)] transition-transform duration-300 ease-out hover:-translate-y-1 sm:w-[24rem]">
+      <div className="overflow-hidden rounded-[1.55rem] border border-border bg-surface">
         {children}
       </div>
     </div>
@@ -44,11 +44,11 @@ function LiveProfile({
   return (
     <Link
       href={`/u/${profile.username}`}
-      className="block outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-text/20"
+      className="block outline-none focus-visible:ring-2 focus-visible:ring-text/20"
       aria-label={`See ${name}'s live profile`}
     >
       <PhoneChrome>
-        <div className="relative h-24 w-full bg-bg">
+        <div className="relative h-32 w-full bg-bg sm:h-36">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt="" className="h-full w-full object-cover" />
@@ -60,8 +60,8 @@ function LiveProfile({
           )}
         </div>
 
-        <div className="px-5 pb-7">
-          <div className="relative z-10 -mt-8 mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-surface bg-bg text-lg font-semibold text-text-muted">
+        <div className="px-6 pb-8">
+          <div className="relative z-10 -mt-10 mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-[3px] border-surface bg-bg text-xl font-semibold text-text-muted">
             {avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatar} alt="" className="h-full w-full object-cover" />
@@ -70,25 +70,25 @@ function LiveProfile({
             )}
           </div>
 
-          <p className="text-lg font-semibold tracking-tight text-text">
+          <p className="text-xl font-semibold tracking-tight text-text">
             {name}
           </p>
-          <p className="mt-0.5 text-xs text-text-muted">@{profile.username}</p>
+          <p className="mt-0.5 text-sm text-text-muted">@{profile.username}</p>
 
           {profile.bio ? (
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-muted">
+            <p className="mt-2.5 line-clamp-2 text-[0.95rem] leading-relaxed text-text-muted">
               {profile.bio}
             </p>
           ) : null}
 
-          <ul className="mt-5 flex flex-col gap-2">
+          <ul className="mt-6 flex flex-col gap-2.5">
             {visible.length === 0 ? (
-              <li className="text-center text-xs text-text-muted">No links yet</li>
+              <li className="text-center text-sm text-text-muted">No links yet</li>
             ) : (
               visible.map((link) => (
                 <li
                   key={link._id}
-                  className="truncate rounded-md border border-border px-3 py-2.5 text-center text-sm font-medium text-text"
+                  className="truncate rounded-lg border border-border px-3.5 py-3 text-center text-[0.95rem] font-medium text-text"
                 >
                   {link.title}
                 </li>
@@ -104,7 +104,7 @@ function LiveProfile({
 function OfflineFallback() {
   return (
     <PhoneChrome>
-      <div className="px-5 py-10">
+      <div className="px-6 py-12">
         <p className="text-center text-sm text-text-muted">
           Live demo needs the API and a published profile at{" "}
           <span className="text-text">/u/{LANDING_DEMO_USERNAME}</span>.
