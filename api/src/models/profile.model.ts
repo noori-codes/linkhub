@@ -8,6 +8,7 @@ export interface IProfile extends Document {
   displayName: string;
   bio: string;
   avatarUrl: string;
+  coverUrl: string;
   location: string;
   website: string;
   status: ProfileStatus;
@@ -56,6 +57,12 @@ const profileSchema = new Schema<IProfile>(
     avatarUrl: {
       type: String,
       default: "default.jpg",
+    },
+
+    coverUrl: {
+      type: String,
+      trim: true,
+      default: "",
     },
 
     location: {

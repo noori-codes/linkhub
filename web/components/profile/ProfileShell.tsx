@@ -10,6 +10,11 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 
 const MENU = [
   {
+    href: "/profile/photos",
+    label: "Photos",
+    icon: "/photos.svg",
+  },
+  {
     href: "/profile/about",
     label: "About",
     icon: "/about.svg",
@@ -27,6 +32,7 @@ const MENU = [
 ];
 
 function sectionTitle(pathname: string) {
+  if (pathname.startsWith("/profile/photos")) return "Photos";
   if (pathname.startsWith("/profile/links")) return "Links";
   if (pathname.startsWith("/profile/settings")) return "Settings";
   if (pathname.startsWith("/profile/about")) return "About";

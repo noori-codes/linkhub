@@ -24,7 +24,7 @@ export function FirstRunGuide({
       id: "avatar",
       done: hasAvatar,
       label: "Add an avatar",
-      hint: "Paste an image URL in Edit profile.",
+      hint: "Open Photos and paste an image URL.",
     },
     {
       id: "link",

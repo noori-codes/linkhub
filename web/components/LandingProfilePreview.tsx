@@ -19,7 +19,7 @@ function isRemote(url: string | undefined) {
   );
 }
 
-const EDITOR_ITEMS = ["About", "Links", "Settings"] as const;
+const EDITOR_ITEMS = ["Photos", "About", "Links", "Settings"] as const;
 
 function EditorStrip() {
   return (

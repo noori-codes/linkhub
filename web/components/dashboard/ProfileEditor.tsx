@@ -19,8 +19,6 @@ export function ProfileEditor() {
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,8 +28,6 @@ export function ProfileEditor() {
     setDisplayName(profile.displayName);
     setUsername(profile.username);
     setBio(profile.bio);
-    setAvatarUrl(profile.avatarUrl?.startsWith("http") ? profile.avatarUrl : "");
-    setCoverUrl(profile.coverUrl ?? "");
   }, [profile]);
 
   if (!profile) {
@@ -62,8 +58,6 @@ export function ProfileEditor() {
           displayName: displayName.trim(),
           username: username.trim().toLowerCase(),
           bio: bio.trim(),
-          avatarUrl: avatarUrl.trim(),
-          coverUrl: coverUrl.trim(),
         }),
       });
 
@@ -120,28 +114,6 @@ export function ProfileEditor() {
           onChange={(e) => setBio(e.target.value)}
           placeholder="Tell the world who you are…"
           className={`${inputClass} resize-y`}
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Avatar URL</span>
-        <input
-          type="url"
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          placeholder="https://…"
-          className={inputClass}
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Cover URL</span>
-        <input
-          type="url"
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          placeholder="https://…"
-          className={inputClass}
         />
       </label>
 
