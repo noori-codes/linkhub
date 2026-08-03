@@ -70,18 +70,20 @@ function escapeHtml(value: string) {
     .replaceAll('"', "&quot;");
 }
 
-/** Settings block: preview + copy HTML for Gmail/Outlook signature. */
+/** Settings: live preview + copy HTML for Gmail/Outlook. */
 export function EmailSignaturePanel({ profile }: Props) {
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
   const html = buildEmailSignatureHtml(profile, pageUrl(profile.username));
 
   async function onCopy() {
+    setError("");
     try {
       await navigator.clipboard.writeText(html);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard blocked */
+      setError("Could not copy. Try again or paste from a text editor.");
     }
   }
 
@@ -89,9 +91,15 @@ export function EmailSignaturePanel({ profile }: Props) {
     <section className="rounded-md border border-border bg-surface p-4">
       <p className="mb-1 text-sm font-medium text-text">Email signature</p>
       <p className="mb-3 text-xs text-text-muted">
-        Copy this into Gmail or Outlook → Settings → Signature. It uses your
-        name, bio, and public page link.
+        Built from your profile. Copy into Gmail or Outlook → Settings →
+        Signature.
       </p>
+
+      {error ? (
+        <p className="mb-2 text-sm text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div
         className="mb-3 overflow-x-auto rounded-md border border-border bg-bg p-3"
