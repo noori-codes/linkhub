@@ -36,7 +36,7 @@ export function FirstRunGuide({
       id: "publish",
       done: isPublished,
       label: "Publish your page",
-      hint: `Use Publish page below so /u/${username} goes live.`,
+      hint: `Open Settings and publish so /u/${username} goes live.`,
     },
   ];
 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { ProfileHero } from "@/components/dashboard/ProfileHero";
 import { ProfileLinksPreview } from "@/components/profile/ProfileLinksPreview";
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -32,7 +33,10 @@ const MENU = [
 ];
 
 function sectionTitle(pathname: string) {
-  if (pathname.startsWith("/profile/avatar") || pathname.startsWith("/profile/photos"))
+  if (
+    pathname.startsWith("/profile/avatar") ||
+    pathname.startsWith("/profile/photos")
+  )
     return "Avatar";
   if (pathname.startsWith("/profile/links")) return "Links";
   if (pathname.startsWith("/profile/settings")) return "Settings";
@@ -42,14 +46,31 @@ function sectionTitle(pathname: string) {
 
 /**
  * Two sidebar modes (Gravatar-style):
- * 1) /profile        → main menu (About / Links / Settings)
- * 2) /profile/about… → section form + back to menu
+ * 1) /profile        → main menu
+ * 2) /profile/…      → section form + back to menu
+ * Getting-started guide sits at the bottom of the sidebar.
  */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { profile, links, loading, error } = useProfile();
   const isMenu = pathname === "/profile";
   const title = sectionTitle(pathname);
+
+  const hasAvatar = Boolean(
+    profile?.avatarUrl && profile.avatarUrl.startsWith("http"),
+  );
+  const hasLinks = links.some((link) => link.isVisible);
+  const isPublished = profile?.status === "published";
+
+  const gettingStarted =
+    profile != null ? (
+      <FirstRunGuide
+        hasAvatar={hasAvatar}
+        hasLinks={hasLinks}
+        isPublished={isPublished}
+        username={profile.username}
+      />
+    ) : null;
 
   return (
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
@@ -107,7 +128,8 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               ))}
             </nav>
 
-            <div className="mt-auto space-y-2 border-t border-border p-3">
+            <div className="mt-auto space-y-3 border-t border-border p-3">
+              {gettingStarted}
               {profile ? (
                 <Link
                   href={`/u/${profile.username}`}
@@ -135,6 +157,12 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
+
+            {gettingStarted ? (
+              <div className="mt-auto border-t border-border p-3">
+                {gettingStarted}
+              </div>
+            ) : null}
           </>
         )}
       </aside>

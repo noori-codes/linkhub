@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
 import { DashboardActions } from "@/components/dashboard/DashboardActions";
-import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -16,9 +15,9 @@ type MeUser = {
   emailVerified: boolean;
 };
 
-/** Sidebar settings: checklist, verify, publish, password. */
+/** Sidebar settings: verify, publish, password. */
 export function SettingsPanel() {
-  const { profile, links, setProfile } = useProfile();
+  const { profile, setProfile } = useProfile();
   const [me, setMe] = useState<MeUser | null>(null);
 
   useEffect(() => {
@@ -46,21 +45,8 @@ export function SettingsPanel() {
     return <p className="text-sm text-text-muted">Loading…</p>;
   }
 
-  const hasAvatar = Boolean(
-    profile.avatarUrl && profile.avatarUrl.startsWith("http"),
-  );
-  const hasLinks = links.some((link) => link.isVisible);
-  const isPublished = profile.status === "published";
-
   return (
     <div className="flex flex-col gap-4">
-      <FirstRunGuide
-        hasAvatar={hasAvatar}
-        hasLinks={hasLinks}
-        isPublished={isPublished}
-        username={profile.username}
-      />
-
       {me && !me.emailVerified ? (
         <VerifyEmailBanner email={me.email} />
       ) : null}
