@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { toast } from "sonner";
 
 import type { PublicProfile } from "@/lib/types";
 
@@ -72,18 +72,14 @@ function escapeHtml(value: string) {
 
 /** Settings: live preview + copy HTML for Gmail/Outlook. */
 export function EmailSignaturePanel({ profile }: Props) {
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState("");
   const html = buildEmailSignatureHtml(profile, pageUrl(profile.username));
 
   async function onCopy() {
-    setError("");
     try {
       await navigator.clipboard.writeText(html);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      toast.success("Signature HTML copied");
     } catch {
-      setError("Could not copy. Try again or paste from a text editor.");
+      toast.error("Could not copy signature");
     }
   }
 
@@ -95,12 +91,6 @@ export function EmailSignaturePanel({ profile }: Props) {
         Signature.
       </p>
 
-      {error ? (
-        <p className="mb-2 text-sm text-danger" role="alert">
-          {error}
-        </p>
-      ) : null}
-
       <div
         className="mb-3 overflow-x-auto rounded-md border border-border bg-bg p-3"
         dangerouslySetInnerHTML={{ __html: html }}
@@ -111,7 +101,7 @@ export function EmailSignaturePanel({ profile }: Props) {
         onClick={() => void onCopy()}
         className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand"
       >
-        {copied ? "Copied HTML" : "Copy HTML"}
+        Copy HTML
       </button>
     </section>
   );

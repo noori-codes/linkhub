@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { ShareQr } from "@/components/dashboard/ShareQr";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -28,7 +29,6 @@ export function DashboardActions({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
 
   const isPublished = profile.status === "published";
@@ -85,10 +85,9 @@ export function DashboardActions({
     setError("");
     try {
       await navigator.clipboard.writeText(publicPageUrl(profile.username));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      toast.success("Link copied");
     } catch {
-      setError("Could not copy. Select the URL and copy manually.");
+      toast.error("Could not copy link");
     }
   }
 
@@ -114,7 +113,7 @@ export function DashboardActions({
           onClick={() => void onCopyLink()}
           className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text hover:border-brand"
         >
-          {copied ? "Copied" : "Copy link"}
+          Copy link
         </button>
         <button
           type="button"
