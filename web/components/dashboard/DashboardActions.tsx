@@ -93,12 +93,6 @@ export function DashboardActions({ profile, onProfileChange }: Props) {
         >
           View public page
         </Link>
-        <Link
-          href="/"
-          className="rounded-md border border-border px-3 py-2 text-center text-sm font-medium text-text hover:border-brand"
-        >
-          Home
-        </Link>
       </div>
     </section>
   );

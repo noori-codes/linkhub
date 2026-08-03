@@ -30,13 +30,13 @@ export function FirstRunGuide({
       id: "link",
       done: hasLinks,
       label: "Add your first link",
-      hint: "Use the Links form in the main column.",
+      hint: "Open Links in the sidebar and add one.",
     },
     {
       id: "publish",
       done: isPublished,
       label: "Publish your page",
-      hint: `Hit Publish so /u/${username} goes live.`,
+      hint: `Use Publish page below so /u/${username} goes live.`,
     },
   ];
 
