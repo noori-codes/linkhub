@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
 import { DashboardActions } from "@/components/dashboard/DashboardActions";
+import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -56,6 +57,8 @@ export function SettingsPanel() {
         onProfileChange={setProfile}
         emailVerified={me?.emailVerified ?? true}
       />
+
+      <EmailSignaturePanel profile={profile} />
 
       <ChangePasswordForm />
     </div>
