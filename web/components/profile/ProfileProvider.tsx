@@ -6,14 +6,19 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
-import { clearToken, getToken } from "@/lib/auth";
-import type { ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
+import { clearToken } from "@/lib/auth";
+import {
+  fetchMyLinks,
+  fetchMyProfile,
+  HttpError,
+  queryKeys,
+} from "@/lib/dashboard-queries";
+import type { PublicLink, PublicProfile } from "@/lib/types";
 
 type ProfileContextValue = {
   profile: PublicProfile | null;
@@ -29,81 +34,91 @@ const ProfileContext = createContext<ProfileContextValue | null>(null);
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [links, setLinks] = useState<PublicLink[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
-  const reload = useCallback(async () => {
-    const token = getToken();
-    if (!token) {
+  const profileQuery = useQuery({
+    queryKey: queryKeys.profileMe,
+    queryFn: fetchMyProfile,
+    retry: false,
+  });
+
+  const linksQuery = useQuery({
+    queryKey: queryKeys.linksMe,
+    queryFn: fetchMyLinks,
+    retry: false,
+    enabled: profileQuery.isSuccess,
+  });
+
+  useEffect(() => {
+    const err = profileQuery.error;
+    if (!err) return;
+
+    if (err instanceof HttpError && err.status === 401) {
+      clearToken();
       router.replace("/login");
       return;
     }
 
-    try {
-      const authHeaders = { Authorization: `Bearer ${token}` };
-
-      const [profileRes, linksRes] = await Promise.all([
-        fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
-          headers: authHeaders,
-          cache: "no-store",
-        }),
-        fetch(`${CLIENT_API_BASE}/api/v1/links/me`, {
-          headers: authHeaders,
-          cache: "no-store",
-        }),
-      ]);
-
-      const profileData = (await profileRes.json()) as ApiSuccess<{
-        profile: PublicProfile;
-      }> & { message?: string };
-
-      const linksData = (await linksRes.json()) as ApiSuccess<{
-        links: PublicLink[];
-      }> & { message?: string };
-
-      if (!profileRes.ok) {
-        if (profileRes.status === 401) {
-          clearToken();
-          router.replace("/login");
-          return;
-        }
-        setError(profileData.message || "Could not load profile");
-        if (profileRes.status === 404) {
-          router.replace("/onboarding");
-        }
-        return;
-      }
-
-      setError("");
-      setProfile(profileData.data.profile);
-
-      if (linksRes.ok) {
-        setLinks(linksData.data.links);
-      }
-    } catch {
-      setError("Cannot reach API. Is the backend running?");
-    } finally {
-      setLoading(false);
+    if (err instanceof HttpError && err.status === 404) {
+      router.replace("/onboarding");
     }
-  }, [router]);
+  }, [profileQuery.error, router]);
 
-  useEffect(() => {
-    void reload();
-  }, [reload]);
+  const setProfile = useCallback(
+    (profile: PublicProfile) => {
+      queryClient.setQueryData(queryKeys.profileMe, profile);
+    },
+    [queryClient],
+  );
+
+  const setLinks = useCallback(
+    (links: PublicLink[]) => {
+      queryClient.setQueryData(queryKeys.linksMe, links);
+    },
+    [queryClient],
+  );
+
+  const reload = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.profileMe }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.linksMe }),
+    ]);
+  }, [queryClient]);
+
+  const profileError =
+    profileQuery.error instanceof Error
+      ? profileQuery.error.message
+      : profileQuery.error
+        ? "Could not load profile"
+        : "";
+
+  const networkError =
+    profileQuery.isError &&
+    !(profileQuery.error instanceof HttpError) &&
+    "Cannot reach API. Is the backend running?";
 
   const value = useMemo(
     () => ({
-      profile,
-      links,
-      loading,
-      error,
+      profile: profileQuery.data ?? null,
+      links: linksQuery.data ?? [],
+      loading: profileQuery.isLoading || (profileQuery.isSuccess && linksQuery.isLoading),
+      error: networkError || profileError,
       setProfile,
       setLinks,
       reload,
     }),
-    [profile, links, loading, error, reload],
+    [
+      profileQuery.data,
+      profileQuery.isLoading,
+      profileQuery.isSuccess,
+      linksQuery.data,
+      linksQuery.isLoading,
+      networkError,
+      profileError,
+      setProfile,
+      setLinks,
+      reload,
+    ],
   );
 
   return (

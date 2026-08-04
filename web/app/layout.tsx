@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 import { AppToaster } from "@/components/AppToaster";
+import { Providers } from "@/components/Provider";
 import "./globals.css";
-// import { Providers } from "@/components/Provider";
 
 export const metadata: Metadata = {
   title: {
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col font-sans">
-        {/* <Providers>{children}</Providers> */}
+        <Providers>{children}</Providers>
         <AppToaster />
       </body>
     </html>

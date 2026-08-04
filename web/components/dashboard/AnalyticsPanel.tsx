@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
-import { CLIENT_API_BASE } from "@/lib/client-api";
-import { getToken } from "@/lib/auth";
-import type { AnalyticsSummary, ApiSuccess } from "@/lib/types";
+import { clearToken } from "@/lib/auth";
+import {
+  fetchMyAnalytics,
+  HttpError,
+  queryKeys,
+} from "@/lib/dashboard-queries";
 
 function formatWhen(iso: string | undefined) {
   if (!iso) return "—";
@@ -20,72 +24,36 @@ function formatWhen(iso: string | undefined) {
   }
 }
 
-/** Owner-only summary of public link clicks. */
+/** Owner-only summary of public page views + link clicks (cached via React Query). */
 export function AnalyticsPanel() {
   const router = useRouter();
-  const [data, setData] = useState<AnalyticsSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const { data, isLoading, error, isError } = useQuery({
+    queryKey: queryKeys.analyticsMe,
+    queryFn: fetchMyAnalytics,
+    retry: false,
+  });
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
+    if (error instanceof HttpError && error.status === 401) {
+      clearToken();
       router.replace("/login");
-      return;
     }
+  }, [error, router]);
 
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const res = await fetch(`${CLIENT_API_BASE}/api/v1/analytics/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
-        });
-
-        const json = (await res.json()) as ApiSuccess<AnalyticsSummary> & {
-          message?: string;
-        };
-
-        if (!res.ok) {
-          if (!cancelled) {
-            setError(json.message || "Could not load analytics");
-          }
-          return;
-        }
-
-        if (!cancelled) {
-          setData(json.data);
-        }
-      } catch {
-        if (!cancelled) {
-          setError("Cannot reach API. Is the backend running?");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
-  if (loading) {
+  if (isLoading) {
     return <p className="text-sm text-text-muted">Loading analytics…</p>;
   }
 
-  if (error) {
+  if (isError) {
+    const message =
+      error instanceof HttpError
+        ? error.message
+        : "Cannot reach API. Is the backend running?";
+
     return (
       <p className="text-sm text-danger" role="alert">
-        {error}
+        {message}
       </p>
     );
   }
