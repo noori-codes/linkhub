@@ -10,6 +10,7 @@ import globalErrorHandler from "./controllers/errorController.js";
 import userRouter from "./routes/user.routes.js";
 import profileRouter from "./routes/profile.routes.js";
 import linkRouter from "./routes/link.routes.js";
+import analyticsRouter from "./routes/analytics.routes.js";
 
 const app: Application = express();
 
@@ -40,6 +41,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/profiles", profileRouter);
 app.use("/api/v1/links", linkRouter);
+app.use("/api/v1/analytics", analyticsRouter);
 
 // 404 handler
 app.use((req, res, next) => {

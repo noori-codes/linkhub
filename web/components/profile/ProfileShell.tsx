@@ -25,6 +25,11 @@ const MENU = [
     icon: "/link.svg",
   },
   {
+    href: "/profile/analytics",
+    label: "Analytics",
+    icon: "/analytics.svg",
+  },
+  {
     href: "/profile/settings",
     label: "Settings",
     icon: "/settings.svg",
@@ -38,9 +43,17 @@ function sectionTitle(pathname: string) {
   )
     return "Avatar";
   if (pathname.startsWith("/profile/links")) return "Links";
+  if (pathname.startsWith("/profile/analytics")) return "Analytics";
   if (pathname.startsWith("/profile/settings")) return "Settings";
   if (pathname.startsWith("/profile/about")) return "About";
   return "Profile";
+}
+
+function sectionHint(pathname: string) {
+  if (pathname.startsWith("/profile/analytics")) {
+    return "Public link clicks from your published page.";
+  }
+  return "Changes update the preview on the right.";
 }
 
 /**
@@ -54,6 +67,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const { profile, links, loading, error } = useProfile();
   const isMenu = pathname === "/profile";
   const title = sectionTitle(pathname);
+  const hint = sectionHint(pathname);
 
   const hasAvatar = Boolean(
     profile?.avatarUrl && profile.avatarUrl.startsWith("http"),
@@ -141,9 +155,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
           <>
             <div className="border-b border-border px-4 py-4">
               <h1 className="text-xl font-semibold text-text">{title}</h1>
-              <p className="mt-1 text-xs text-text-muted">
-                Changes update the preview on the right.
-              </p>
+              <p className="mt-1 text-xs text-text-muted">{hint}</p>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>

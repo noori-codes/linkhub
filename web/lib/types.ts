@@ -26,6 +26,27 @@ export interface PublicLink {
   clickCount: number;
 }
 
+export interface AnalyticsSummary {
+  summary: {
+    totalClicks: number;
+    linkCount: number;
+    eventCount: number;
+  };
+  topLinks: Array<{
+    _id: string;
+    title: string;
+    url: string;
+    clickCount: number;
+    isVisible: boolean;
+  }>;
+  recentClicks: Array<{
+    _id: string;
+    createdAt?: string;
+    referrer: string;
+    link: { _id: string; title: string; url: string } | null;
+  }>;
+}
+
 export interface ApiSuccess<T> {
   status: string;
   results?: number;
