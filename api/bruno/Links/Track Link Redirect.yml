@@ -1,0 +1,21 @@
+info:
+  name: Track Link Redirect
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/links/r/{{linkId}}"
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+
+docs: |
+  Public. Increments clickCount, creates link_click event, then 302 → link.url.
+  followRedirects is off so Bruno shows the 302 instead of chasing the destination.
+  Set {{linkId}} from Create Link (or paste a public link id).

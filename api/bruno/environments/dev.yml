@@ -9,5 +9,8 @@ variables:
   - name: linkId
     value: 6a6cbd802d66e537e64ca607
     description: Last created link id (saved by Create Link)
+  - name: username
+    value: imran12
+    description: Published username for public analytics / profile requests
   - name: verifyURL
     value: http://127.0.0.1:3001/verify-email/88dd7c8a0748356d68abd1bae7377a0f849ec9c7f997ddf5757aa8b2f3e37857

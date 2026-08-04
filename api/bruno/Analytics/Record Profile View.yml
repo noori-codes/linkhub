@@ -1,0 +1,20 @@
+info:
+  name: Record Profile View
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/analytics/u/{{username}}/view"
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Public. Creates a profile_view AnalyticsEvent for a published profile.
+  Expect 204. Draft / missing username → 404.
