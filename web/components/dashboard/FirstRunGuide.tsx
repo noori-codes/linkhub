@@ -30,7 +30,7 @@ export function FirstRunGuide({
       id: "link",
       done: hasLinks,
       label: "Add your first link",
-      hint: "Open Links in the sidebar and add one.",
+      hint: "Open Links and add one.",
     },
     {
       id: "publish",

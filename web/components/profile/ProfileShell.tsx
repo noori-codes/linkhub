@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
@@ -62,19 +63,34 @@ function sectionHint(pathname: string) {
   if (pathname.startsWith("/profile/shop")) {
     return "Products and buy / affiliate links for your page.";
   }
-  return "Changes update the preview on the right.";
+  if (pathname.startsWith("/profile/settings")) {
+    return "Publish, signature, and account.";
+  }
+  return "Edits update the live preview.";
+}
+
+function isActive(pathname: string, href: string) {
+  if (href === "/profile/about") {
+    return pathname === "/profile/about" || pathname === "/profile";
+  }
+  if (href === "/profile/avatar") {
+    return (
+      pathname.startsWith("/profile/avatar") ||
+      pathname.startsWith("/profile/photos")
+    );
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /**
- * Two sidebar modes (Gravatar-style):
- * 1) /profile        → main menu
- * 2) /profile/…      → section form + back to menu
- * Getting-started guide sits at the bottom of the sidebar.
+ * Three-column dashboard:
+ * nav (left) · editor (center) · public preview (right)
  */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { profile, links, loading, error } = useProfile();
-  const isMenu = pathname === "/profile";
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   const title = sectionTitle(pathname);
   const hint = sectionHint(pathname);
 
@@ -94,10 +110,27 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
       />
     ) : null;
 
+  const preview = (
+    <>
+      {loading ? (
+        <p className="text-sm text-text-muted">Loading preview…</p>
+      ) : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {profile ? (
+        <PublicProfileView
+          profile={profile}
+          links={links}
+          variant="preview"
+        />
+      ) : null}
+    </>
+  );
+
   return (
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
-      <aside className="relative z-10 flex w-full shrink-0 flex-col border-b border-border bg-surface lg:min-h-full lg:w-[22rem] lg:border-b-0 lg:border-r xl:w-[24rem]">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-4">
+      {/* —— Left: persistent nav —— */}
+      <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface lg:w-56 lg:border-b-0 lg:border-r xl:w-60">
+        <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/linkhub-mark.png"
@@ -110,89 +143,112 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               LinkHub
             </span>
           </Link>
+          <button
+            type="button"
+            className="rounded-md px-2.5 py-1.5 text-xs font-medium text-brand lg:hidden"
+            onClick={() => setPreviewOpen(true)}
+          >
+            Preview
+          </button>
         </div>
 
-        {!isMenu ? (
-          <div className="border-b border-border px-4 py-3">
-            <Link
-              href="/profile"
-              className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors hover:text-text"
-            >
-              <Image src="/back.svg" alt="" width={18} height={18} />
-              Back
-            </Link>
-          </div>
-        ) : null}
-
-        {isMenu ? (
-          <>
-            <nav
-              className="flex flex-1 flex-col gap-1 p-3"
-              aria-label="Profile"
-            >
-              {MENU.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-bg"
-                >
-                  <Image
-                    src={item.icon}
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="opacity-80"
-                  />
-                  <span className="text-sm font-medium text-text">
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="mt-auto space-y-3 border-t border-border p-3">
-              {gettingStarted}
+        <nav
+          className="flex gap-1 overflow-x-auto p-2 lg:flex-1 lg:flex-col lg:overflow-visible lg:p-3"
+          aria-label="Profile"
+        >
+          {MENU.map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
               <Link
-                href="/"
-                className="block px-2 py-1.5 text-xs text-text-muted hover:text-text"
+                key={item.href}
+                href={item.href}
+                className={
+                  active
+                    ? "flex shrink-0 items-center gap-2.5 rounded-lg bg-brand-muted px-3 py-2.5 text-sm font-medium text-text lg:gap-3"
+                    : "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-text-muted transition-colors hover:bg-bg hover:text-text lg:gap-3"
+                }
               >
-                ← Home
+                <Image
+                  src={item.icon}
+                  alt=""
+                  width={18}
+                  height={18}
+                  className="opacity-80"
+                />
+                <span>{item.label}</span>
               </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="border-b border-border px-4 py-4">
-              <h1 className="text-xl font-semibold text-text">{title}</h1>
-              <p className="mt-1 text-xs text-text-muted">{hint}</p>
-            </div>
+            );
+          })}
+        </nav>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
-
-            {gettingStarted ? (
-              <div className="mt-auto border-t border-border p-3">
-                {gettingStarted}
-              </div>
-            ) : null}
-          </>
-        )}
+        <div className="mt-auto hidden space-y-3 border-t border-border p-3 lg:block">
+          {gettingStarted}
+          <Link
+            href="/"
+            className="block px-2 py-1.5 text-xs text-text-muted hover:text-text"
+          >
+            ← Home
+          </Link>
+        </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col bg-bg">
-        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">
-          {loading ? (
-            <p className="text-sm text-text-muted">Loading preview…</p>
-          ) : null}
-          {error ? <p className="text-sm text-danger">{error}</p> : null}
-          {profile ? (
-            <PublicProfileView
-              profile={profile}
-              links={links}
-              variant="preview"
-            />
+      {/* —— Center: open editor —— */}
+      <main className="flex min-w-0 flex-1 flex-col border-border bg-bg-elevated lg:border-r">
+        <header className="flex items-start justify-between gap-3 border-b border-border px-4 py-4 sm:px-6">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold tracking-tight text-text">
+              {title}
+            </h1>
+            <p className="mt-1 text-xs text-text-muted">{hint}</p>
+          </div>
+          <button
+            type="button"
+            className="hidden shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text md:inline-flex lg:hidden"
+            onClick={() => setPreviewOpen(true)}
+          >
+            Preview
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+          <div className="mx-auto w-full max-w-xl">{children}</div>
+          {gettingStarted ? (
+            <div className="mx-auto mt-6 w-full max-w-xl lg:hidden">
+              {gettingStarted}
+            </div>
           ) : null}
         </div>
-      </div>
+      </main>
+
+      {/* —— Right: live preview (desktop) —— */}
+      <aside className="hidden min-w-0 flex-col bg-bg lg:flex lg:w-[24rem] xl:w-md">
+        <div className="border-b border-border px-5 py-4">
+          <p className="text-sm font-medium text-text">Preview</p>
+          <p className="mt-0.5 text-xs text-text-muted">
+            How your public page looks
+          </p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-5">
+          {preview}
+        </div>
+      </aside>
+
+      {/* —— Mobile preview overlay —— */}
+      {previewOpen ? (
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg lg:hidden">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <p className="text-sm font-medium text-text">Preview</p>
+            <button
+              type="button"
+              className="rounded-md px-3 py-1.5 text-sm text-text-muted hover:text-text"
+              onClick={() => setPreviewOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-6">{preview}</div>
+        </div>
+      ) : null}
     </div>
   );
 }

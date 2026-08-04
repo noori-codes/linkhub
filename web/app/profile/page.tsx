@@ -1,4 +1,6 @@
-// Menu lives in ProfileShell — this route only mounts the shell in menu mode
+import { redirect } from "next/navigation";
+
+/** Dashboard entry → first editor section (3-column shell always has an open page). */
 export default function ProfileMenuPage() {
-  return null;
+  redirect("/profile/about");
 }
