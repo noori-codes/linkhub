@@ -1,0 +1,20 @@
+info:
+  name: Delete Product Link
+  type: http
+  seq: 9
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/products/{{productId}}/links/{{productLinkId}}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Owner-only. Deletes one buy/affiliate link. Expect 204.

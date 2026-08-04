@@ -1,0 +1,43 @@
+info:
+  name: Create Product Link
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/products/{{productId}}/links"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Buy on Amazon",
+        "url": "https://www.amazon.com/dp/example",
+        "isAffiliate": true,
+        "isVisible": true
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        const productLinkId =
+          body.data && body.data.productLink && body.data.productLink._id;
+        if (productLinkId) {
+          bru.setVar("productLinkId", productLinkId);
+          bru.setEnvVar("productLinkId", String(productLinkId));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Owner-only. Adds a buy/affiliate URL to {{productId}}.
+  Run Create Product first (or set productId in env).
+  Saves {{productLinkId}}.

@@ -8,6 +8,12 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/product.controller.js";
+import {
+  createProductLink,
+  getProductLinks,
+  updateProductLink,
+  deleteProductLink,
+} from "../controllers/productLink.controller.js";
 
 const router = Router();
 
@@ -17,6 +23,13 @@ router.use(protect);
 router.get("/", getAllProducts);
 router.post("/", createProduct);
 router.get("/me", getMyProducts);
+
+// Nested buy/affiliate links — register before bare /:id
+router.get("/:productId/links", getProductLinks);
+router.post("/:productId/links", createProductLink);
+router.patch("/:productId/links/:linkId", updateProductLink);
+router.delete("/:productId/links/:linkId", deleteProductLink);
+
 router.patch("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
 

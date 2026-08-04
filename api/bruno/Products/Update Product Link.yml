@@ -1,0 +1,28 @@
+info:
+  name: Update Product Link
+  type: http
+  seq: 8
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/products/{{productId}}/links/{{productLinkId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Amazon (affiliate)",
+        "isAffiliate": true,
+        "isVisible": true
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Owner-only. Whitelist: title, url, isAffiliate, order, isVisible.
