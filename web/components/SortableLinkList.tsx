@@ -232,27 +232,7 @@ function RowActions({
       >
         <Image src="/edit.svg" alt="" width={16} height={16} />
       </button>
-      <button
-        type="button"
-        disabled={busy}
-        title={link.isVisible ? "Hide" : "Show"}
-        aria-label={
-          toggling
-            ? "Updating visibility…"
-            : link.isVisible
-              ? `Hide ${link.title}`
-              : `Show ${link.title}`
-        }
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleVisibility(link);
-        }}
-        className={`rounded-md p-1.5 transition-opacity hover:bg-bg-elevated disabled:opacity-40 ${
-          link.isVisible ? "opacity-70 hover:opacity-100" : "opacity-40 hover:opacity-70"
-        }`}
-      >
-        <Image src="/hide.svg" alt="" width={16} height={16} />
-      </button>
+
       <button
         type="button"
         disabled={busy}
@@ -265,6 +245,37 @@ function RowActions({
         className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg-elevated hover:opacity-100 disabled:opacity-40"
       >
         <Image src="/delete.svg" alt="" width={16} height={16} />
+      </button>
+
+      <button
+        type="button"
+        role="switch"
+        aria-checked={link.isVisible}
+        disabled={busy}
+        title={
+          link.isVisible ? "Visible on public page" : "Hidden from public page"
+        }
+        aria-label={
+          toggling
+            ? "Updating visibility…"
+            : link.isVisible
+              ? `Hide ${link.title}`
+              : `Show ${link.title}`
+        }
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleVisibility(link);
+        }}
+        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:opacity-40 ${
+          link.isVisible ? "bg-brand" : "bg-border"
+        }`}
+      >
+        <span
+          aria-hidden
+          className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-surface shadow-sm transition-transform ${
+            link.isVisible ? "translate-x-4" : "translate-x-0"
+          }`}
+        />
       </button>
     </div>
   );
