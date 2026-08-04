@@ -5,11 +5,17 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/v1/users/me"
-  auth: inherit
+  url: "{{baseUrl}}/api/v1/users/123"
   headers:
     - name: Authorization
       value: Bearer {{token}}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
 
 docs: |
   Returns the logged-in user (safe fields).
