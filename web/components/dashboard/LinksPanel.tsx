@@ -292,6 +292,9 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
       <div className="flex flex-col gap-2">
         <p className="text-xs text-text-muted">
           {links.length} total
+          {links.length > 0
+            ? ` · ${links.reduce((sum, link) => sum + link.clickCount, 0)} clicks`
+            : ""}
           {links.length > 0 ? " · Drag the handle to reorder" : ""}
           {reordering ? " · Saving…" : ""}
         </p>

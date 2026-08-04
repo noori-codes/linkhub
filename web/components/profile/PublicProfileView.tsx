@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
+import { CLIENT_API_BASE } from "@/lib/client-api";
 import type { PublicLink, PublicProfile } from "@/lib/types";
 
 function initials(name: string) {
@@ -41,6 +42,10 @@ export function PublicProfileView({ profile, links, variant }: Props) {
 
   const avatarBorder =
     variant === "page" ? "border-bg" : "border-surface";
+  const trackedHref = (link: PublicLink) =>
+    variant === "page"
+      ? `${CLIENT_API_BASE}/api/v1/links/r/${link._id}`
+      : link.url;
 
   const coverBlock = (
     <div className="relative z-0 h-52 w-full sm:h-64">
@@ -66,7 +71,7 @@ export function PublicProfileView({ profile, links, variant }: Props) {
       }
     >
       <div
-        className={`relative z-10 -mt-16 mb-7 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-[5px] ${avatarBorder} bg-surface text-4xl font-semibold tracking-wide text-text-muted sm:-mt-[4.5rem]`}
+        className={`relative z-10 -mt-16 mb-7 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-[5px] ${avatarBorder} bg-surface text-4xl font-semibold tracking-wide text-text-muted sm:-mt-18`}
       >
         {avatar ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -147,7 +152,7 @@ export function PublicProfileView({ profile, links, variant }: Props) {
         visible.map((link) => (
           <a
             key={link._id}
-            href={link.url}
+            href={trackedHref(link)}
             target="_blank"
             rel="noopener noreferrer"
             className="block rounded-md border border-border bg-transparent px-4 py-3.5 text-center text-[15px] font-medium text-text transition-colors hover:bg-bg hover:text-brand"

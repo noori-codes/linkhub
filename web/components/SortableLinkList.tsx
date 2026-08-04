@@ -162,15 +162,20 @@ export function SortableLinkList({
                   <p className="mt-0.5 truncate text-xs text-text-muted">
                     {link.url}
                   </p>
-                  <p
-                    className={
-                      link.isVisible
-                        ? "mt-1 text-[10px] uppercase tracking-wide text-brand"
-                        : "mt-1 text-[10px] uppercase tracking-wide text-text-muted"
-                    }
-                  >
-                    {link.isVisible ? "visible" : "hidden"}
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p
+                      className={
+                        link.isVisible
+                          ? "text-[10px] uppercase tracking-wide text-brand"
+                          : "text-[10px] uppercase tracking-wide text-text-muted"
+                      }
+                    >
+                      {link.isVisible ? "visible" : "hidden"}
+                    </p>
+                    <span className="text-[10px] uppercase tracking-wide text-text-muted">
+                      {link.clickCount} click{link.clickCount === 1 ? "" : "s"}
+                    </span>
+                  </div>
                 </div>
                 <RowActions
                   link={link}

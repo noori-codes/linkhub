@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
+import AnalyticsEvent from "../models/analyticsEvent.model.js";
 import Link from "../models/link.model.js";
 import Profile from "../models/profile.model.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -249,5 +250,50 @@ export const getPublicLinksByUsername = catchAsync(
         links,
       },
     });
+  },
+);
+
+// =============================
+// TRACK + REDIRECT PUBLIC LINK
+// Visitors click /api/v1/links/r/:id, we count then forward
+// =============================
+
+export const redirectPublicLink = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) {
+      return next(new AppError("Please provide a link id.", 400));
+    }
+
+    const link = await Link.findById(id);
+
+    if (!link || !link.isVisible) {
+      return next(new AppError("No public link found with that ID.", 404));
+    }
+
+    const profile = await Profile.findOne({
+      _id: link.profile,
+      status: "published",
+    }).select("_id");
+
+    if (!profile) {
+      return next(new AppError("No public link found with that ID.", 404));
+    }
+
+    await Promise.all([
+      Link.findByIdAndUpdate(link._id, { $inc: { clickCount: 1 } }),
+      AnalyticsEvent.create({
+        profile: profile._id,
+        type: "link_click",
+        link: link._id,
+        meta: {
+          referrer: req.get("referer") || "",
+          userAgent: req.get("user-agent") || "",
+        },
+      }),
+    ]);
+
+    return res.redirect(302, link.url);
   },
 );

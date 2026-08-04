@@ -23,6 +23,7 @@ export interface PublicLink {
   platform: string;
   order: number;
   isVisible: boolean;
+  clickCount: number;
 }
 
 export interface ApiSuccess<T> {
