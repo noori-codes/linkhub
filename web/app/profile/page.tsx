@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Dashboard entry → first editor section (3-column shell always has an open page). */
+/** Dashboard entry → Links editor (most common next action). */
 export default function ProfileMenuPage() {
-  redirect("/profile/about");
+  redirect("/profile/links");
 }

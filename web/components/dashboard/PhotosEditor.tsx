@@ -12,11 +12,7 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 const inputClass =
   "w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand";
 
-function isRemote(url: string) {
-  return url.startsWith("http://") || url.startsWith("https://");
-}
-
-/** Avatar + cover uploads to MinIO/S3, with URL paste as a fallback. */
+/** Avatar + cover uploads. Live preview lives in the right column. */
 export function PhotosEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
@@ -25,6 +21,7 @@ export function PhotosEditor() {
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [showUrlFields, setShowUrlFields] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -41,10 +38,7 @@ export function PhotosEditor() {
     return <p className="text-sm text-text-muted">Loading…</p>;
   }
 
-  async function uploadImage(
-    kind: "avatar" | "cover",
-    file: File,
-  ) {
+  async function uploadImage(kind: "avatar" | "cover", file: File) {
     const token = getToken();
     if (!token) {
       router.replace("/login");
@@ -53,23 +47,19 @@ export function PhotosEditor() {
 
     const setUploading =
       kind === "avatar" ? setUploadingAvatar : setUploadingCover;
-    const fieldName = kind;
     const path = kind === "avatar" ? "avatar" : "cover";
 
     setUploading(true);
 
     try {
       const body = new FormData();
-      body.append(fieldName, file);
+      body.append(kind, file);
 
-      const res = await fetch(
-        `${CLIENT_API_BASE}/api/v1/profiles/me/${path}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body,
-        },
-      );
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me/${path}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      });
 
       const data = (await res.json()) as ApiSuccess<{
         profile: PublicProfile;
@@ -104,7 +94,7 @@ export function PhotosEditor() {
     }
   }
 
-  async function onSave(event: FormEvent<HTMLFormElement>) {
+  async function onSaveUrls(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
 
@@ -139,7 +129,7 @@ export function PhotosEditor() {
       }
 
       setProfile(data.data.profile);
-      toast.success("Photos saved");
+      toast.success("Photo URLs saved");
     } catch {
       toast.error("Cannot reach API. Is the backend running?");
     } finally {
@@ -147,45 +137,31 @@ export function PhotosEditor() {
     }
   }
 
-  const avatarPreview = isRemote(avatarUrl) ? avatarUrl : null;
-  const coverPreview = isRemote(coverUrl) ? coverUrl : null;
   const busy = uploadingAvatar || uploadingCover || saving;
+  const hasAvatar = Boolean(avatarUrl.startsWith("http"));
+  const hasCover = Boolean(coverUrl.startsWith("http"));
 
   return (
-    <form onSubmit={onSave} className="flex flex-col gap-5">
-      <div className="overflow-hidden rounded-lg border border-border bg-bg">
-        <div className="relative z-0 h-24 w-full bg-bg-elevated">
-          {coverPreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={coverPreview}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <p className="flex h-full items-center justify-center text-xs text-text-muted">
-              Cover preview
+    <div className="flex flex-col gap-4">
+      <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-text">Profile photo</h2>
+            <p className="mt-1 text-xs text-text-muted">
+              Square crop works best · max 2 MB
             </p>
-          )}
-        </div>
-        <div className="relative px-4 pb-4">
-          <div className="relative z-10 -mt-8 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-surface bg-surface text-sm font-semibold text-text-muted">
-            {avatarPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarPreview}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span>?</span>
-            )}
           </div>
+          <span
+            className={
+              hasAvatar
+                ? "text-[10px] uppercase tracking-wide text-brand"
+                : "text-[10px] uppercase tracking-wide text-text-muted"
+            }
+          >
+            {hasAvatar ? "set" : "missing"}
+          </span>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm text-text-muted">Avatar</span>
         <input
           ref={avatarInputRef}
           type="file"
@@ -196,26 +172,40 @@ export function PhotosEditor() {
             if (file) void uploadImage("avatar", file);
           }}
         />
+
         <button
           type="button"
           disabled={busy}
           onClick={() => avatarInputRef.current?.click()}
-          className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-bg disabled:opacity-50"
+          className="mt-4 w-full rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
         >
-          {uploadingAvatar ? "Uploading…" : "Upload avatar"}
+          {uploadingAvatar
+            ? "Uploading…"
+            : hasAvatar
+              ? "Replace avatar"
+              : "Upload avatar"}
         </button>
-        <p className="text-xs text-text-muted">Max 2 MB</p>
-        <input
-          type="url"
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          placeholder="Or paste avatar URL…"
-          className={inputClass}
-        />
-      </div>
+      </section>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm text-text-muted">Header / cover</span>
+      <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-text">Cover image</h2>
+            <p className="mt-1 text-xs text-text-muted">
+              Wide banner · max 5 MB
+            </p>
+          </div>
+          <span
+            className={
+              hasCover
+                ? "text-[10px] uppercase tracking-wide text-brand"
+                : "text-[10px] uppercase tracking-wide text-text-muted"
+            }
+          >
+            {hasCover ? "set" : "missing"}
+          </span>
+        </div>
+
         <input
           ref={coverInputRef}
           type="file"
@@ -226,31 +216,65 @@ export function PhotosEditor() {
             if (file) void uploadImage("cover", file);
           }}
         />
+
         <button
           type="button"
           disabled={busy}
           onClick={() => coverInputRef.current?.click()}
-          className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text hover:bg-bg disabled:opacity-50"
+          className="mt-4 w-full rounded-md border border-border bg-bg px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
         >
-          {uploadingCover ? "Uploading…" : "Upload cover"}
+          {uploadingCover
+            ? "Uploading…"
+            : hasCover
+              ? "Replace cover"
+              : "Upload cover"}
         </button>
-        <p className="text-xs text-text-muted">Max 5 MB · wide banner works best</p>
-        <input
-          type="url"
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          placeholder="Or paste cover URL…"
-          className={inputClass}
-        />
-      </div>
+      </section>
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
-      >
-        {saving ? "Saving…" : "Save pasted URLs"}
-      </button>
-    </form>
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowUrlFields((open) => !open)}
+          className="text-xs font-medium text-text-muted hover:text-text"
+        >
+          {showUrlFields ? "Hide URL paste" : "Or paste image URLs…"}
+        </button>
+
+        {showUrlFields ? (
+          <form
+            onSubmit={onSaveUrls}
+            className="mt-3 flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+          >
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-text-muted">Avatar URL</span>
+              <input
+                type="url"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://…"
+                className={inputClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-text-muted">Cover URL</span>
+              <input
+                type="url"
+                value={coverUrl}
+                onChange={(e) => setCoverUrl(e.target.value)}
+                placeholder="https://…"
+                className={inputClass}
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={busy}
+              className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save URLs"}
+            </button>
+          </form>
+        ) : null}
+      </div>
+    </div>
   );
 }

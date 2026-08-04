@@ -57,6 +57,12 @@ function sectionTitle(pathname: string) {
 }
 
 function sectionHint(pathname: string) {
+  if (
+    pathname.startsWith("/profile/avatar") ||
+    pathname.startsWith("/profile/photos")
+  ) {
+    return "Upload photos — see the result in Preview.";
+  }
   if (pathname.startsWith("/profile/analytics")) {
     return "Public link clicks from your published page.";
   }
@@ -70,8 +76,12 @@ function sectionHint(pathname: string) {
 }
 
 function isActive(pathname: string, href: string) {
-  if (href === "/profile/about") {
-    return pathname === "/profile/about" || pathname === "/profile";
+  if (href === "/profile/links") {
+    return (
+      pathname === "/profile/links" ||
+      pathname === "/profile" ||
+      pathname.startsWith("/profile/links/")
+    );
   }
   if (href === "/profile/avatar") {
     return (
