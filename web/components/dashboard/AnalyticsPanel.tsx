@@ -100,9 +100,17 @@ export function AnalyticsPanel() {
     <div className="flex flex-col gap-4">
       <SettingsCard
         title="Overview"
-        description="Clicks from your published public page only."
+        description="Views and clicks from your published public page."
       >
         <dl className="grid grid-cols-2 gap-3">
+          <div className="rounded-md border border-border bg-bg px-3 py-3">
+            <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+              Page views
+            </dt>
+            <dd className="mt-1 text-2xl font-semibold tracking-tight text-text">
+              {summary.profileViews}
+            </dd>
+          </div>
           <div className="rounded-md border border-border bg-bg px-3 py-3">
             <dt className="text-[10px] uppercase tracking-wide text-text-muted">
               Total clicks
@@ -111,9 +119,9 @@ export function AnalyticsPanel() {
               {summary.totalClicks}
             </dd>
           </div>
-          <div className="rounded-md border border-border bg-bg px-3 py-3">
+          <div className="col-span-2 rounded-md border border-border bg-bg px-3 py-3">
             <dt className="text-[10px] uppercase tracking-wide text-text-muted">
-              Recorded events
+              Recorded click events
             </dt>
             <dd className="mt-1 text-2xl font-semibold tracking-tight text-text">
               {summary.eventCount}

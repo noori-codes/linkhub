@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
+import { TrackProfileView } from "@/components/profile/TrackProfileView";
 import { getPublicLinks, getPublicProfile } from "@/lib/api";
 
 type PageProps = {
@@ -40,6 +41,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <main className="flex min-h-full flex-1 flex-col">
+      <TrackProfileView username={profile.username} />
       <PublicProfileView profile={profile} links={links} variant="page" />
     </main>
   );

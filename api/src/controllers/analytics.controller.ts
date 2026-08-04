@@ -7,6 +7,43 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
 // =============================
+// RECORD PUBLIC PROFILE VIEW
+// Fired once from /u/:username (client)
+// =============================
+
+export const recordProfileView = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username } = req.params;
+
+    if (!username) {
+      return next(new AppError("Please provide a username.", 400));
+    }
+
+    const profile = await Profile.findOne({
+      username: username.toString().toLowerCase(),
+      status: "published",
+    }).select("_id");
+
+    if (!profile) {
+      return next(
+        new AppError("No published profile found with that username.", 404),
+      );
+    }
+
+    await AnalyticsEvent.create({
+      profile: profile._id,
+      type: "profile_view",
+      meta: {
+        referrer: req.get("referer") || "",
+        userAgent: req.get("user-agent") || "",
+      },
+    });
+
+    res.status(204).send();
+  },
+);
+
+// =============================
 // GET MY ANALYTICS (owner)
 // Totals + top links + recent clicks
 // =============================
@@ -19,25 +56,33 @@ export const getMyAnalytics = catchAsync(
       return next(new AppError("Create a profile before viewing analytics.", 404));
     }
 
-    const [links, recentEvents, eventCount] = await Promise.all([
-      Link.find({ profile: profile._id })
-        .select("title url clickCount isVisible")
-        .sort({ clickCount: -1, order: 1 }),
-      AnalyticsEvent.find({
-        profile: profile._id,
-        type: "link_click",
-      })
-        .sort({ createdAt: -1 })
-        .limit(15)
-        .populate("link", "title url")
-        .select("type link createdAt meta"),
-      AnalyticsEvent.countDocuments({
-        profile: profile._id,
-        type: "link_click",
-      }),
-    ]);
+    const [links, recentEvents, clickEventCount, profileViews] =
+      await Promise.all([
+        Link.find({ profile: profile._id })
+          .select("title url clickCount isVisible")
+          .sort({ clickCount: -1, order: 1 }),
+        AnalyticsEvent.find({
+          profile: profile._id,
+          type: "link_click",
+        })
+          .sort({ createdAt: -1 })
+          .limit(15)
+          .populate("link", "title url")
+          .select("type link createdAt meta"),
+        AnalyticsEvent.countDocuments({
+          profile: profile._id,
+          type: "link_click",
+        }),
+        AnalyticsEvent.countDocuments({
+          profile: profile._id,
+          type: "profile_view",
+        }),
+      ]);
 
-    const totalClicks = links.reduce((sum, link) => sum + (link.clickCount || 0), 0);
+    const totalClicks = links.reduce(
+      (sum, link) => sum + (link.clickCount || 0),
+      0,
+    );
     const topLinks = links
       .filter((link) => link.clickCount > 0)
       .slice(0, 5)
@@ -73,9 +118,10 @@ export const getMyAnalytics = catchAsync(
       status: "success",
       data: {
         summary: {
+          profileViews,
           totalClicks,
           linkCount: links.length,
-          eventCount,
+          eventCount: clickEventCount,
         },
         topLinks,
         recentClicks,

@@ -1,11 +1,17 @@
 import { Router } from "express";
 
 import { protect } from "../controllers/auth.controller.js";
-import { getMyAnalytics } from "../controllers/analytics.controller.js";
+import {
+  getMyAnalytics,
+  recordProfileView,
+} from "../controllers/analytics.controller.js";
 
 const router = Router();
 
-// Owner-only — never public
+// Public — visitors on /u/:username
+router.post("/u/:username/view", recordProfileView);
+
+// Owner-only below
 router.use(protect);
 
 router.get("/me", getMyAnalytics);

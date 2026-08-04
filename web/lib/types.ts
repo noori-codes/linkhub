@@ -28,6 +28,7 @@ export interface PublicLink {
 
 export interface AnalyticsSummary {
   summary: {
+    profileViews: number;
     totalClicks: number;
     linkCount: number;
     eventCount: number;
