@@ -26,6 +26,24 @@ export interface PublicLink {
   clickCount: number;
 }
 
+export interface ShopProduct {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  order: number;
+  isVisible: boolean;
+}
+
+export interface ShopProductLink {
+  _id: string;
+  title: string;
+  url: string;
+  isAffiliate: boolean;
+  order: number;
+  isVisible: boolean;
+}
+
 export interface AnalyticsSummary {
   summary: {
     profileViews: number;

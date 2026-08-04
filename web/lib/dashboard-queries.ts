@@ -1,11 +1,21 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
-import type { AnalyticsSummary, ApiSuccess, PublicLink, PublicProfile } from "@/lib/types";
+import type {
+  AnalyticsSummary,
+  ApiSuccess,
+  PublicLink,
+  PublicProfile,
+  ShopProduct,
+  ShopProductLink,
+} from "@/lib/types";
 
 export const queryKeys = {
   profileMe: ["profile", "me"] as const,
   linksMe: ["links", "me"] as const,
   analyticsMe: ["analytics", "me"] as const,
+  productsMe: ["products", "me"] as const,
+  productLinks: (productId: string) =>
+    ["products", productId, "links"] as const,
 };
 
 export class HttpError extends Error {
@@ -75,4 +85,46 @@ export async function fetchMyAnalytics(): Promise<AnalyticsSummary> {
   }
 
   return json.data;
+}
+
+export async function fetchMyProducts(): Promise<ShopProduct[]> {
+  const token = requireToken();
+  const res = await fetch(`${CLIENT_API_BASE}/api/v1/products/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const json = (await res.json()) as ApiSuccess<{ products: ShopProduct[] }> & {
+    message?: string;
+  };
+
+  if (!res.ok) {
+    throw new HttpError(json.message || "Could not load products", res.status);
+  }
+
+  return json.data.products;
+}
+
+export async function fetchProductLinks(
+  productId: string,
+): Promise<ShopProductLink[]> {
+  const token = requireToken();
+  const res = await fetch(
+    `${CLIENT_API_BASE}/api/v1/products/${encodeURIComponent(productId)}/links`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+
+  const json = (await res.json()) as ApiSuccess<{
+    productLinks: ShopProductLink[];
+  }> & { message?: string };
+
+  if (!res.ok) {
+    throw new HttpError(
+      json.message || "Could not load product links",
+      res.status,
+    );
+  }
+
+  return json.data.productLinks;
 }

@@ -25,6 +25,11 @@ const MENU = [
     icon: "/link.svg",
   },
   {
+    href: "/profile/shop",
+    label: "Shop",
+    icon: "/shop.svg",
+  },
+  {
     href: "/profile/analytics",
     label: "Analytics",
     icon: "/analytics.svg",
@@ -43,6 +48,7 @@ function sectionTitle(pathname: string) {
   )
     return "Avatar";
   if (pathname.startsWith("/profile/links")) return "Links";
+  if (pathname.startsWith("/profile/shop")) return "Shop";
   if (pathname.startsWith("/profile/analytics")) return "Analytics";
   if (pathname.startsWith("/profile/settings")) return "Settings";
   if (pathname.startsWith("/profile/about")) return "About";
@@ -52,6 +58,9 @@ function sectionTitle(pathname: string) {
 function sectionHint(pathname: string) {
   if (pathname.startsWith("/profile/analytics")) {
     return "Public link clicks from your published page.";
+  }
+  if (pathname.startsWith("/profile/shop")) {
+    return "Products and buy / affiliate links for your page.";
   }
   return "Changes update the preview on the right.";
 }
