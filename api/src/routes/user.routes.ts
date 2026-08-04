@@ -14,6 +14,7 @@ import {
 
 import {
   getMe,
+  getAllUsers,
   updateMe,
   deleteMe,
 } from "../controllers/user.controller.js";
@@ -37,6 +38,7 @@ router.patch("/updateMyPassword", updatePassword);
 router.patch("/updateMe", updateMe);
 router.delete("/deleteMe", deleteMe);
 
+router.get("/", getAllUsers);
 router.get("/me", getMe);
 
 export default router;

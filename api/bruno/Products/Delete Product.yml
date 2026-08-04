@@ -1,0 +1,21 @@
+info:
+  name: Delete Product
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/products/{{productId}}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Owner-only. Deletes the product and any ProductLinks under it.
+  Expect 204.

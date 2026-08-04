@@ -12,5 +12,8 @@ variables:
   - name: username
     value: imran12
     description: Published username for public analytics / profile requests
+  - name: productId
+    value: 6a7200d60a67245dd4912ff0
+    description: Last created product id (saved by Create Product)
   - name: verifyURL
     value: http://127.0.0.1:3001/verify-email/88dd7c8a0748356d68abd1bae7377a0f849ec9c7f997ddf5757aa8b2f3e37857

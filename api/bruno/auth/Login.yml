@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/users/login
+  url: "{{baseUrl}}/api/v1/users/login"
   body:
     type: json
     data: |-
@@ -13,10 +13,27 @@ http:
         "email": "imrannoori1919@gmail.com",
         "password": "password123"
       }
-  auth: inherit
+  auth:
+    type: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Refresh {{token}} so Bearer auth stops using a deleted user's JWT
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        if (body.token) {
+          bru.setEnvVar("token", String(body.token));
+          bru.setVar("token", String(body.token));
+        }
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |
+  Saves response.token into env {{token}}.
+  Without this, protected requests keep using an old Bearer token
+  even after a successful login (common after deleteMe).

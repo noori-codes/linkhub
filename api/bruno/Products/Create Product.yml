@@ -1,0 +1,41 @@
+info:
+  name: Create Product
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/products"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Mechanical Keyboard",
+        "description": "My daily driver for coding streams.",
+        "imageUrl": "https://example.com/keyboard.jpg",
+        "isVisible": true
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = (typeof res.getBody === "function" ? res.getBody() : null) || res.body || {};
+        const productId = body.data && body.data.product && body.data.product._id;
+        if (productId) {
+          bru.setVar("productId", productId);
+          bru.setEnvVar("productId", String(productId));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Owner-only. Creates a Product on your Profile.
+  Saves {{productId}} for Update / Delete.

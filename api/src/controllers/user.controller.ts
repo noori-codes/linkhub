@@ -41,6 +41,29 @@ export const getMe = catchAsync(async (req: Request, res: Response, next: NextFu
 });
 
 // =============================
+// GET ALL USERS
+// Safe fields only — never return password / tokens
+// =============================
+
+export const getAllUsers = catchAsync(
+  async (_req: Request, res: Response, _next: NextFunction) => {
+    const users = await User.find()
+      .select(
+        "firstName lastName email emailVerified photo onboardingCompleted onboardingStep createdAt",
+      )
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: "success",
+      results: users.length,
+      data: {
+        users,
+      },
+    });
+  },
+);
+
+// =============================
 // UPDATE CURRENT USER
 // =============================
 
