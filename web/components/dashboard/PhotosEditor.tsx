@@ -12,7 +12,7 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 const inputClass =
   "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand";
 
-/** Avatar + cover — visual upload zones (Linktree Design-style). */
+/** Avatar + cover — visual upload zones on Profile. */
 export function PhotosEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
@@ -149,7 +149,7 @@ export function PhotosEditor() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Cover zone */}
+      {/* Cover + avatar */}
       <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,20,26,0.04)]">
         <button
           type="button"
@@ -166,28 +166,27 @@ export function PhotosEditor() {
                 className="h-full w-full object-cover"
               />
             ) : null}
-            <div className="absolute inset-0 flex items-end bg-linear-to-t from-black/45 via-transparent to-transparent p-4 opacity-100 transition-opacity group-hover:from-black/55">
-              <div>
-                <p className="text-sm font-semibold text-white">Cover image</p>
-                <p className="mt-0.5 text-xs text-white/80">
-                  {uploadingCover
-                    ? "Uploading…"
-                    : hasCover
-                      ? "Click to replace · max 5 MB"
-                      : "Click to upload a wide banner · max 5 MB"}
-                </p>
-              </div>
+            {/* Label stays top-right so the overlapping avatar never covers it */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/25 transition-[background] group-hover:from-black/50" />
+            <div className="absolute top-3 right-3 max-w-[11rem] rounded-lg bg-black/50 px-3 py-2 text-right backdrop-blur-sm sm:max-w-none">
+              <p className="text-sm font-semibold text-white">Cover image</p>
+              <p className="mt-0.5 text-xs text-white/80">
+                {uploadingCover
+                  ? "Uploading…"
+                  : hasCover
+                    ? "Click to replace · max 5 MB"
+                    : "Click to upload · max 5 MB"}
+              </p>
             </div>
           </div>
         </button>
 
-        {/* Avatar overlapping cover */}
-        <div className="relative px-5 pb-5">
+        <div className="flex items-end gap-4 px-5 pb-5 pt-0">
           <button
             type="button"
             disabled={busy}
             onClick={() => avatarInputRef.current?.click()}
-            className="group absolute -top-12 left-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg shadow-md transition-transform hover:scale-[1.02] disabled:opacity-60"
+            className="group relative -mt-10 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg shadow-md transition-transform hover:scale-[1.02] disabled:opacity-60 sm:-mt-12 sm:h-24 sm:w-24"
             aria-label={hasAvatar ? "Replace avatar" : "Upload avatar"}
           >
             {hasAvatar ? (
@@ -207,29 +206,25 @@ export function PhotosEditor() {
             </span>
           </button>
 
-          <div className="pt-16">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-text">
-                  Profile photo
-                </h2>
-                <p className="mt-1 text-xs text-text-muted">
-                  Square crop works best · max 2 MB
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => avatarInputRef.current?.click()}
-                className="rounded-xl bg-brand px-3.5 py-2 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
-              >
-                {uploadingAvatar
-                  ? "Uploading…"
-                  : hasAvatar
-                    ? "Replace"
-                    : "Upload"}
-              </button>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 pb-1 pt-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-text">Profile photo</h2>
+              <p className="mt-0.5 text-xs text-text-muted">
+                Square crop works best · max 2 MB
+              </p>
             </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => avatarInputRef.current?.click()}
+              className="rounded-xl bg-brand px-3.5 py-2 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+            >
+              {uploadingAvatar
+                ? "Uploading…"
+                : hasAvatar
+                  ? "Replace"
+                  : "Upload"}
+            </button>
           </div>
         </div>
 

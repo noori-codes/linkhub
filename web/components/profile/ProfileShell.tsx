@@ -15,13 +15,13 @@ const MENU = [
   {
     href: "/profile/avatar",
     label: "Design",
-    hint: "Photos",
+    hint: "Theme",
     icon: "/avatar.svg",
   },
   {
     href: "/profile/about",
     label: "Profile",
-    hint: "Name & bio",
+    hint: "Photos & bio",
     icon: "/about.svg",
   },
   {
@@ -69,10 +69,10 @@ function sectionHint(pathname: string) {
     pathname.startsWith("/profile/avatar") ||
     pathname.startsWith("/profile/photos")
   ) {
-    return "Avatar and cover — updates show instantly in the phone preview.";
+    return "Pick a look for your public page — preview updates live.";
   }
   if (pathname.startsWith("/profile/about")) {
-    return "Name, username, and bio visitors see on your page.";
+    return "Photos, name, username, and bio visitors see on your page.";
   }
   if (pathname.startsWith("/profile/analytics")) {
     return "Views and clicks from your published page.";
