@@ -46,71 +46,76 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
       ? `${CLIENT_API_BASE}/api/v1/links/r/${link._id}`
       : link.url;
 
-  /* —— Owner phone preview: clean visitor-style stack, no admin chrome —— */
+  /* —— Owner phone preview: top = identity · bottom = links —— */
   if (variant === "preview") {
     return (
-      <div className="overflow-hidden bg-bg">
-        <div className="relative h-28 w-full">
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt="" className="h-full w-full object-cover" />
-          ) : (
+      <div className="flex min-h-full flex-col bg-[#eef0f3]">
+        {/* TOP: cover + avatar + personal info */}
+        <div className="shrink-0">
+          <div className="relative h-[4.75rem] w-full">
+            {cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cover} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div
+                aria-hidden
+                className="h-full w-full bg-[linear-gradient(155deg,#9aa3b2_0%,#c5cbd4_55%,#eef0f3_100%)]"
+              />
+            )}
             <div
               aria-hidden
-              className="h-full w-full bg-[linear-gradient(135deg,#cfd5de_0%,#e8ebf0_100%)]"
+              className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-[#eef0f3]"
             />
-          )}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent to-bg"
-          />
-        </div>
-
-        <div className="relative z-10 -mt-10 flex flex-col items-center px-5 pb-6 text-center">
-          <div className="mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-[3px] border-bg bg-surface text-xl font-semibold text-text-muted shadow-sm">
-            {avatar ? (
-              <SafeRemoteImage
-                src={avatar}
-                alt={name}
-                className="h-full w-full object-cover"
-                fallback={<span>{initials(name) || "?"}</span>}
-              />
-            ) : (
-              <span>{initials(name) || "?"}</span>
-            )}
           </div>
 
-          <h1 className="font-display text-lg font-semibold tracking-tight text-text">
-            {name}
-          </h1>
-          <p className="mt-0.5 text-xs text-text-muted">@{profile.username}</p>
+          <div className="relative z-10 -mt-7 flex flex-col items-center px-4 pb-3 text-center">
+            <div className="mb-2 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-[3px] border-[#eef0f3] bg-surface text-sm font-semibold text-text-muted shadow-md">
+              {avatar ? (
+                <SafeRemoteImage
+                  src={avatar}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                  fallback={<span>{initials(name) || "?"}</span>}
+                />
+              ) : (
+                <span>{initials(name) || "?"}</span>
+              )}
+            </div>
 
-          {profile.bio ? (
-            <p className="mt-2 max-w-[16rem] text-[13px] leading-relaxed text-text-muted">
-              {profile.bio}
+            <h1 className="font-display text-[15px] font-semibold leading-tight tracking-tight text-text">
+              {name}
+            </h1>
+            <p className="mt-0.5 text-[11px] text-text-muted">
+              @{profile.username}
             </p>
-          ) : (
-            <p className="mt-2 text-[13px] text-text-muted/70">
-              Add a short bio in Profile
-            </p>
-          )}
 
-          {profile.tags.length > 0 ? (
-            <ul className="mt-3 flex flex-wrap justify-center gap-1.5">
-              {profile.tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="rounded-full bg-surface px-2.5 py-0.5 text-[10px] font-medium text-text-muted ring-1 ring-border"
-                >
-                  {tag}
-                </li>
-              ))}
-            </ul>
-          ) : null}
+            {profile.bio ? (
+              <p className="mt-1.5 max-w-[15rem] text-[12px] leading-snug text-text-muted">
+                {profile.bio}
+              </p>
+            ) : null}
 
-          <div className="mt-5 flex w-full flex-col gap-2.5">
+            {profile.tags.length > 0 ? (
+              <ul className="mt-2 flex flex-wrap justify-center gap-1">
+                {profile.tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="rounded-full bg-surface/90 px-2.5 py-0.5 text-[9px] font-medium text-text-muted ring-1 ring-border"
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </div>
+
+        {/* BOTTOM: links + logo */}
+        <div className="mx-4 mb-1 border-t border-border/80" />
+        <div className="flex min-h-0 flex-1 flex-col px-4 pb-7 pt-3">
+          <div className="flex flex-1 flex-col gap-2">
             {visible.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border bg-surface/80 px-3 py-6 text-center text-xs text-text-muted">
+              <p className="rounded-2xl border border-dashed border-border bg-surface/70 px-3 py-6 text-center text-[11px] text-text-muted">
                 No visible links yet
               </p>
             ) : (
@@ -120,7 +125,7 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full rounded-xl border border-border bg-surface px-4 py-3 text-center text-sm font-semibold text-text shadow-[0_1px_2px_rgba(18,20,26,0.04)] transition-colors hover:border-brand/30 hover:text-brand"
+                  className="block w-full rounded-2xl border border-border bg-surface px-4 py-3 text-center text-[13px] font-semibold text-text shadow-[0_1px_2px_rgba(18,20,26,0.05)]"
                 >
                   {link.title}
                 </a>
@@ -128,17 +133,15 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
             )}
           </div>
 
-          <div className="mt-6 flex items-center gap-1.5 opacity-40">
+          <div className="mt-auto flex items-center justify-center gap-1.5 pt-4 opacity-40">
             <Image
               src="/linkhub-mark.png"
               alt=""
-              width={14}
-              height={14}
+              width={12}
+              height={12}
               unoptimized
             />
-            <span className="text-[10px] tracking-wide text-text">
-              LinkHub
-            </span>
+            <span className="text-[9px] tracking-wide text-text">LinkHub</span>
           </div>
         </div>
       </div>

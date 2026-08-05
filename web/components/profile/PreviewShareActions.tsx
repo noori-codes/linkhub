@@ -56,7 +56,7 @@ export function PreviewShareActions({ username }: Props) {
 
   return (
     <>
-      <div className="mt-0 flex flex-wrap items-center justify-center gap-2">
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
         <Link
           href={`/u/${username}`}
           className="rounded-xl bg-brand px-3.5 py-2 text-xs font-semibold text-text-inverse transition-colors hover:bg-brand-hover"

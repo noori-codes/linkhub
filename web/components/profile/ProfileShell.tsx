@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
+import { PhoneFrame } from "@/components/profile/PhoneFrame";
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -259,8 +260,8 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* —— Right: phone preview —— */}
-      <aside className="hidden min-w-0 flex-col bg-[linear-gradient(180deg,#e8eaef_0%,#f3f4f6_40%,#f3f4f6_100%)] lg:flex lg:w-[26rem] xl:w-[28rem]">
-        <div className="flex items-center justify-between px-6 py-4">
+      <aside className="hidden min-w-0 flex-col bg-[linear-gradient(165deg,#e6e9ef_0%,#f0f2f5_45%,#f3f4f6_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
+        <div className="flex items-center justify-between px-5 py-4">
           <div>
             <p className="text-sm font-semibold text-text">Live preview</p>
             <p className="mt-0.5 text-xs text-text-muted">
@@ -277,25 +278,14 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
             </span>
           )}
         </div>
-        <div className="flex flex-1 flex-col items-center overflow-y-auto px-6 pb-6 pt-2">
-          <div className="w-full max-w-[20rem]">
-            <div className="overflow-hidden rounded-[1.75rem] border-[6px] border-[#1c1f26] bg-surface shadow-[0_20px_50px_rgba(18,20,26,0.18)]">
-              <div className="flex justify-center bg-[#1c1f26] pb-2 pt-2.5">
-                <div className="h-1.5 w-16 rounded-full bg-[#3a3f4a]" />
-              </div>
-              <div className="max-h-[min(68vh,36rem)] overflow-y-auto bg-bg">
-                {preview}
-              </div>
-            </div>
-            {profile ? (
-              <div className="mt-4">
-                <PreviewShareActions
-                  username={profile.username}
-                  status={profile.status}
-                />
-              </div>
-            ) : null}
-          </div>
+        <div className="flex flex-1 flex-col items-center gap-5 overflow-y-auto px-5 pb-6 pt-1">
+          <PhoneFrame>{preview}</PhoneFrame>
+          {profile ? (
+            <PreviewShareActions
+              username={profile.username}
+              status={profile.status}
+            />
+          ) : null}
         </div>
       </aside>
 
@@ -311,10 +301,14 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               Close
             </button>
           </div>
-          <div className="flex flex-1 justify-center overflow-y-auto px-4 py-6">
-            <div className="w-full max-w-sm overflow-hidden rounded-[1.5rem] border-[5px] border-[#1c1f26] bg-surface shadow-lg">
-              {preview}
-            </div>
+          <div className="flex flex-1 flex-col items-center gap-5 overflow-y-auto px-4 py-6">
+            <PhoneFrame>{preview}</PhoneFrame>
+            {profile ? (
+              <PreviewShareActions
+                username={profile.username}
+                status={profile.status}
+              />
+            ) : null}
           </div>
         </div>
       ) : null}
