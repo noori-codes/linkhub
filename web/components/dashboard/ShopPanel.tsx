@@ -48,6 +48,7 @@ export function ShopPanel() {
   const [newLinkAffiliate, setNewLinkAffiliate] = useState(true);
   const [newProductVisible, setNewProductVisible] = useState(true);
   const [productError, setProductError] = useState("");
+  const [importedFromLink, setImportedFromLink] = useState(false);
   const addImageInputRef = useRef<HTMLInputElement>(null);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -103,21 +104,22 @@ export function ShopPanel() {
     setProductTitle("");
     setProductDescription("");
     clearAddImage();
-    setNewLinkTitle("");
+    setNewLinkTitle("Shop");
     setNewLinkUrl("");
     setNewLinkAffiliate(true);
     setNewProductVisible(true);
     setProductError("");
     setFetchingPreview(false);
+    setImportedFromLink(false);
   }
 
-  async function fetchPhotoFromBuyLink() {
+  async function importFromBuyLink() {
     const token = requireToken();
     if (!token) return;
 
     const url = newLinkUrl.trim();
     if (!url) {
-      setProductError("Paste a buy link URL first.");
+      setProductError("Paste a product URL to import.");
       return;
     }
 
@@ -143,37 +145,41 @@ export function ShopPanel() {
       }> & { message?: string };
 
       if (!res.ok) {
-        throw new HttpError(json.message || "Could not fetch that link", res.status);
+        throw new HttpError(
+          json.message || "Could not import from that link",
+          res.status,
+        );
       }
 
       const { preview } = json.data;
 
-      if (!productTitle.trim() && preview.title) {
+      if (preview.title) {
         setProductTitle(preview.title);
       }
-      if (!productDescription.trim() && preview.description) {
+      if (preview.description) {
         setProductDescription(preview.description);
       }
-      if (!newLinkTitle.trim() && preview.title) {
-        setNewLinkTitle(preview.title.slice(0, 80));
+      setNewLinkTitle("Shop");
+
+      if (preview.imageUrl) {
+        clearAddImage();
+        setProductImageRemoteUrl(preview.imageUrl);
+        setProductImagePreview(preview.imageUrl);
       }
 
-      if (!preview.imageUrl) {
-        toast.error("No image found on that page");
-        return;
-      }
-
-      clearAddImage();
-      setProductImageRemoteUrl(preview.imageUrl);
-      setProductImagePreview(preview.imageUrl);
-      toast.success("Photo fetched from link");
+      setImportedFromLink(true);
+      toast.success(
+        preview.imageUrl
+          ? "Imported title and photo from link"
+          : "Imported title from link — add a photo if you want",
+      );
     } catch (err) {
       const message =
         err instanceof TypeError
           ? "Cannot reach API. Is the backend running?"
           : err instanceof Error
             ? err.message
-            : "Could not fetch that link";
+            : "Could not import from that link";
       setProductError(message);
       toast.error(message);
     } finally {
@@ -820,6 +826,7 @@ export function ShopPanel() {
           onClick={() => {
             setShowAddProduct(true);
             setProductError("");
+            setNewLinkTitle("Shop");
           }}
           className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
         >
@@ -828,177 +835,231 @@ export function ShopPanel() {
       ) : (
         <form
           onSubmit={onAddProduct}
-          className="flex flex-col gap-3 rounded-xl border border-border bg-surface/90 p-4"
+          className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,20,26,0.04)]"
         >
-          <p className="text-sm font-medium text-text">New product</p>
-
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-text-muted">Title</span>
-            <input
-              type="text"
-              required
-              maxLength={120}
-              value={productTitle}
-              onChange={(e) => setProductTitle(e.target.value)}
-              placeholder="Product name"
-              autoFocus
-              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-text-muted">Description</span>
-            <textarea
-              maxLength={1000}
-              rows={3}
-              value={productDescription}
-              onChange={(e) => setProductDescription(e.target.value)}
-              placeholder="Short note for visitors"
-              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-            />
-          </label>
-
-          <div className="flex flex-col gap-2 border-t border-border pt-3">
-            <p className="text-sm font-medium text-text">Buy link</p>
-            <p className="text-xs text-text-muted">
-              Required so the product can appear on your public page.
+          <div className="border-b border-border bg-bg/60 px-5 py-4">
+            <p className="text-base font-semibold text-text">Add from a link</p>
+            <p className="mt-1 text-sm text-text-muted">
+              Paste an Amazon or store URL — we pull the title and photo, then
+              you can edit before saving.
             </p>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-text-muted">Link title</span>
-              <input
-                type="text"
-                required
-                maxLength={80}
-                value={newLinkTitle}
-                onChange={(e) => setNewLinkTitle(e.target.value)}
-                placeholder="Buy on Amazon"
-                className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-text-muted">URL</span>
-              <input
-                type="url"
-                required
-                value={newLinkUrl}
-                onChange={(e) => setNewLinkUrl(e.target.value)}
-                placeholder="https://"
-                className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-              />
-            </label>
-            <label className="flex items-center gap-2 text-sm text-text">
-              <input
-                type="checkbox"
-                checked={newLinkAffiliate}
-                onChange={(e) => setNewLinkAffiliate(e.target.checked)}
-                className="rounded border-border"
-              />
-              Affiliate link
-            </label>
           </div>
 
-          <div className="flex flex-col gap-1.5 border-t border-border pt-3 text-sm">
-            <span className="text-text-muted">Photo</span>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => addImageInputRef.current?.click()}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40"
-              >
-                {productImagePreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={productImagePreview}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-text-muted">
-                    Add
-                  </span>
-                )}
-              </button>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-text-muted">
-                  Upload a file, or pull the image from the buy link above.
-                </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={fetchingPreview || !newLinkUrl.trim()}
-                    onClick={() => {
-                      void fetchPhotoFromBuyLink();
-                    }}
-                    className="rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-text transition-colors hover:bg-bg disabled:opacity-40"
-                  >
-                    {fetchingPreview ? "Fetching…" : "Fetch from link"}
-                  </button>
-                  {productImagePreview ? (
-                    <button
-                      type="button"
-                      onClick={clearAddImage}
-                      className="text-xs text-text-muted hover:text-danger"
-                    >
-                      Remove photo
-                    </button>
+          <div className="flex flex-col gap-5 px-5 py-5">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-text" htmlFor="product-url">
+                Product URL
+              </label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="product-url"
+                  type="url"
+                  required
+                  value={newLinkUrl}
+                  onChange={(e) => {
+                    setNewLinkUrl(e.target.value);
+                    setImportedFromLink(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void importFromBuyLink();
+                    }
+                  }}
+                  placeholder="https://www.amazon.com/…"
+                  autoFocus
+                  className="min-w-0 flex-1 rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
+                />
+                <button
+                  type="button"
+                  disabled={fetchingPreview || !newLinkUrl.trim()}
+                  onClick={() => {
+                    void importFromBuyLink();
+                  }}
+                  className="shrink-0 rounded-xl bg-text px-4 py-2.5 text-sm font-semibold text-text-inverse transition-colors hover:bg-text/90 disabled:opacity-40"
+                >
+                  {fetchingPreview ? "Importing…" : "Import"}
+                </button>
+              </div>
+              <p className="text-xs text-text-muted">
+                Imports title + photo. Button label defaults to “Shop”.
+              </p>
+            </div>
+
+            {(importedFromLink ||
+              productTitle ||
+              productDescription ||
+              productImagePreview) && (
+              <div className="rounded-xl border border-border bg-bg/50 p-4">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Preview — edit anything
+                  </p>
+                  {importedFromLink ? (
+                    <span className="rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+                      From link
+                    </span>
                   ) : null}
                 </div>
-                {productImageRemoteUrl ? (
-                  <p className="mt-1 text-[11px] text-brand">
-                    Using image from buy link
-                  </p>
-                ) : null}
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addImageInputRef.current?.click()}
+                      className="relative h-28 w-28 overflow-hidden rounded-xl border border-dashed border-border bg-surface transition-colors hover:border-brand/40"
+                    >
+                      {productImagePreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={productImagePreview}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center text-[11px] text-text-muted">
+                          <span className="font-medium text-text">Photo</span>
+                          Click to upload
+                        </span>
+                      )}
+                    </button>
+                    {productImagePreview ? (
+                      <button
+                        type="button"
+                        onClick={clearAddImage}
+                        className="text-[11px] text-text-muted hover:text-danger"
+                      >
+                        Remove
+                      </button>
+                    ) : null}
+                    <input
+                      ref={addImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        if (productImageFile && productImagePreview) {
+                          URL.revokeObjectURL(productImagePreview);
+                        }
+                        setProductImageRemoteUrl(null);
+                        setProductImageFile(file);
+                        setProductImagePreview(
+                          file ? URL.createObjectURL(file) : null,
+                        );
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-3">
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-text">Title</span>
+                      <input
+                        type="text"
+                        required
+                        maxLength={120}
+                        value={productTitle}
+                        onChange={(e) => setProductTitle(e.target.value)}
+                        placeholder="Product name"
+                        className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-text">Description</span>
+                      <textarea
+                        maxLength={1000}
+                        rows={2}
+                        value={productDescription}
+                        onChange={(e) => setProductDescription(e.target.value)}
+                        placeholder="Optional short note"
+                        className="resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-text">
+                        Button label
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        maxLength={80}
+                        value={newLinkTitle}
+                        onChange={(e) => setNewLinkTitle(e.target.value)}
+                        placeholder="Shop"
+                        className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
-              <input
-                ref={addImageInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                className="sr-only"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] ?? null;
-                  if (productImageFile && productImagePreview) {
-                    URL.revokeObjectURL(productImagePreview);
-                  }
-                  setProductImageRemoteUrl(null);
-                  setProductImageFile(file);
-                  setProductImagePreview(
-                    file ? URL.createObjectURL(file) : null,
-                  );
+            )}
+
+            {!importedFromLink &&
+            !productTitle &&
+            !productDescription &&
+            !productImagePreview ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setImportedFromLink(true);
+                  if (!newLinkTitle) setNewLinkTitle("Shop");
                 }}
-              />
+                className="text-left text-sm text-brand hover:text-brand-hover"
+              >
+                Or enter details manually →
+              </button>
+            ) : null}
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <label className="flex items-center gap-2 text-sm text-text">
+                <input
+                  type="checkbox"
+                  checked={newLinkAffiliate}
+                  onChange={(e) => setNewLinkAffiliate(e.target.checked)}
+                  className="rounded border-border"
+                />
+                Affiliate link
+              </label>
+              <label className="flex items-center gap-2.5 text-sm text-text">
+                <span className="text-text-muted">Show on page</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={newProductVisible}
+                  onClick={() => setNewProductVisible((v) => !v)}
+                  className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                    newProductVisible ? "bg-brand" : "bg-border"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-surface shadow-sm transition-transform ${
+                      newProductVisible ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
             </div>
+
+            {productError ? (
+              <p className="text-sm text-danger" role="alert">
+                {productError}
+              </p>
+            ) : null}
           </div>
 
-          <label className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
-            <span className="text-text-muted">Show on public page</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={newProductVisible}
-              onClick={() => setNewProductVisible((v) => !v)}
-              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                newProductVisible ? "bg-brand" : "bg-border"
-              }`}
-            >
-              <span
-                aria-hidden
-                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-surface shadow-sm transition-transform ${
-                  newProductVisible ? "translate-x-4" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </label>
-
-          {productError ? (
-            <p className="text-sm text-danger">{productError}</p>
-          ) : null}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-bg/40 px-5 py-4">
             <button
               type="submit"
-              disabled={createProduct.isPending}
-              className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              disabled={
+                createProduct.isPending ||
+                !newLinkUrl.trim() ||
+                !productTitle.trim() ||
+                !newLinkTitle.trim()
+              }
+              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
             >
-              {createProduct.isPending ? "Adding…" : "Save product"}
+              {createProduct.isPending ? "Saving…" : "Save product"}
             </button>
             <button
               type="button"
@@ -1007,7 +1068,7 @@ export function ShopPanel() {
                 setShowAddProduct(false);
                 resetAddForm();
               }}
-              className="rounded-md border border-border px-4 py-2.5 text-sm text-text-muted hover:text-text disabled:opacity-50"
+              className="rounded-xl px-4 py-2.5 text-sm font-medium text-text-muted hover:bg-bg hover:text-text disabled:opacity-50"
             >
               Cancel
             </button>
