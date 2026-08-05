@@ -255,82 +255,106 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
   const shopSection =
     variant === "page" && products.length > 0 ? (
       <section className="mt-12" aria-label="Shop">
-        <div className="mb-5">
+        <div className="mb-6">
           <h2 className="font-display text-xl font-semibold tracking-tight text-text sm:text-2xl">
             Shop
           </h2>
           <p className="mt-1 text-sm text-text-muted">
-            Products curated by @{profile.username}
+            Picks from @{profile.username}
           </p>
         </div>
 
-        <ul className="grid gap-4 sm:grid-cols-2">
-          {products.map((product) => (
-            <li
-              key={product._id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,20,26,0.04)]"
-            >
-              {isRemote(product.imageUrl) ? (
-                <div className="relative aspect-[16/10] w-full bg-bg">
-                  <SafeRemoteImage
-                    src={product.imageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    fallback={
-                      <div
-                        aria-hidden
-                        className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-sm font-semibold text-text-muted"
-                      >
-                        {initials(product.title)}
-                      </div>
-                    }
-                  />
-                </div>
-              ) : (
-                <div
-                  aria-hidden
-                  className="flex aspect-[16/10] w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-sm font-semibold text-text-muted"
-                >
-                  {initials(product.title) || product.title.slice(0, 1)}
-                </div>
-              )}
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-stretch">
+          {products.map((product) => {
+            const primary = product.links[0];
+            const extraLinks = product.links.slice(1);
+            const hasAffiliate = product.links.some((l) => l.isAffiliate);
 
-              <div className="flex flex-1 flex-col p-4">
-                <h3 className="text-base font-semibold text-text">
-                  {product.title}
-                </h3>
-                {product.description ? (
-                  <p className="mt-1.5 flex-1 text-sm leading-relaxed text-text-muted line-clamp-3">
-                    {product.description}
-                  </p>
-                ) : (
-                  <div className="flex-1" />
-                )}
-
-                <div className="mt-4 flex flex-col gap-2">
-                  {product.links.map((productLink) => (
-                    <a
-                      key={productLink._id}
-                      href={productLink.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${pageLinkButtonClass} py-3 text-sm`}
+            return (
+              <li
+                key={product._id}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(18,20,26,0.08)]"
+              >
+                <div className="relative aspect-square w-full overflow-hidden bg-bg">
+                  {isRemote(product.imageUrl) ? (
+                    <SafeRemoteImage
+                      src={product.imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      fallback={
+                        <div
+                          aria-hidden
+                          className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-lg font-semibold text-text-muted"
+                        >
+                          {initials(product.title)}
+                        </div>
+                      }
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-lg font-semibold text-text-muted"
                     >
-                      <span className="truncate">{productLink.title}</span>
-                      <span className="flex shrink-0 items-center gap-2">
+                      {initials(product.title) || product.title.slice(0, 1)}
+                    </div>
+                  )}
+                  {hasAffiliate ? (
+                    <span className="absolute top-3 left-3 rounded-full bg-surface/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-text shadow-sm backdrop-blur-sm">
+                      Affiliate
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
+                  <div className="min-h-[4.75rem]">
+                    <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-text">
+                      {product.title}
+                    </h3>
+                    {product.description ? (
+                      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text-muted">
+                        {product.description}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-2">
+                    {primary ? (
+                      <a
+                        href={primary.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-text px-4 py-3 text-sm font-semibold text-text-inverse transition-colors hover:bg-text/90"
+                      >
+                        <span className="truncate">
+                          {product.links.length === 1 ? "Shop" : primary.title}
+                        </span>
+                        <span aria-hidden className="opacity-70">
+                          →
+                        </span>
+                      </a>
+                    ) : null}
+
+                    {extraLinks.map((productLink) => (
+                      <a
+                        key={productLink._id}
+                        href={productLink.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-bg px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-brand/30 hover:text-brand"
+                      >
+                        <span className="truncate">{productLink.title}</span>
                         {productLink.isAffiliate ? (
-                          <span className="rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
-                            affiliate
+                          <span className="shrink-0 text-[10px] uppercase tracking-wide text-text-muted">
+                            · aff
                           </span>
                         ) : null}
-                        {pageLinkChevron}
-                      </span>
-                    </a>
-                  ))}
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </section>
     ) : null;

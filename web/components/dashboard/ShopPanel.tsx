@@ -35,7 +35,16 @@ export function ShopPanel() {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [productTitle, setProductTitle] = useState("");
   const [productDescription, setProductDescription] = useState("");
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [productImagePreview, setProductImagePreview] = useState<string | null>(
+    null,
+  );
+  const [newLinkTitle, setNewLinkTitle] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkAffiliate, setNewLinkAffiliate] = useState(true);
+  const [newProductVisible, setNewProductVisible] = useState(true);
   const [productError, setProductError] = useState("");
+  const addImageInputRef = useRef<HTMLInputElement>(null);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -58,7 +67,10 @@ export function ShopPanel() {
   });
 
   useEffect(() => {
-    if (productsQuery.error instanceof HttpError && productsQuery.error.status === 401) {
+    if (
+      productsQuery.error instanceof HttpError &&
+      productsQuery.error.status === 401
+    ) {
       clearToken();
       router.replace("/login");
     }
@@ -73,35 +85,114 @@ export function ShopPanel() {
     return token;
   }
 
+  function resetAddForm() {
+    setProductTitle("");
+    setProductDescription("");
+    setProductImageFile(null);
+    if (productImagePreview) URL.revokeObjectURL(productImagePreview);
+    setProductImagePreview(null);
+    setNewLinkTitle("");
+    setNewLinkUrl("");
+    setNewLinkAffiliate(true);
+    setNewProductVisible(true);
+    setProductError("");
+    if (addImageInputRef.current) addImageInputRef.current.value = "";
+  }
+
   const createProduct = useMutation({
     mutationFn: async () => {
       const token = requireToken();
       if (!token) throw new HttpError("Please log in again.", 401);
 
+      const title = productTitle.trim();
+      const buyTitle = newLinkTitle.trim();
+      const buyUrl = newLinkUrl.trim();
+
+      if (!buyTitle || !buyUrl) {
+        throw new HttpError(
+          "Add a buy link title and URL so the product can appear on your page.",
+          400,
+        );
+      }
+
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/products`, {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({
-          title: productTitle.trim(),
+          title,
           description: productDescription.trim(),
+          isVisible: newProductVisible,
         }),
       });
 
-      const json = (await res.json()) as ApiSuccess<{ product: ShopProduct }> & {
+      const json = (await res.json()) as ApiSuccess<{
+        product: ShopProduct;
+      }> & {
         message?: string;
       };
 
       if (!res.ok) {
-        throw new HttpError(json.message || "Could not create product", res.status);
+        throw new HttpError(
+          json.message || "Could not create product",
+          res.status,
+        );
       }
 
-      return json.data.product;
+      const product = json.data.product;
+
+      if (productImageFile) {
+        const body = new FormData();
+        body.append("image", productImageFile);
+        const imageRes = await fetch(
+          `${CLIENT_API_BASE}/api/v1/products/${product._id}/image`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body,
+          },
+        );
+        if (!imageRes.ok) {
+          let message = "Product saved, but photo upload failed";
+          try {
+            const imageJson = (await imageRes.json()) as { message?: string };
+            message = imageJson.message || message;
+          } catch {
+            // empty
+          }
+          throw new HttpError(message, imageRes.status);
+        }
+      }
+
+      const linkRes = await fetch(
+        `${CLIENT_API_BASE}/api/v1/products/${product._id}/links`,
+        {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify({
+            title: buyTitle,
+            url: buyUrl,
+            isAffiliate: newLinkAffiliate,
+          }),
+        },
+      );
+
+      if (!linkRes.ok) {
+        let message = "Product saved, but buy link failed";
+        try {
+          const linkJson = (await linkRes.json()) as { message?: string };
+          message = linkJson.message || message;
+        } catch {
+          // empty
+        }
+        throw new HttpError(message, linkRes.status);
+      }
+
+      return product;
     },
     onSuccess: async () => {
-      setProductTitle("");
-      setProductDescription("");
+      resetAddForm();
       setShowAddProduct(false);
-      setProductError("");
+      toast.success("Product added");
       await queryClient.invalidateQueries({ queryKey: queryKeys.productsMe });
     },
     onError: (err) => {
@@ -126,18 +217,26 @@ export function ShopPanel() {
       if (input.description !== undefined) body.description = input.description;
       if (input.isVisible !== undefined) body.isVisible = input.isVisible;
 
-      const res = await fetch(`${CLIENT_API_BASE}/api/v1/products/${input.id}`, {
-        method: "PATCH",
-        headers: authHeaders(token),
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `${CLIENT_API_BASE}/api/v1/products/${input.id}`,
+        {
+          method: "PATCH",
+          headers: authHeaders(token),
+          body: JSON.stringify(body),
+        },
+      );
 
-      const json = (await res.json()) as ApiSuccess<{ product: ShopProduct }> & {
+      const json = (await res.json()) as ApiSuccess<{
+        product: ShopProduct;
+      }> & {
         message?: string;
       };
 
       if (!res.ok) {
-        throw new HttpError(json.message || "Could not update product", res.status);
+        throw new HttpError(
+          json.message || "Could not update product",
+          res.status,
+        );
       }
 
       return json.data.product;
@@ -148,7 +247,9 @@ export function ShopPanel() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.productsMe });
     },
     onError: (err) => {
-      setPanelError(err instanceof Error ? err.message : "Could not update product");
+      setPanelError(
+        err instanceof Error ? err.message : "Could not update product",
+      );
     },
   });
 
@@ -179,7 +280,9 @@ export function ShopPanel() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.productsMe });
     },
     onError: (err) => {
-      setPanelError(err instanceof Error ? err.message : "Could not delete product");
+      setPanelError(
+        err instanceof Error ? err.message : "Could not delete product",
+      );
     },
   });
 
@@ -206,7 +309,10 @@ export function ShopPanel() {
       }> & { message?: string };
 
       if (!res.ok) {
-        throw new HttpError(json.message || "Could not create link", res.status);
+        throw new HttpError(
+          json.message || "Could not create link",
+          res.status,
+        );
       }
 
       return json.data.productLink;
@@ -216,12 +322,17 @@ export function ShopPanel() {
       setLinkUrl("");
       setLinkAffiliate(true);
       setLinkError("");
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.productLinks(productId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productLinks(productId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.productsMe }),
+      ]);
     },
     onError: (err) => {
-      setLinkError(err instanceof Error ? err.message : "Could not create link");
+      setLinkError(
+        err instanceof Error ? err.message : "Could not create link",
+      );
     },
   });
 
@@ -250,12 +361,17 @@ export function ShopPanel() {
       }
     },
     onSuccess: async (_data, input) => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.productLinks(input.productId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.productLinks(input.productId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.productsMe }),
+      ]);
     },
     onError: (err) => {
-      setPanelError(err instanceof Error ? err.message : "Could not delete link");
+      setPanelError(
+        err instanceof Error ? err.message : "Could not delete link",
+      );
     },
   });
 
@@ -293,7 +409,9 @@ export function ShopPanel() {
         },
       );
 
-      const json = (await res.json()) as ApiSuccess<{ product: ShopProduct }> & {
+      const json = (await res.json()) as ApiSuccess<{
+        product: ShopProduct;
+      }> & {
         message?: string;
       };
 
@@ -486,15 +604,21 @@ export function ShopPanel() {
                       </div>
 
                       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-                        <p
-                          className={
-                            product.isVisible
-                              ? "text-[10px] uppercase tracking-wide text-brand"
-                              : "text-[10px] uppercase tracking-wide text-text-muted"
-                          }
-                        >
-                          {product.isVisible ? "visible" : "hidden"}
-                        </p>
+                        <div className="min-w-0">
+                          {!product.isVisible ? (
+                            <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                              hidden
+                            </p>
+                          ) : product.linkCount > 0 ? (
+                            <p className="text-[10px] uppercase tracking-wide text-brand">
+                              on your page
+                            </p>
+                          ) : (
+                            <p className="text-[11px] leading-snug text-danger">
+                              Buy link required to show on your public page
+                            </p>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -522,10 +646,16 @@ export function ShopPanel() {
                             className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                               isExpanded
                                 ? "bg-brand-muted text-text"
-                                : "text-text-muted hover:bg-bg hover:text-text"
+                                : product.isVisible && product.linkCount === 0
+                                  ? "bg-danger/10 text-danger hover:bg-danger/15"
+                                  : "text-text-muted hover:bg-bg hover:text-text"
                             }`}
                           >
-                            {isExpanded ? "Close" : "Buy links"}
+                            {isExpanded
+                              ? "Close"
+                              : product.linkCount === 0
+                                ? "Add buy link"
+                                : "Buy links"}
                           </button>
                           <button
                             type="button"
@@ -595,7 +725,12 @@ export function ShopPanel() {
           Add product
         </button>
       ) : (
-        <form onSubmit={onAddProduct} className="flex flex-col gap-3">
+        <form
+          onSubmit={onAddProduct}
+          className="flex flex-col gap-3 rounded-xl border border-border bg-surface/90 p-4"
+        >
+          <p className="text-sm font-medium text-text">New product</p>
+
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-text-muted">Title</span>
             <input
@@ -604,11 +739,12 @@ export function ShopPanel() {
               maxLength={120}
               value={productTitle}
               onChange={(e) => setProductTitle(e.target.value)}
-              placeholder="Mechanical Keyboard"
+              placeholder="Product name"
               autoFocus
               className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
             />
           </label>
+
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-text-muted">Description</span>
             <textarea
@@ -620,6 +756,129 @@ export function ShopPanel() {
               className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
             />
           </label>
+
+          <div className="flex flex-col gap-1.5 text-sm">
+            <span className="text-text-muted">Photo</span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => addImageInputRef.current?.click()}
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40"
+              >
+                {productImagePreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={productImagePreview}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-text-muted">
+                    Add
+                  </span>
+                )}
+              </button>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-text-muted">
+                  Optional. JPEG, PNG, WebP, or GIF.
+                </p>
+                {productImageFile ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProductImageFile(null);
+                      if (productImagePreview) {
+                        URL.revokeObjectURL(productImagePreview);
+                      }
+                      setProductImagePreview(null);
+                      if (addImageInputRef.current) {
+                        addImageInputRef.current.value = "";
+                      }
+                    }}
+                    className="mt-1 text-xs text-text-muted hover:text-danger"
+                  >
+                    Remove photo
+                  </button>
+                ) : null}
+              </div>
+              <input
+                ref={addImageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  if (productImagePreview) {
+                    URL.revokeObjectURL(productImagePreview);
+                  }
+                  setProductImageFile(file);
+                  setProductImagePreview(
+                    file ? URL.createObjectURL(file) : null,
+                  );
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 border-t border-border pt-3">
+            <p className="text-sm font-medium text-text">Buy link</p>
+            <p className="text-xs text-text-muted">
+              Required so the product can appear on your public page.
+            </p>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-text-muted">Link title</span>
+              <input
+                type="text"
+                required
+                maxLength={80}
+                value={newLinkTitle}
+                onChange={(e) => setNewLinkTitle(e.target.value)}
+                placeholder="Buy on Amazon"
+                className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-text-muted">URL</span>
+              <input
+                type="url"
+                required
+                value={newLinkUrl}
+                onChange={(e) => setNewLinkUrl(e.target.value)}
+                placeholder="https://"
+                className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                checked={newLinkAffiliate}
+                onChange={(e) => setNewLinkAffiliate(e.target.checked)}
+                className="rounded border-border"
+              />
+              Affiliate link
+            </label>
+          </div>
+
+          <label className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
+            <span className="text-text-muted">Show on public page</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={newProductVisible}
+              onClick={() => setNewProductVisible((v) => !v)}
+              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                newProductVisible ? "bg-brand" : "bg-border"
+              }`}
+            >
+              <span
+                aria-hidden
+                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-surface shadow-sm transition-transform ${
+                  newProductVisible ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </label>
+
           {productError ? (
             <p className="text-sm text-danger">{productError}</p>
           ) : null}
@@ -636,9 +895,7 @@ export function ShopPanel() {
               disabled={createProduct.isPending}
               onClick={() => {
                 setShowAddProduct(false);
-                setProductTitle("");
-                setProductDescription("");
-                setProductError("");
+                resetAddForm();
               }}
               className="rounded-md border border-border px-4 py-2.5 text-sm text-text-muted hover:text-text disabled:opacity-50"
             >
@@ -684,7 +941,13 @@ function ProductLinksSection({
 
   return (
     <div className="mt-3 border-t border-border pt-3">
-      <p className="mb-2 text-xs font-medium text-text">Buy / affiliate links</p>
+      <p className="mb-2 text-xs font-medium text-text">
+        Buy / affiliate links
+      </p>
+      <p className="mb-3 text-xs leading-relaxed text-text-muted">
+        At least one visible buy link is required for this product to appear on
+        your public page.
+      </p>
 
       {linksQuery.isLoading ? (
         <p className="text-xs text-text-muted">Loading links…</p>
@@ -710,7 +973,9 @@ function ProductLinksSection({
                     </span>
                   ) : null}
                 </p>
-                <p className="truncate text-[11px] text-text-muted">{link.url}</p>
+                <p className="truncate text-[11px] text-text-muted">
+                  {link.url}
+                </p>
               </div>
               <button
                 type="button"

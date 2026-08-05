@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import type { Request, Response, NextFunction } from "express";
+import type { Types } from "mongoose";
 
 import { getS3Client, getS3Config } from "../config/s3.js";
 import Product from "../models/product.model.js";
@@ -105,15 +106,40 @@ export const getMyProducts = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const profile = await getMyProfileOrFail(req.user._id.toString());
 
-    const products = await Product.find({ profile: profile._id }).sort({
-      order: 1,
-    });
+    const products = await Product.find({ profile: profile._id })
+      .sort({
+        order: 1,
+      })
+      .lean();
+
+    const productIds = products.map((product) => product._id);
+    const linkCounts =
+      productIds.length > 0
+        ? await ProductLink.aggregate<{ _id: Types.ObjectId; count: number }>([
+            {
+              $match: {
+                product: { $in: productIds },
+                isVisible: true,
+              },
+            },
+            { $group: { _id: "$product", count: { $sum: 1 } } },
+          ])
+        : [];
+
+    const countByProduct = new Map(
+      linkCounts.map((row) => [String(row._id), row.count]),
+    );
+
+    const productsWithCounts = products.map((product) => ({
+      ...product,
+      linkCount: countByProduct.get(String(product._id)) ?? 0,
+    }));
 
     res.status(200).json({
       status: "success",
-      results: products.length,
+      results: productsWithCounts.length,
       data: {
-        products,
+        products: productsWithCounts,
       },
     });
   },
@@ -169,10 +195,13 @@ export const getPublicProductsByUsername = catchAsync(
       linksByProduct.set(key, current);
     }
 
-    const publicProducts = products.map((product) => ({
-      ...product,
-      links: linksByProduct.get(String(product._id)) ?? [],
-    }));
+    // Only publish products that have at least one buy link — empty cards look broken
+    const publicProducts = products
+      .map((product) => ({
+        ...product,
+        links: linksByProduct.get(String(product._id)) ?? [],
+      }))
+      .filter((product) => product.links.length > 0);
 
     res.status(200).json({
       status: "success",

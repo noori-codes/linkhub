@@ -33,6 +33,8 @@ export interface ShopProduct {
   imageUrl: string;
   order: number;
   isVisible: boolean;
+  /** Visible buy/affiliate links — required to appear on /u/[username] */
+  linkCount: number;
 }
 
 export interface ShopProductLink {
