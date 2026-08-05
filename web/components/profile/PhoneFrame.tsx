@@ -7,13 +7,15 @@ type Props = {
 
 /**
  * Standard-width iPhone frame (9:19.5). Content should fill the screen.
+ * Uses a fixed px width so the frame keeps size in shrink-to-fit flex parents
+ * (e.g. landing hero) — percentage-only width collapses when children are absolute.
  */
 export function PhoneFrame({ children, className = "" }: Props) {
   return (
     <div
-      className={`relative mx-auto w-[min(100%,292px)] shrink-0 ${className}`}
+      className={`relative mx-auto w-[min(100%,292px)] min-w-[260px] shrink-0 ${className}`}
     >
-      <div className="relative aspect-[9/19.5] rounded-[2.5rem] bg-[#111318] p-[11px] shadow-[0_24px_48px_-12px_rgba(18,20,26,0.4)]">
+      <div className="relative aspect-[9/19.5] w-full rounded-[2.5rem] bg-[#111318] p-[11px] shadow-[0_24px_48px_-12px_rgba(18,20,26,0.4)]">
         <div
           aria-hidden
           className="absolute top-[18%] -left-[2px] h-7 w-[2px] rounded-l-sm bg-[#2c3038]"
