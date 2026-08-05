@@ -8,6 +8,12 @@ import Link from "next/link";
 import { AuthShell } from "@/components/AuthShell";
 import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import {
+  onboardingCardClass,
+  onboardingInputClass,
+  onboardingPrimaryBtnClass,
+  resumeOnboardingHref,
+} from "@/lib/onboarding";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,6 +42,39 @@ export default function LoginPage() {
       }
 
       saveToken(data.token);
+
+      // Resume wizard if they never finished onboarding
+      try {
+        const meRes = await fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+        if (meRes.ok) {
+          const meJson = await meRes.json();
+          const user = meJson.data?.user as
+            | {
+                onboardingCompleted?: boolean;
+                onboardingStep?: string;
+              }
+            | undefined;
+
+          if (user && !user.onboardingCompleted) {
+            const profileRes = await fetch(
+              `${CLIENT_API_BASE}/api/v1/profiles/me`,
+              { headers: { Authorization: `Bearer ${data.token}` } },
+            );
+            router.push(
+              resumeOnboardingHref(
+                user.onboardingStep,
+                profileRes.status !== 404,
+              ),
+            );
+            return;
+          }
+        }
+      } catch {
+        /* fall through to dashboard */
+      }
+
       router.push("/profile");
     } catch {
       setError("Cannot reach API. Is `cd api && yarn dev` running?");
@@ -57,34 +96,31 @@ export default function LoginPage() {
         </p>
       }
     >
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
-      >
+      <form onSubmit={onSubmit} className={onboardingCardClass}>
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">Email</span>
+          <span className="font-medium text-text">Email</span>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className={onboardingInputClass}
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">Password</span>
+          <span className="font-medium text-text">Password</span>
           <input
             type="password"
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className={onboardingInputClass}
           />
         </label>
 
-        <p className="-mt-2 text-right text-sm">
+        <p className="-mt-1 text-right text-sm">
           <Link
             href="/forgot-password"
             className="text-text-muted hover:text-brand"
@@ -102,7 +138,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
+          className={onboardingPrimaryBtnClass}
         >
           {loading ? "Logging in…" : "Log in"}
         </button>

@@ -3,12 +3,18 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-import { AuthShell } from "@/components/AuthShell";
+import {
+  OnboardingShell,
+  OnboardingSkipFooter,
+} from "@/components/onboarding/OnboardingShell";
+import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
+import {
+  onboardingCardClass,
+  onboardingPrimaryBtnClass,
+  setOnboardingStep,
+} from "@/lib/onboarding";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -19,7 +25,26 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (!getToken()) {
       router.replace("/login");
+      return;
     }
+
+    // Resume: if profile already exists, skip to about
+    async function check() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          router.replace("/onboarding/about");
+        }
+      } catch {
+        /* stay on claim username */
+      }
+    }
+    void check();
   }, [router]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -34,7 +59,7 @@ export default function OnboardingPage() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/profiles`, {
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,6 +77,7 @@ export default function OnboardingPage() {
         return;
       }
 
+      await setOnboardingStep(token, "profile");
       router.push("/onboarding/about");
     } catch {
       setError("Cannot reach API. Is the backend running?");
@@ -61,39 +87,40 @@ export default function OnboardingPage() {
   }
 
   return (
-    <AuthShell
+    <OnboardingShell
+      step="profile"
       title="Claim your username"
-      description="This becomes your public page URL. Next you’ll add a bio and socials."
+      description="This becomes your public URL. You can change display name and bio next."
       footer={
-        <p className="text-center text-sm text-text-muted">
-          <Link
-            href="/onboarding/about"
-            className="text-brand hover:text-brand-hover"
-          >
-            I already have a username
-          </Link>
-        </p>
+        <OnboardingSkipFooter
+          label="I already have a username"
+          onSkip={() => router.push("/onboarding/about")}
+        />
       }
     >
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
-      >
+      <form onSubmit={onSubmit} className={onboardingCardClass}>
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">Username</span>
-          <input
-            type="text"
-            required
-            minLength={3}
-            maxLength={30}
-            pattern="[a-z0-9._]+"
-            title="Lowercase letters, numbers, dots, and underscores only"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
-            placeholder="yourname"
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
-          />
-          <span className="text-xs text-text-muted">/u/{username || "…"}</span>
+          <span className="font-medium text-text">Username</span>
+          <div className="flex overflow-hidden rounded-xl border border-border focus-within:border-brand">
+            <span className="flex items-center bg-bg px-3 text-sm text-text-muted">
+              /u/
+            </span>
+            <input
+              type="text"
+              required
+              minLength={3}
+              maxLength={30}
+              pattern="[a-z0-9._]+"
+              title="Lowercase letters, numbers, dots, and underscores only"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase())}
+              placeholder="yourname"
+              className="min-w-0 flex-1 border-0 bg-bg px-2 py-2.5 text-sm text-text outline-none"
+            />
+          </div>
+          <span className="text-xs text-text-muted">
+            Lowercase letters, numbers, dots, underscores
+          </span>
         </label>
 
         {error ? (
@@ -105,11 +132,11 @@ export default function OnboardingPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
+          className={onboardingPrimaryBtnClass}
         >
           {loading ? "Saving…" : "Continue"}
         </button>
       </form>
-    </AuthShell>
+    </OnboardingShell>
   );
 }

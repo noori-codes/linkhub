@@ -17,51 +17,56 @@ import {
   setOnboardingStep,
 } from "@/lib/onboarding";
 
-type SocialField = {
+type WalletField = {
   platform: string;
   label: string;
   placeholder: string;
   title: string;
 };
 
-const SOCIALS: SocialField[] = [
+const WALLETS: WalletField[] = [
   {
-    platform: "instagram",
-    label: "Instagram",
-    placeholder: "https://instagram.com/you",
-    title: "Instagram",
+    platform: "ethereum",
+    label: "Ethereum / ENS",
+    placeholder: "0x… or name.eth",
+    title: "Ethereum",
   },
   {
-    platform: "x",
-    label: "X / Twitter",
-    placeholder: "https://x.com/you",
-    title: "X",
+    platform: "bitcoin",
+    label: "Bitcoin",
+    placeholder: "bc1… or address",
+    title: "Bitcoin",
   },
   {
-    platform: "github",
-    label: "GitHub",
-    placeholder: "https://github.com/you",
-    title: "GitHub",
-  },
-  {
-    platform: "linkedin",
-    label: "LinkedIn",
-    placeholder: "https://linkedin.com/in/you",
-    title: "LinkedIn",
-  },
-  {
-    platform: "website",
-    label: "Website",
-    placeholder: "https://yoursite.com",
-    title: "Website",
+    platform: "solana",
+    label: "Solana",
+    placeholder: "Solana address",
+    title: "Solana",
   },
 ];
 
-/** Step 3: optional social links → theme. */
-export default function OnboardingSocialsPage() {
+function walletUrl(platform: string, value: string) {
+  const v = value.trim();
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  if (platform === "ethereum") {
+    return v.endsWith(".eth")
+      ? `https://app.ens.domains/${encodeURIComponent(v)}`
+      : `https://etherscan.io/address/${encodeURIComponent(v)}`;
+  }
+  if (platform === "bitcoin") {
+    return `https://mempool.space/address/${encodeURIComponent(v)}`;
+  }
+  if (platform === "solana") {
+    return `https://solscan.io/account/${encodeURIComponent(v)}`;
+  }
+  return `https://${encodeURIComponent(v)}`;
+}
+
+/** Step 6: optional wallet addresses as wallet-type links. */
+export default function OnboardingWalletsPage() {
   const router = useRouter();
-  const [urls, setUrls] = useState<Record<string, string>>(() =>
-    Object.fromEntries(SOCIALS.map((s) => [s.platform, ""])),
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(WALLETS.map((w) => [w.platform, ""])),
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -95,34 +100,8 @@ export default function OnboardingSocialsPage() {
   }, [router]);
 
   async function goNext(token: string) {
-    await setOnboardingStep(token, "theme");
-    router.push("/onboarding/theme");
-  }
-
-  async function createSocialLinks(token: string) {
-    for (const social of SOCIALS) {
-      const url = urls[social.platform]?.trim();
-      if (!url) continue;
-
-      const res = await fetch(`${CLIENT_API_BASE}/api/v1/links`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: social.title,
-          url,
-          type: "social",
-          platform: social.platform,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = (await res.json()) as { message?: string };
-        throw new Error(data.message || `Could not add ${social.label}`);
-      }
-    }
+    await setOnboardingStep(token, "tags");
+    router.push("/onboarding/tags");
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -139,7 +118,30 @@ export default function OnboardingSocialsPage() {
     setError("");
 
     try {
-      await createSocialLinks(token);
+      for (const wallet of WALLETS) {
+        const raw = values[wallet.platform]?.trim();
+        if (!raw) continue;
+
+        const res = await fetch(`${CLIENT_API_BASE}/api/v1/links`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: wallet.title,
+            url: walletUrl(wallet.platform, raw),
+            type: "wallet",
+            platform: wallet.platform,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = (await res.json()) as { message?: string };
+          throw new Error(data.message || `Could not add ${wallet.label}`);
+        }
+      }
+
       await goNext(token);
     } catch (err) {
       setError(
@@ -162,7 +164,7 @@ export default function OnboardingSocialsPage() {
     try {
       await goNext(token);
     } catch {
-      router.push("/onboarding/theme");
+      router.push("/onboarding/tags");
     } finally {
       setLoading(false);
     }
@@ -170,9 +172,9 @@ export default function OnboardingSocialsPage() {
 
   return (
     <OnboardingShell
-      step="socials"
-      title="Add your socials"
-      description="Paste profiles you want on your page. You can add more later in Links."
+      step="wallets"
+      title="Add wallets"
+      description="Optional — show tipping or payment addresses on your page."
       footer={
         <OnboardingSkipFooter
           onSkip={() => void onSkip()}
@@ -184,26 +186,33 @@ export default function OnboardingSocialsPage() {
         <p className="text-sm text-text-muted">Loading…</p>
       ) : (
         <form onSubmit={onSubmit} className={onboardingCardClass}>
-          {SOCIALS.map((social) => (
+          {WALLETS.map((wallet) => (
             <label
-              key={social.platform}
+              key={wallet.platform}
               className="flex flex-col gap-1.5 text-left text-sm"
             >
-              <span className="font-medium text-text">{social.label}</span>
+              <span className="font-medium text-text">{wallet.label}</span>
               <input
-                type="url"
-                value={urls[social.platform] ?? ""}
+                type="text"
+                value={values[wallet.platform] ?? ""}
                 onChange={(e) =>
-                  setUrls((prev) => ({
+                  setValues((prev) => ({
                     ...prev,
-                    [social.platform]: e.target.value,
+                    [wallet.platform]: e.target.value,
                   }))
                 }
-                placeholder={social.placeholder}
-                className={onboardingInputClass}
+                placeholder={wallet.placeholder}
+                spellCheck={false}
+                autoComplete="off"
+                className={`${onboardingInputClass} font-mono text-[13px]`}
               />
             </label>
           ))}
+
+          <p className="text-xs text-text-muted">
+            Addresses are stored as links visitors can open. Skip if you don’t
+            need this.
+          </p>
 
           {error ? (
             <p className="text-sm text-danger" role="alert">

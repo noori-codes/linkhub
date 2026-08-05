@@ -7,8 +7,13 @@ import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
 import { getToken, saveToken } from "@/lib/auth";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
+import { CLIENT_API_BASE } from "@/lib/client-api";
+import {
+  onboardingCardClass,
+  onboardingInputClass,
+  onboardingPrimaryBtnClass,
+  setOnboardingStep,
+} from "@/lib/onboarding";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -18,15 +23,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  // Username is for the Profile (public /u/...), not the User account
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  // After User is created, retries only create the Profile (skip signup again)
   const [accountCreated, setAccountCreated] = useState(false);
 
   async function createProfile(token: string) {
-    const profileRes = await fetch(`${API_BASE}/api/v1/profiles`, {
+    const profileRes = await fetch(`${CLIENT_API_BASE}/api/v1/profiles`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,14 +37,14 @@ export default function SignupPage() {
       },
       body: JSON.stringify({
         username: username.trim().toLowerCase(),
+        displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       }),
     });
 
-    const profileData = (await profileRes.json()) as { message?: string };
+    const profileData = await profileRes.json();
 
     if (!profileRes.ok) {
-      // Stay here and show a clear message (e.g. username taken)
-      setError(profileData.message || "Could not create profile");
+      setError(profileData.message || "Could not claim that username");
       return false;
     }
 
@@ -51,20 +54,13 @@ export default function SignupPage() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-
-    if (password !== passwordConfirm) {
-      setError("Passwords do not match.");
-      return;
-    }
-
     setLoading(true);
 
     try {
       let token = getToken();
 
-      // Step 1: create User only if we haven't already this session
-      if (!accountCreated || !token) {
-        const signupRes = await fetch(`${API_BASE}/api/v1/users/signup`, {
+      if (!accountCreated) {
+        const signupRes = await fetch(`${CLIENT_API_BASE}/api/v1/users/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -72,6 +68,7 @@ export default function SignupPage() {
             lastName: lastName.trim(),
             email: email.trim(),
             password,
+            passwordConfirm,
           }),
         });
 
@@ -95,7 +92,6 @@ export default function SignupPage() {
         token = signupData.token;
         setAccountCreated(true);
 
-        // Dev helper for the dashboard banner — open without Mailtrap
         if (signupData.verifyURL) {
           try {
             sessionStorage.setItem("linkhub_verifyURL", signupData.verifyURL);
@@ -105,10 +101,10 @@ export default function SignupPage() {
         }
       }
 
-      // Step 2: create Profile — may fail if username is taken
       const ok = await createProfile(token!);
       if (!ok) return;
 
+      await setOnboardingStep(token!, "profile");
       router.push("/onboarding/about");
     } catch {
       setError("Cannot reach API. Is the backend running?");
@@ -120,7 +116,7 @@ export default function SignupPage() {
   return (
     <AuthShell
       title="Sign up"
-      description="Create an account and claim your public username — then a short bio and socials."
+      description="Create an account and claim your public username — then finish a short setup wizard."
       footer={
         <p className="text-center text-sm text-text-muted">
           Already have an account?{" "}
@@ -130,49 +126,50 @@ export default function SignupPage() {
         </p>
       }
     >
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
-      >
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1.5 text-left text-sm">
-              <span className="text-text-muted">First name</span>
-              <input
-                type="text"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                disabled={accountCreated}
-                className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand disabled:opacity-60"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-left text-sm">
-              <span className="text-text-muted">Last name</span>
-              <input
-                type="text"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                disabled={accountCreated}
-                className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand disabled:opacity-60"
-              />
-            </label>
-          </div>
-
+      <form onSubmit={onSubmit} className={onboardingCardClass}>
+        <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Email</span>
+            <span className="font-medium text-text">First name</span>
             <input
-              type="email"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               disabled={accountCreated}
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand disabled:opacity-60"
+              className={`${onboardingInputClass} disabled:opacity-60`}
             />
           </label>
-
           <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Username</span>
+            <span className="font-medium text-text">Last name</span>
+            <input
+              type="text"
+              required
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={accountCreated}
+              className={`${onboardingInputClass} disabled:opacity-60`}
+            />
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-1.5 text-left text-sm">
+          <span className="font-medium text-text">Email</span>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={accountCreated}
+            className={`${onboardingInputClass} disabled:opacity-60`}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-left text-sm">
+          <span className="font-medium text-text">Username</span>
+          <div className="flex overflow-hidden rounded-xl border border-border focus-within:border-brand">
+            <span className="flex items-center bg-bg px-3 text-sm text-text-muted">
+              /u/
+            </span>
             <input
               type="text"
               required
@@ -183,56 +180,54 @@ export default function SignupPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase())}
               placeholder="yourname"
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+              className="min-w-0 flex-1 border-0 bg-bg px-2 py-2.5 text-sm text-text outline-none"
             />
-            <span className="text-xs text-text-muted">
-              Your page will be /u/{username || "…"}
-            </span>
-          </label>
+          </div>
+        </label>
 
-          <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Password</span>
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={accountCreated}
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand disabled:opacity-60"
-            />
-          </label>
+        <label className="flex flex-col gap-1.5 text-left text-sm">
+          <span className="font-medium text-text">Password</span>
+          <input
+            type="password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={accountCreated}
+            className={`${onboardingInputClass} disabled:opacity-60`}
+          />
+        </label>
 
-          <label className="flex flex-col gap-1.5 text-left text-sm">
-            <span className="text-text-muted">Confirm password</span>
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              disabled={accountCreated}
-              className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand disabled:opacity-60"
-            />
-          </label>
+        <label className="flex flex-col gap-1.5 text-left text-sm">
+          <span className="font-medium text-text">Confirm password</span>
+          <input
+            type="password"
+            required
+            minLength={8}
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            disabled={accountCreated}
+            className={`${onboardingInputClass} disabled:opacity-60`}
+          />
+        </label>
 
-          {error ? (
-            <p className="text-sm text-danger" role="alert">
-              {error}
-            </p>
-          ) : null}
+        {error ? (
+          <p className="text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
-          >
-            {loading
-              ? "Creating account…"
-              : accountCreated
-                ? "Try username again"
-                : "Create account"}
-          </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={onboardingPrimaryBtnClass}
+        >
+          {loading
+            ? "Creating account…"
+            : accountCreated
+              ? "Try username again"
+              : "Create account"}
+        </button>
       </form>
     </AuthShell>
   );
