@@ -1,0 +1,8 @@
+info:
+  name: Themes
+  type: folder
+  seq: 9
+
+request:
+  auth:
+    mode: none

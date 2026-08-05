@@ -12,6 +12,7 @@ import profileRouter from "./routes/profile.routes.js";
 import linkRouter from "./routes/link.routes.js";
 import analyticsRouter from "./routes/analytics.routes.js";
 import productRouter from "./routes/product.routes.js";
+import themeRouter from "./routes/theme.routes.js";
 
 const app: Application = express();
 
@@ -44,6 +45,7 @@ app.use("/api/v1/profiles", profileRouter);
 app.use("/api/v1/links", linkRouter);
 app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/themes", themeRouter);
 
 // 404 handler
 app.use((req, res, next) => {

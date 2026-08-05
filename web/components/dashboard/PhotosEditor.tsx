@@ -28,10 +28,10 @@ export function PhotosEditor() {
 
   useEffect(() => {
     if (!profile) return;
-    setAvatarUrl(profile.avatarUrl?.startsWith("http") ? profile.avatarUrl : "");
-    setCoverUrl(
-      profile.coverUrl?.startsWith("http") ? profile.coverUrl : "",
+    setAvatarUrl(
+      profile.avatarUrl?.startsWith("http") ? profile.avatarUrl : "",
     );
+    setCoverUrl(profile.coverUrl?.startsWith("http") ? profile.coverUrl : "");
   }, [profile]);
 
   if (!profile) {

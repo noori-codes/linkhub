@@ -2,6 +2,22 @@
 
 export type ProfileStatus = "draft" | "published";
 
+export interface ThemeTokens {
+  backgroundColor: string;
+  textColor: string;
+  buttonColor: string;
+  buttonTextColor: string;
+  fontFamily: string;
+}
+
+export interface ProfileTheme {
+  _id: string;
+  name: string;
+  slug: string;
+  tokens: ThemeTokens;
+  isDefault: boolean;
+}
+
 export interface PublicProfile {
   _id: string;
   username: string;
@@ -13,6 +29,8 @@ export interface PublicProfile {
   website: string;
   status: ProfileStatus;
   tags: string[];
+  /** Populated Theme doc, or raw ObjectId string before populate */
+  theme?: ProfileTheme | string | null;
 }
 
 export interface PublicLink {

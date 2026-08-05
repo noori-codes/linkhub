@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 
 import Profile from "../models/profile.model.js";
+import Theme from "../models/theme.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
@@ -18,6 +20,20 @@ export const createProfile = catchAsync(
       return next(new AppError("You already have a profile.", 400));
     }
 
+    let themeId = req.body.theme;
+    if (themeId) {
+      if (!mongoose.isValidObjectId(themeId)) {
+        return next(new AppError("Invalid theme id.", 400));
+      }
+      const themeExists = await Theme.exists({ _id: themeId });
+      if (!themeExists) {
+        return next(new AppError("Theme not found.", 404));
+      }
+    } else {
+      const defaultTheme = await Theme.findOne({ isDefault: true }).select("_id");
+      themeId = defaultTheme?._id;
+    }
+
     const profile = await Profile.create({
       user: req.user._id, // owner from JWT — never take user id from the body
       username: req.body.username, // becomes the public URL /u/:username
@@ -30,7 +46,7 @@ export const createProfile = catchAsync(
       location: req.body.location,
       website: req.body.website,
       tags: req.body.tags,
-      theme: req.body.theme,
+      theme: themeId,
       // status defaults to "draft" in the schema (not public yet)
     });
 
@@ -51,12 +67,22 @@ export const createProfile = catchAsync(
 export const getMyProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // populate("theme") replaces theme ObjectId with the full Theme document
-    const profile = await Profile.findOne({ user: req.user._id }).populate(
+    let profile = await Profile.findOne({ user: req.user._id }).populate(
       "theme",
     );
 
     if (!profile) {
       return next(new AppError("You do not have a profile yet.", 404));
+    }
+
+    // Backfill default theme for older profiles
+    if (!profile.theme) {
+      const defaultTheme = await Theme.findOne({ isDefault: true });
+      if (defaultTheme) {
+        profile.theme = defaultTheme._id;
+        await profile.save();
+        profile = await Profile.findById(profile._id).populate("theme");
+      }
     }
 
     res.status(200).json({
@@ -96,6 +122,17 @@ export const updateMyProfile = catchAsync(
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
+      }
+    }
+
+    if (updates.theme !== undefined) {
+      const themeId = updates.theme;
+      if (typeof themeId !== "string" || !mongoose.isValidObjectId(themeId)) {
+        return next(new AppError("Invalid theme id.", 400));
+      }
+      const themeExists = await Theme.exists({ _id: themeId });
+      if (!themeExists) {
+        return next(new AppError("Theme not found.", 404));
       }
     }
 

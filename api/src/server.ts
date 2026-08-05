@@ -1,6 +1,7 @@
 import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./config/database.js";
+import { ensureThemes } from "./utils/ensureThemes.js";
 
 // 1. Handle synchronous errors
 process.on("uncaughtException", (err) => {
@@ -12,6 +13,7 @@ process.on("uncaughtException", (err) => {
 async function startServer() {
   try {
     await connectDB();
+    await ensureThemes();
 
     const PORT = process.env.PORT || 3000;
 

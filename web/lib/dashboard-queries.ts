@@ -14,6 +14,7 @@ export const queryKeys = {
   linksMe: ["links", "me"] as const,
   analyticsMe: ["analytics", "me"] as const,
   productsMe: ["products", "me"] as const,
+  themes: ["themes"] as const,
   productLinks: (productId: string) =>
     ["products", productId, "links"] as const,
 };
