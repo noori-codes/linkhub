@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
+import { PasswordInput } from "@/components/PasswordInput";
 import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import {
@@ -110,13 +111,12 @@ export default function LoginPage() {
 
         <label className="flex flex-col gap-1.5 text-left text-sm">
           <span className="font-medium text-text">Password</span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={onboardingInputClass}
+            autoComplete="current-password"
           />
         </label>
 

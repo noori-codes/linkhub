@@ -6,8 +6,13 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
+import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { saveToken } from "@/lib/auth";
+import {
+  onboardingCardClass,
+  onboardingPrimaryBtnClass,
+} from "@/lib/onboarding";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -86,31 +91,26 @@ export default function ResetPasswordPage() {
         </p>
       }
     >
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
-      >
+      <form onSubmit={onSubmit} className={onboardingCardClass}>
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">New password</span>
-          <input
-            type="password"
+          <span className="font-medium text-text">New password</span>
+          <PasswordInput
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            autoComplete="new-password"
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">Confirm password</span>
-          <input
-            type="password"
+          <span className="font-medium text-text">Confirm password</span>
+          <PasswordInput
             required
             minLength={8}
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            autoComplete="new-password"
           />
         </label>
 
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
+          className={onboardingPrimaryBtnClass}
         >
           {loading ? "Saving…" : "Update password"}
         </button>

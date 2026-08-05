@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
+import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
 
@@ -83,37 +84,37 @@ export function ChangePasswordForm() {
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">Current password</span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={passwordCurrent}
             onChange={(e) => setPasswordCurrent(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+            autoComplete="current-password"
+            wrapperClassName="rounded-md"
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">New password</span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+            autoComplete="new-password"
+            wrapperClassName="rounded-md"
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-text-muted">Confirm new password</span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+            autoComplete="new-password"
+            wrapperClassName="rounded-md"
           />
         </label>
 
