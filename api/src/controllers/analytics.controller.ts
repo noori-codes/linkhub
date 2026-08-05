@@ -44,6 +44,46 @@ export const recordProfileView = catchAsync(
 );
 
 // =============================
+// RECORD PUBLIC PROFILE SHARE
+// Fired when someone copies / shares the page link
+// =============================
+
+export const recordProfileShare = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username } = req.params;
+
+    if (!username) {
+      return next(new AppError("Please provide a username.", 400));
+    }
+
+    const profile = await Profile.findOne({
+      username: username.toString().toLowerCase(),
+      status: "published",
+    }).select("_id");
+
+    if (!profile) {
+      return next(
+        new AppError("No published profile found with that username.", 404),
+      );
+    }
+
+    const method =
+      typeof req.body?.method === "string" ? req.body.method.slice(0, 40) : "";
+
+    await AnalyticsEvent.create({
+      profile: profile._id,
+      type: "share",
+      meta: {
+        referrer: method || req.get("referer") || "",
+        userAgent: req.get("user-agent") || "",
+      },
+    });
+
+    res.status(204).send();
+  },
+);
+
+// =============================
 // GET MY ANALYTICS (owner)
 // Totals + top links + recent clicks
 // =============================
@@ -56,7 +96,7 @@ export const getMyAnalytics = catchAsync(
       return next(new AppError("Create a profile before viewing analytics.", 404));
     }
 
-    const [links, recentEvents, clickEventCount, profileViews] =
+    const [links, recentEvents, clickEventCount, profileViews, shares] =
       await Promise.all([
         Link.find({ profile: profile._id })
           .select("title url clickCount isVisible")
@@ -76,6 +116,10 @@ export const getMyAnalytics = catchAsync(
         AnalyticsEvent.countDocuments({
           profile: profile._id,
           type: "profile_view",
+        }),
+        AnalyticsEvent.countDocuments({
+          profile: profile._id,
+          type: "share",
         }),
       ]);
 
@@ -120,6 +164,7 @@ export const getMyAnalytics = catchAsync(
         summary: {
           profileViews,
           totalClicks,
+          shares,
           linkCount: links.length,
           eventCount: clickEventCount,
         },

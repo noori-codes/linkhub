@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { SiteHeader } from "@/components/SiteHeader";
+import { FinishLaterButton } from "@/components/onboarding/FinishLaterButton";
 import {
   ONBOARDING_STEPS,
   stepIndex,
@@ -75,12 +74,7 @@ export function OnboardingShell({
 
           {footer ? <div className="mt-6">{footer}</div> : null}
 
-          <p className="mt-8 text-center text-xs text-text-muted">
-            Already set up?{" "}
-            <Link href="/profile" className="font-medium text-brand hover:text-brand-hover">
-              Open dashboard
-            </Link>
-          </p>
+          {step !== "profile" ? <FinishLaterButton /> : null}
         </div>
       </main>
     </div>

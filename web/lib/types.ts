@@ -78,6 +78,7 @@ export interface AnalyticsSummary {
   summary: {
     profileViews: number;
     totalClicks: number;
+    shares: number;
     linkCount: number;
     eventCount: number;
   };

@@ -129,6 +129,19 @@ export default function OnboardingThemePage() {
     }
     setLoading(true);
     try {
+      // Apply default theme explicitly when skipping
+      const defaultTheme =
+        themesQuery.data?.find((t) => t.isDefault) ?? themesQuery.data?.[0];
+      if (defaultTheme) {
+        await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ theme: defaultTheme._id }),
+        });
+      }
       await goNext(token);
     } catch {
       router.push("/onboarding/links");

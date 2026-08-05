@@ -58,6 +58,60 @@ export async function completeOnboarding(token: string) {
   });
 }
 
+/**
+ * Skip rest of wizard → apply defaults (theme) and open dashboard.
+ * Safe to call from any step once a profile exists.
+ */
+export async function skipToDashboard(token: string) {
+  // Ensure Classic (or any default) theme if profile has none
+  try {
+    const profileRes = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (profileRes.ok) {
+      const profileJson = (await profileRes.json()) as {
+        data?: { profile?: { theme?: unknown; displayName?: string } };
+      };
+      const profile = profileJson.data?.profile;
+      const hasTheme = Boolean(
+        profile?.theme &&
+          (typeof profile.theme === "string" ||
+            (typeof profile.theme === "object" &&
+              profile.theme !== null &&
+              "_id" in profile.theme)),
+      );
+
+      if (!hasTheme) {
+        const themesRes = await fetch(`${CLIENT_API_BASE}/api/v1/themes`);
+        if (themesRes.ok) {
+          const themesJson = (await themesRes.json()) as {
+            data?: { themes?: Array<{ _id: string; isDefault?: boolean }> };
+          };
+          const themes = themesJson.data?.themes ?? [];
+          const fallback =
+            themes.find((t) => t.isDefault) ?? themes[0];
+          if (fallback) {
+            await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ theme: fallback._id }),
+            });
+          }
+        }
+      }
+    }
+  } catch {
+    /* still complete onboarding */
+  }
+
+  await completeOnboarding(token);
+}
+
 export const onboardingInputClass =
   "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none transition-colors focus:border-brand";
 

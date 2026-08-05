@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ShareQr } from "@/components/dashboard/ShareQr";
+import { trackProfileShare } from "@/lib/track-share";
 import type { ProfileStatus } from "@/lib/types";
 
 type Props = {
@@ -19,12 +20,13 @@ function publicPageUrl(username: string) {
 /**
  * Preview card: View + Share (modal) + Live/Draft badge.
  */
-export function PreviewShareActions({ username }: Props) {
+export function PreviewShareActions({ username, status }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const pathLabel = `/u/${username}`;
-  const fullUrl = publicPageUrl(username);
+  const fullUrl =
+    typeof window !== "undefined" ? publicPageUrl(username) : pathLabel;
 
   useEffect(() => {
     if (!open) return;
@@ -47,10 +49,33 @@ export function PreviewShareActions({ username }: Props) {
 
   async function onCopy() {
     try {
-      await navigator.clipboard.writeText(fullUrl);
+      await navigator.clipboard.writeText(publicPageUrl(username));
+      if (status === "published") {
+        trackProfileShare(username, "copy");
+      }
       toast.success("Link copied");
     } catch {
       toast.error("Could not copy link");
+    }
+  }
+
+  async function onNativeShare() {
+    const url = publicPageUrl(username);
+    if (!navigator.share) {
+      await onCopy();
+      return;
+    }
+    try {
+      await navigator.share({
+        title: `@${username} on LinkHub`,
+        url,
+      });
+      if (status === "published") {
+        trackProfileShare(username, "native");
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      await onCopy();
     }
   }
 
@@ -127,8 +152,26 @@ export function PreviewShareActions({ username }: Props) {
               </button>
             </div>
 
+            {typeof navigator !== "undefined" && "share" in navigator ? (
+              <button
+                type="button"
+                onClick={() => void onNativeShare()}
+                className="mt-3 w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand/40"
+              >
+                Share via device…
+              </button>
+            ) : null}
+
             <div className="mt-5 flex flex-col items-center gap-2 border-t border-border pt-5">
-              <ShareQr url={fullUrl} />
+              <div
+                onClick={() => {
+                  if (status === "published") {
+                    trackProfileShare(username, "qr");
+                  }
+                }}
+              >
+                <ShareQr url={fullUrl} />
+              </div>
               {typeof window !== "undefined" &&
               (window.location.hostname === "localhost" ||
                 window.location.hostname === "127.0.0.1") ? (

@@ -70,7 +70,7 @@ export function AnalyticsPanel() {
         title="Overview"
         description="Views and clicks from your published public page."
       >
-        <dl className="grid grid-cols-2 gap-3">
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-xl bg-bg px-4 py-4">
             <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
               Page views
@@ -87,7 +87,15 @@ export function AnalyticsPanel() {
               {summary.totalClicks}
             </dd>
           </div>
-          <div className="col-span-2 rounded-xl bg-bg px-4 py-4">
+          <div className="rounded-xl bg-bg px-4 py-4">
+            <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
+              Shares
+            </dt>
+            <dd className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-text">
+              {summary.shares ?? 0}
+            </dd>
+          </div>
+          <div className="col-span-2 rounded-xl bg-bg px-4 py-4 sm:col-span-3">
             <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
               Recorded click events
             </dt>

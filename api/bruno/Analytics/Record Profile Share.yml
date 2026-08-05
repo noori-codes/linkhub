@@ -1,0 +1,23 @@
+info:
+  name: Record Profile Share
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/analytics/u/{{username}}/share"
+  body:
+    type: json
+    data: '{ "method": "copy" }'
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |
+  Public. Creates a share AnalyticsEvent for a published profile.
+  Body method is optional (copy | native | qr). Expect 204.
