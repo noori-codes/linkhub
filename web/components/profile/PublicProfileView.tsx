@@ -78,8 +78,10 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
   const identityInner = (
     <>
       <div
-        className={`relative z-10 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-[4px] ${avatarBorder} bg-surface text-3xl font-semibold tracking-wide text-text-muted shadow-sm sm:h-32 sm:w-32 sm:text-4xl ${
-          variant === "page" ? "-mt-14 sm:-mt-16" : "-mt-16 mb-7 sm:-mt-18"
+        className={`relative z-10 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 ${avatarBorder} bg-surface text-3xl font-semibold tracking-wide text-text-muted shadow-sm sm:h-32 sm:w-32 sm:text-4xl lg:h-24 lg:w-24 lg:text-3xl ${
+          variant === "page"
+            ? "-mt-14 sm:-mt-16 lg:mt-0 lg:border-white/35 lg:shadow-lg"
+            : "-mt-16 mb-7 sm:-mt-18"
         }`}
       >
         {avatar ? (
@@ -94,17 +96,31 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
         )}
       </div>
 
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-text sm:text-3xl lg:text-[2rem]">
+      <h1
+        className={`font-display text-2xl font-semibold tracking-tight sm:text-3xl ${
+          variant === "page"
+            ? "text-text lg:text-2xl lg:text-white xl:text-3xl"
+            : "text-text"
+        }`}
+      >
         {name}
       </h1>
-      <p className="mt-1.5 text-sm tracking-wide text-text-muted">
+      <p
+        className={`mt-1.5 text-sm tracking-wide ${
+          variant === "page"
+            ? "text-text-muted lg:text-white/70"
+            : "text-text-muted"
+        }`}
+      >
         @{profile.username}
       </p>
 
       {profile.bio ? (
         <p
-          className={`mt-4 text-sm leading-relaxed text-text-muted sm:text-[15px] ${
-            variant === "page" ? "max-w-sm px-2" : "max-w-xl"
+          className={`mt-4 text-sm leading-relaxed sm:text-[15px] ${
+            variant === "page"
+              ? "max-w-sm px-2 text-text-muted lg:max-w-none lg:px-0 lg:text-white/85"
+              : "max-w-xl text-text-muted"
           }`}
         >
           {profile.bio}
@@ -139,15 +155,37 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
 
   const identity =
     variant === "page" ? (
-      <header className="flex flex-col items-center px-2 text-center">
+      <header className="relative z-10 flex flex-col items-center bg-bg px-6 pb-8 pt-0 text-center lg:items-start lg:bg-transparent lg:px-10 lg:pb-12 lg:pt-0 lg:text-left xl:px-12">
         {identityInner}
       </header>
     ) : (
       <header className="mb-10 flex flex-col px-5 sm:px-8">{identityInner}</header>
     );
 
+  const pageFooter = (
+    <footer className="mt-16 flex flex-col items-center gap-1.5 lg:items-start">
+      <Image
+        src="/linkhub-mark.png"
+        alt="LinkHub"
+        width={20}
+        height={20}
+        unoptimized
+        className="opacity-50"
+      />
+      <p className="text-[11px] tracking-wide text-text-muted">
+        Powered by LinkHub
+      </p>
+    </footer>
+  );
+
   const pageLinkButtonClass =
-    "block w-full rounded-xl border border-border bg-surface px-5 py-3.5 text-center text-[15px] font-semibold text-text shadow-[0_1px_2px_rgba(18,20,26,0.04)] transition-[transform,box-shadow,background-color,color] hover:-translate-y-px hover:border-brand/25 hover:bg-bg-elevated hover:text-brand hover:shadow-md active:translate-y-0";
+    "flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 text-[15px] font-semibold text-text shadow-[0_1px_2px_rgba(18,20,26,0.04)] transition-[transform,box-shadow,background-color,color] hover:-translate-y-px hover:border-brand/25 hover:bg-bg-elevated hover:text-brand hover:shadow-md active:translate-y-0";
+
+  const pageLinkChevron = (
+    <span aria-hidden className="shrink-0 text-text-muted/50">
+      ↗
+    </span>
+  );
 
   const linkList = (
     <section
@@ -158,6 +196,19 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
       }
       aria-label="Links"
     >
+      {variant === "page" ? (
+        <div className="mb-4">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-text sm:text-2xl">
+            Links
+          </h2>
+          <p className="mt-1 text-sm text-text-muted">
+            {visible.length > 0
+              ? "Open a destination in a new tab"
+              : "Nothing published yet"}
+          </p>
+        </div>
+      ) : null}
+
       {visible.length === 0 ? (
         variant === "preview" ? (
           <div className="flex flex-col items-start gap-2 py-1">
@@ -187,7 +238,14 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                 : "block rounded-md border border-border bg-transparent px-4 py-3.5 text-center text-[15px] font-medium text-text transition-colors hover:bg-bg hover:text-brand"
             }
           >
-            {link.title}
+            {variant === "page" ? (
+              <>
+                <span className="truncate">{link.title}</span>
+                {pageLinkChevron}
+              </>
+            ) : (
+              link.title
+            )}
           </a>
         ))
       )}
@@ -196,63 +254,84 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
 
   const shopSection =
     variant === "page" && products.length > 0 ? (
-      <section className="mt-8 flex flex-col gap-3" aria-label="Shop">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted">
-          Shop
-        </p>
-        {products.map((product) => (
-          <div key={product._id} className="flex flex-col gap-2">
-            {(product.description || isRemote(product.imageUrl)) && (
-              <div className="flex items-center gap-3 rounded-xl border border-border/80 bg-surface/80 px-4 py-3">
-                {isRemote(product.imageUrl) ? (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-bg">
-                    <SafeRemoteImage
-                      src={product.imageUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      fallback={
-                        <div
-                          aria-hidden
-                          className="flex h-full w-full items-center justify-center bg-bg text-[10px] font-semibold text-text-muted"
-                        >
-                          {initials(product.title)}
-                        </div>
-                      }
-                    />
-                  </div>
-                ) : null}
-                <div className="min-w-0 text-left">
-                  <p className="text-sm font-semibold text-text">{product.title}</p>
-                  {product.description ? (
-                    <p className="mt-0.5 text-xs leading-relaxed text-text-muted line-clamp-2">
-                      {product.description}
-                    </p>
-                  ) : null}
+      <section className="mt-12" aria-label="Shop">
+        <div className="mb-5">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-text sm:text-2xl">
+            Shop
+          </h2>
+          <p className="mt-1 text-sm text-text-muted">
+            Products curated by @{profile.username}
+          </p>
+        </div>
+
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {products.map((product) => (
+            <li
+              key={product._id}
+              className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,20,26,0.04)]"
+            >
+              {isRemote(product.imageUrl) ? (
+                <div className="relative aspect-[16/10] w-full bg-bg">
+                  <SafeRemoteImage
+                    src={product.imageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    fallback={
+                      <div
+                        aria-hidden
+                        className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-sm font-semibold text-text-muted"
+                      >
+                        {initials(product.title)}
+                      </div>
+                    }
+                  />
+                </div>
+              ) : (
+                <div
+                  aria-hidden
+                  className="flex aspect-[16/10] w-full items-center justify-center bg-[linear-gradient(135deg,#eef0f4,#f8f9fb)] text-sm font-semibold text-text-muted"
+                >
+                  {initials(product.title) || product.title.slice(0, 1)}
+                </div>
+              )}
+
+              <div className="flex flex-1 flex-col p-4">
+                <h3 className="text-base font-semibold text-text">
+                  {product.title}
+                </h3>
+                {product.description ? (
+                  <p className="mt-1.5 flex-1 text-sm leading-relaxed text-text-muted line-clamp-3">
+                    {product.description}
+                  </p>
+                ) : (
+                  <div className="flex-1" />
+                )}
+
+                <div className="mt-4 flex flex-col gap-2">
+                  {product.links.map((productLink) => (
+                    <a
+                      key={productLink._id}
+                      href={productLink.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${pageLinkButtonClass} py-3 text-sm`}
+                    >
+                      <span className="truncate">{productLink.title}</span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        {productLink.isAffiliate ? (
+                          <span className="rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+                            affiliate
+                          </span>
+                        ) : null}
+                        {pageLinkChevron}
+                      </span>
+                    </a>
+                  ))}
                 </div>
               </div>
-            )}
-            {product.links.map((productLink) => (
-              <a
-                key={productLink._id}
-                href={productLink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${pageLinkButtonClass} flex items-center justify-center gap-2`}
-              >
-                <span className="truncate">
-                  {product.links.length === 1 && !product.description
-                    ? product.title
-                    : productLink.title}
-                </span>
-                {productLink.isAffiliate ? (
-                  <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-brand">
-                    · affiliate
-                  </span>
-                ) : null}
-              </a>
-            ))}
-          </div>
-        ))}
+            </li>
+          ))}
+        </ul>
       </section>
     ) : null;
 
@@ -267,31 +346,42 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-bg">
-      {coverBlock}
-      <div className="relative z-10 mx-auto w-full max-w-[26rem] flex-1 px-5 pb-14 sm:max-w-md sm:px-6">
-        <div className="-mt-12 sm:-mt-14">
-          {identity}
-        </div>
-        <div className="mt-7 flex flex-col">
-          {linkList}
-          {shopSection}
+    <div className="flex min-h-full flex-1 flex-col bg-bg lg:min-h-screen lg:grid lg:grid-cols-[minmax(300px,38%)_1fr]">
+      {/* Left: full-bleed cover + profile (fills column — no empty card) */}
+      <aside className="relative flex flex-col lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:overflow-hidden">
+        <div className="relative h-44 shrink-0 sm:h-52 lg:absolute lg:inset-0 lg:h-full">
+          {cover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={cover}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div
+              aria-hidden
+              className="h-full w-full bg-[linear-gradient(160deg,#3d4654_0%,#5c6470_40%,#8b939e_100%)]"
+            />
+          )}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/25 via-black/10 to-black/75 lg:from-black/30 lg:via-black/20 lg:to-black/80"
+          />
         </div>
 
-        <footer className="mt-14 flex flex-col items-center gap-1.5">
-          <Image
-            src="/linkhub-mark.png"
-            alt="LinkHub"
-            width={20}
-            height={20}
-            unoptimized
-            className="opacity-50"
-          />
-          <p className="text-[11px] tracking-wide text-text-muted">
-            Powered by LinkHub
-          </p>
-        </footer>
-      </div>
+        <div className="-mt-14 sm:-mt-16 lg:mt-auto lg:flex lg:flex-1 lg:flex-col lg:justify-end">
+          {identity}
+        </div>
+      </aside>
+
+      {/* Right: scrollable content */}
+      <main className="flex min-w-0 flex-1 flex-col border-border bg-bg-elevated lg:border-l">
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-10 sm:px-8 sm:py-12 lg:px-10 lg:py-14 xl:px-14">
+          {linkList}
+          {shopSection}
+          {pageFooter}
+        </div>
+      </main>
     </div>
   );
 }

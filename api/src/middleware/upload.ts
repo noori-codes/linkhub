@@ -42,3 +42,9 @@ export const coverUpload = imageUpload({
   maxBytes: 5 * 1024 * 1024,
   label: "Cover",
 });
+
+/** Product card image on shop */
+export const productUpload = imageUpload({
+  maxBytes: 5 * 1024 * 1024,
+  label: "Product image",
+});

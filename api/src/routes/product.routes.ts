@@ -6,9 +6,11 @@ import {
   getAllProducts,
   getMyProducts,
   getPublicProductsByUsername,
+  uploadProductImage,
   updateProduct,
   deleteProduct,
 } from "../controllers/product.controller.js";
+import { productUpload } from "../middleware/upload.js";
 import {
   createProductLink,
   getProductLinks,
@@ -34,6 +36,7 @@ router.post("/:productId/links", createProductLink);
 router.patch("/:productId/links/:linkId", updateProductLink);
 router.delete("/:productId/links/:linkId", deleteProductLink);
 
+router.post("/:id/image", productUpload.single("image"), uploadProductImage);
 router.patch("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
 

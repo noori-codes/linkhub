@@ -1,10 +1,35 @@
+import { randomUUID } from "node:crypto";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import type { Request, Response, NextFunction } from "express";
 
+import { getS3Client, getS3Config } from "../config/s3.js";
 import Product from "../models/product.model.js";
 import ProductLink from "../models/productLink.model.js";
 import Profile from "../models/profile.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+
+const EXT_BY_MIME: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+function keyFromOurPublicUrl(
+  url: string | undefined,
+  publicUrl: string,
+): string | null {
+  if (!url) return null;
+  const prefix = `${publicUrl}/`;
+  if (!url.startsWith(prefix)) return null;
+  const key = url.slice(prefix.length);
+  return key || null;
+}
+
+function isOwnedProductUploadKey(key: string, userId: string): boolean {
+  return key.startsWith(`products/${userId}/`);
+}
 
 // Products belong to a Profile (same ownership pattern as Links).
 const getMyProfileOrFail = async (userId: string) => {
@@ -154,6 +179,93 @@ export const getPublicProductsByUsername = catchAsync(
       results: publicProducts.length,
       data: {
         products: publicProducts,
+      },
+    });
+  },
+);
+
+// =============================
+// UPLOAD PRODUCT IMAGE
+// =============================
+
+export const uploadProductImage = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.file) {
+      return next(new AppError("Please choose an image file to upload.", 400));
+    }
+
+    const { id } = req.params;
+    if (!id) {
+      return next(new AppError("Please provide a product id.", 400));
+    }
+
+    const ext = EXT_BY_MIME[req.file.mimetype];
+    if (!ext) {
+      return next(new AppError("Unsupported image type.", 400));
+    }
+
+    const profile = await getMyProfileOrFail(req.user._id.toString());
+    const product = await Product.findOne({ _id: id, profile: profile._id });
+
+    if (!product) {
+      return next(new AppError("No product found with that ID.", 404));
+    }
+
+    let bucket: string;
+    let publicUrl: string;
+    let s3;
+
+    try {
+      ({ bucket, publicUrl } = getS3Config());
+      s3 = getS3Client();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "S3 is not configured on the server.";
+      return next(new AppError(message, 500));
+    }
+
+    const userId = req.user._id.toString();
+    const oldUrl = product.imageUrl;
+    const key = `products/${userId}/${product._id}/${randomUUID()}.${ext}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      }),
+    );
+
+    const url = `${publicUrl}/${key}`;
+
+    const updated = await Product.findByIdAndUpdate(
+      product._id,
+      { imageUrl: url },
+      { new: true, runValidators: true },
+    );
+
+    const oldKey = keyFromOurPublicUrl(oldUrl, publicUrl);
+    if (oldKey && isOwnedProductUploadKey(oldKey, userId)) {
+      try {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: oldKey,
+          }),
+        );
+      } catch (err) {
+        console.warn("Could not delete old product image:", oldKey, err);
+      }
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        product: updated,
+        imageUrl: url,
       },
     });
   },

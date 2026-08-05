@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
@@ -20,6 +21,10 @@ function authHeaders(token: string) {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
+}
+
+function productImageSrc(url: string | undefined) {
+  return url?.startsWith("http") ? url : null;
 }
 
 /** Owner shop: products + nested buy/affiliate links. */
@@ -42,6 +47,9 @@ export function ShopPanel() {
   const [linkAffiliate, setLinkAffiliate] = useState(true);
   const [linkError, setLinkError] = useState("");
   const [panelError, setPanelError] = useState("");
+  const [uploadingImageId, setUploadingImageId] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageTargetIdRef = useRef<string | null>(null);
 
   const productsQuery = useQuery({
     queryKey: queryKeys.productsMe,
@@ -257,6 +265,53 @@ export function ShopPanel() {
     createProduct.mutate();
   }
 
+  function openProductImagePicker(productId: string) {
+    imageTargetIdRef.current = productId;
+    imageInputRef.current?.click();
+  }
+
+  async function onProductImageSelected(file: File | undefined) {
+    const productId = imageTargetIdRef.current;
+    imageTargetIdRef.current = null;
+    if (!file || !productId) return;
+
+    const token = requireToken();
+    if (!token) return;
+
+    setUploadingImageId(productId);
+
+    try {
+      const body = new FormData();
+      body.append("image", file);
+
+      const res = await fetch(
+        `${CLIENT_API_BASE}/api/v1/products/${productId}/image`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body,
+        },
+      );
+
+      const json = (await res.json()) as ApiSuccess<{ product: ShopProduct }> & {
+        message?: string;
+      };
+
+      if (!res.ok) {
+        toast.error(json.message || "Could not upload product photo");
+        return;
+      }
+
+      toast.success("Product photo uploaded");
+      await queryClient.invalidateQueries({ queryKey: queryKeys.productsMe });
+    } catch {
+      toast.error("Cannot reach API. Is the backend running?");
+    } finally {
+      setUploadingImageId(null);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  }
+
   function onSaveEdit(event: FormEvent) {
     event.preventDefault();
     if (!editingId) return;
@@ -287,6 +342,16 @@ export function ShopPanel() {
 
   return (
     <section className="flex flex-col gap-4">
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="sr-only"
+        onChange={(e) => {
+          void onProductImageSelected(e.target.files?.[0]);
+        }}
+      />
+
       <p className="text-xs text-text-muted">
         {products.length} product{products.length === 1 ? "" : "s"}
       </p>
@@ -348,6 +413,29 @@ export function ShopPanel() {
                   <>
                     <div className="flex flex-col gap-3">
                       <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          title="Upload product photo"
+                          aria-label={`Upload photo for ${product.title}`}
+                          disabled={uploadingImageId === product._id}
+                          onClick={() => openProductImagePicker(product._id)}
+                          className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40 disabled:opacity-50"
+                        >
+                          {productImageSrc(product.imageUrl) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={product.imageUrl}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="flex h-full w-full items-center justify-center text-[10px] font-medium leading-tight text-text-muted">
+                              {uploadingImageId === product._id
+                                ? "…"
+                                : "Add\nphoto"}
+                            </span>
+                          )}
+                        </button>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold leading-snug text-text">
                             {product.title}
