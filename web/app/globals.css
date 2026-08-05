@@ -56,6 +56,28 @@ body {
   color: var(--text);
 }
 
+/* Subtle scrollbar (matches your paper UI) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c3c9d3 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c3c9d3;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
 /* Quiet panel — border + soft depth, no colored glow */
 .lh-panel {
   border: 1px solid var(--border);
