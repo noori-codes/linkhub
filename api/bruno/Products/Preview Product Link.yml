@@ -1,0 +1,23 @@
+meta:
+  name: Preview Product Link
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/products/link-preview"
+  headers:
+    - name: Authorization
+      value: Bearer {{token}}
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "url": "https://www.amazon.com/dp/B0BSHF7WHW"
+      }
+
+docs: |
+  Owner-only. Fetches Open Graph / Twitter card metadata (title, description, image)
+  from a buy/affiliate URL so the dashboard can auto-fill product photo.

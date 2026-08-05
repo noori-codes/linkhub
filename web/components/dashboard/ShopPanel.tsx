@@ -39,6 +39,10 @@ export function ShopPanel() {
   const [productImagePreview, setProductImagePreview] = useState<string | null>(
     null,
   );
+  const [productImageRemoteUrl, setProductImageRemoteUrl] = useState<
+    string | null
+  >(null);
+  const [fetchingPreview, setFetchingPreview] = useState(false);
   const [newLinkTitle, setNewLinkTitle] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkAffiliate, setNewLinkAffiliate] = useState(true);
@@ -85,18 +89,96 @@ export function ShopPanel() {
     return token;
   }
 
+  function clearAddImage() {
+    if (productImageFile && productImagePreview) {
+      URL.revokeObjectURL(productImagePreview);
+    }
+    setProductImageFile(null);
+    setProductImagePreview(null);
+    setProductImageRemoteUrl(null);
+    if (addImageInputRef.current) addImageInputRef.current.value = "";
+  }
+
   function resetAddForm() {
     setProductTitle("");
     setProductDescription("");
-    setProductImageFile(null);
-    if (productImagePreview) URL.revokeObjectURL(productImagePreview);
-    setProductImagePreview(null);
+    clearAddImage();
     setNewLinkTitle("");
     setNewLinkUrl("");
     setNewLinkAffiliate(true);
     setNewProductVisible(true);
     setProductError("");
-    if (addImageInputRef.current) addImageInputRef.current.value = "";
+    setFetchingPreview(false);
+  }
+
+  async function fetchPhotoFromBuyLink() {
+    const token = requireToken();
+    if (!token) return;
+
+    const url = newLinkUrl.trim();
+    if (!url) {
+      setProductError("Paste a buy link URL first.");
+      return;
+    }
+
+    setFetchingPreview(true);
+    setProductError("");
+
+    try {
+      const res = await fetch(
+        `${CLIENT_API_BASE}/api/v1/products/link-preview`,
+        {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify({ url }),
+        },
+      );
+
+      const json = (await res.json()) as ApiSuccess<{
+        preview: {
+          title: string;
+          description: string;
+          imageUrl: string | null;
+        };
+      }> & { message?: string };
+
+      if (!res.ok) {
+        throw new HttpError(json.message || "Could not fetch that link", res.status);
+      }
+
+      const { preview } = json.data;
+
+      if (!productTitle.trim() && preview.title) {
+        setProductTitle(preview.title);
+      }
+      if (!productDescription.trim() && preview.description) {
+        setProductDescription(preview.description);
+      }
+      if (!newLinkTitle.trim() && preview.title) {
+        setNewLinkTitle(preview.title.slice(0, 80));
+      }
+
+      if (!preview.imageUrl) {
+        toast.error("No image found on that page");
+        return;
+      }
+
+      clearAddImage();
+      setProductImageRemoteUrl(preview.imageUrl);
+      setProductImagePreview(preview.imageUrl);
+      toast.success("Photo fetched from link");
+    } catch (err) {
+      const message =
+        err instanceof TypeError
+          ? "Cannot reach API. Is the backend running?"
+          : err instanceof Error
+            ? err.message
+            : "Could not fetch that link";
+      setProductError(message);
+      toast.error(message);
+    } finally {
+      setFetchingPreview(false);
+    }
   }
 
   const createProduct = useMutation({
@@ -153,6 +235,25 @@ export function ShopPanel() {
         );
         if (!imageRes.ok) {
           let message = "Product saved, but photo upload failed";
+          try {
+            const imageJson = (await imageRes.json()) as { message?: string };
+            message = imageJson.message || message;
+          } catch {
+            // empty
+          }
+          throw new HttpError(message, imageRes.status);
+        }
+      } else if (productImageRemoteUrl) {
+        const imageRes = await fetch(
+          `${CLIENT_API_BASE}/api/v1/products/${product._id}/image-from-url`,
+          {
+            method: "POST",
+            headers: authHeaders(token),
+            body: JSON.stringify({ imageUrl: productImageRemoteUrl }),
+          },
+        );
+        if (!imageRes.ok) {
+          let message = "Product saved, but photo from link failed";
           try {
             const imageJson = (await imageRes.json()) as { message?: string };
             message = imageJson.message || message;
@@ -757,69 +858,6 @@ export function ShopPanel() {
             />
           </label>
 
-          <div className="flex flex-col gap-1.5 text-sm">
-            <span className="text-text-muted">Photo</span>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => addImageInputRef.current?.click()}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40"
-              >
-                {productImagePreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={productImagePreview}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-text-muted">
-                    Add
-                  </span>
-                )}
-              </button>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-text-muted">
-                  Optional. JPEG, PNG, WebP, or GIF.
-                </p>
-                {productImageFile ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProductImageFile(null);
-                      if (productImagePreview) {
-                        URL.revokeObjectURL(productImagePreview);
-                      }
-                      setProductImagePreview(null);
-                      if (addImageInputRef.current) {
-                        addImageInputRef.current.value = "";
-                      }
-                    }}
-                    className="mt-1 text-xs text-text-muted hover:text-danger"
-                  >
-                    Remove photo
-                  </button>
-                ) : null}
-              </div>
-              <input
-                ref={addImageInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                className="sr-only"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] ?? null;
-                  if (productImagePreview) {
-                    URL.revokeObjectURL(productImagePreview);
-                  }
-                  setProductImageFile(file);
-                  setProductImagePreview(
-                    file ? URL.createObjectURL(file) : null,
-                  );
-                }}
-              />
-            </div>
-          </div>
-
           <div className="flex flex-col gap-2 border-t border-border pt-3">
             <p className="text-sm font-medium text-text">Buy link</p>
             <p className="text-xs text-text-muted">
@@ -857,6 +895,78 @@ export function ShopPanel() {
               />
               Affiliate link
             </label>
+          </div>
+
+          <div className="flex flex-col gap-1.5 border-t border-border pt-3 text-sm">
+            <span className="text-text-muted">Photo</span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => addImageInputRef.current?.click()}
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40"
+              >
+                {productImagePreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={productImagePreview}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-[10px] font-medium text-text-muted">
+                    Add
+                  </span>
+                )}
+              </button>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-text-muted">
+                  Upload a file, or pull the image from the buy link above.
+                </p>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={fetchingPreview || !newLinkUrl.trim()}
+                    onClick={() => {
+                      void fetchPhotoFromBuyLink();
+                    }}
+                    className="rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-text transition-colors hover:bg-bg disabled:opacity-40"
+                  >
+                    {fetchingPreview ? "Fetching…" : "Fetch from link"}
+                  </button>
+                  {productImagePreview ? (
+                    <button
+                      type="button"
+                      onClick={clearAddImage}
+                      className="text-xs text-text-muted hover:text-danger"
+                    >
+                      Remove photo
+                    </button>
+                  ) : null}
+                </div>
+                {productImageRemoteUrl ? (
+                  <p className="mt-1 text-[11px] text-brand">
+                    Using image from buy link
+                  </p>
+                ) : null}
+              </div>
+              <input
+                ref={addImageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  if (productImageFile && productImagePreview) {
+                    URL.revokeObjectURL(productImagePreview);
+                  }
+                  setProductImageRemoteUrl(null);
+                  setProductImageFile(file);
+                  setProductImagePreview(
+                    file ? URL.createObjectURL(file) : null,
+                  );
+                }}
+              />
+            </div>
           </div>
 
           <label className="flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">

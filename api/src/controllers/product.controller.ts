@@ -7,6 +7,10 @@ import { getS3Client, getS3Config } from "../config/s3.js";
 import Product from "../models/product.model.js";
 import ProductLink from "../models/productLink.model.js";
 import Profile from "../models/profile.model.js";
+import {
+  downloadRemoteImage,
+  fetchLinkPreview,
+} from "../utils/linkPreview.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
@@ -265,6 +269,127 @@ export const uploadProductImage = catchAsync(
         Key: key,
         Body: req.file.buffer,
         ContentType: req.file.mimetype,
+      }),
+    );
+
+    const url = `${publicUrl}/${key}`;
+
+    const updated = await Product.findByIdAndUpdate(
+      product._id,
+      { imageUrl: url },
+      { new: true, runValidators: true },
+    );
+
+    const oldKey = keyFromOurPublicUrl(oldUrl, publicUrl);
+    if (oldKey && isOwnedProductUploadKey(oldKey, userId)) {
+      try {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: oldKey,
+          }),
+        );
+      } catch (err) {
+        console.warn("Could not delete old product image:", oldKey, err);
+      }
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        product: updated,
+        imageUrl: url,
+      },
+    });
+  },
+);
+
+// =============================
+// LINK PREVIEW (og:image etc.)
+// =============================
+
+export const previewProductLink = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const url =
+      typeof req.body.url === "string" ? req.body.url.trim() : "";
+
+    if (!url) {
+      return next(new AppError("Please provide a product URL.", 400));
+    }
+
+    try {
+      const preview = await fetchLinkPreview(url);
+      res.status(200).json({
+        status: "success",
+        data: { preview },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not preview that link.";
+      return next(new AppError(message, 400));
+    }
+  },
+);
+
+// =============================
+// SET PRODUCT IMAGE FROM REMOTE URL
+// Downloads og/product image into MinIO
+// =============================
+
+export const uploadProductImageFromUrl = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const imageUrl =
+      typeof req.body.imageUrl === "string" ? req.body.imageUrl.trim() : "";
+
+    if (!id) {
+      return next(new AppError("Please provide a product id.", 400));
+    }
+    if (!imageUrl) {
+      return next(new AppError("Please provide an image URL.", 400));
+    }
+
+    const profile = await getMyProfileOrFail(req.user._id.toString());
+    const product = await Product.findOne({ _id: id, profile: profile._id });
+
+    if (!product) {
+      return next(new AppError("No product found with that ID.", 404));
+    }
+
+    let downloaded;
+    try {
+      downloaded = await downloadRemoteImage(imageUrl);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not download that image.";
+      return next(new AppError(message, 400));
+    }
+
+    let bucket: string;
+    let publicUrl: string;
+    let s3;
+
+    try {
+      ({ bucket, publicUrl } = getS3Config());
+      s3 = getS3Client();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "S3 is not configured on the server.";
+      return next(new AppError(message, 500));
+    }
+
+    const userId = req.user._id.toString();
+    const oldUrl = product.imageUrl;
+    const key = `products/${userId}/${product._id}/${randomUUID()}.${downloaded.ext}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: downloaded.buffer,
+        ContentType: downloaded.contentType,
       }),
     );
 
