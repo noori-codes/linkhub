@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { TrackProfileView } from "@/components/profile/TrackProfileView";
-import { getPublicLinks, getPublicProfile } from "@/lib/api";
+import { getPublicLinks, getPublicProducts, getPublicProfile } from "@/lib/api";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -30,9 +30,10 @@ export async function generateMetadata({
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
 
-  const [profile, links] = await Promise.all([
+  const [profile, links, products] = await Promise.all([
     getPublicProfile(username),
     getPublicLinks(username),
+    getPublicProducts(username),
   ]);
 
   if (!profile) {
@@ -42,7 +43,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <main className="flex min-h-full flex-1 flex-col">
       <TrackProfileView username={profile.username} />
-      <PublicProfileView profile={profile} links={links} variant="page" />
+      <PublicProfileView
+        profile={profile}
+        links={links}
+        products={products}
+        variant="page"
+      />
     </main>
   );
 }

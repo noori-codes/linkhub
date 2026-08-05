@@ -5,6 +5,7 @@ import {
   createProduct,
   getAllProducts,
   getMyProducts,
+  getPublicProductsByUsername,
   updateProduct,
   deleteProduct,
 } from "../controllers/product.controller.js";
@@ -17,7 +18,10 @@ import {
 
 const router = Router();
 
-// Owner-only for now (public shop listing comes later)
+// Public shop for published profiles
+router.get("/u/:username", getPublicProductsByUsername);
+
+// Owner-only below
 router.use(protect);
 
 router.get("/", getAllProducts);

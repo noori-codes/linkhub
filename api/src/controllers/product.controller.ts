@@ -95,6 +95,71 @@ export const getMyProducts = catchAsync(
 );
 
 // =============================
+// GET PUBLIC PRODUCTS BY USERNAME
+// Visitors on /u/:username use this
+// =============================
+
+export const getPublicProductsByUsername = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username } = req.params;
+
+    if (!username) {
+      return next(new AppError("Please provide a username.", 400));
+    }
+
+    const profile = await Profile.findOne({
+      username: username.toString().toLowerCase(),
+      status: "published",
+    }).select("_id");
+
+    if (!profile) {
+      return next(
+        new AppError("No published profile found with that username.", 404),
+      );
+    }
+
+    const products = await Product.find({
+      profile: profile._id,
+      isVisible: true,
+    })
+      .sort({ order: 1 })
+      .lean();
+
+    const productIds = products.map((product) => product._id);
+    const rawLinks =
+      productIds.length > 0
+        ? await ProductLink.find({
+            product: { $in: productIds },
+            isVisible: true,
+          })
+            .sort({ order: 1 })
+            .lean()
+        : [];
+
+    const linksByProduct = new Map<string, typeof rawLinks>();
+    for (const productLink of rawLinks) {
+      const key = String(productLink.product);
+      const current = linksByProduct.get(key) ?? [];
+      current.push(productLink);
+      linksByProduct.set(key, current);
+    }
+
+    const publicProducts = products.map((product) => ({
+      ...product,
+      links: linksByProduct.get(String(product._id)) ?? [],
+    }));
+
+    res.status(200).json({
+      status: "success",
+      results: publicProducts.length,
+      data: {
+        products: publicProducts,
+      },
+    });
+  },
+);
+
+// =============================
 // UPDATE PRODUCT
 // =============================
 

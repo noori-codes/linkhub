@@ -44,6 +44,16 @@ export interface ShopProductLink {
   isVisible: boolean;
 }
 
+export interface PublicShopProduct {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  order: number;
+  isVisible: boolean;
+  links: ShopProductLink[];
+}
+
 export interface AnalyticsSummary {
   summary: {
     profileViews: number;

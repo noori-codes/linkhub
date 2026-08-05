@@ -1,4 +1,9 @@
-import type { ApiSuccess, PublicLink, PublicProfile } from "./types";
+import type {
+  ApiSuccess,
+  PublicLink,
+  PublicProfile,
+  PublicShopProduct,
+} from "./types";
 
 // Server-side: talk to the Express API.
 // Default assumes API on :3000 and Next on :3001.
@@ -47,6 +52,14 @@ export async function getPublicLinks(username: string) {
   );
 
   return json?.data.links ?? [];
+}
+
+export async function getPublicProducts(username: string) {
+  const json = await getJson<ApiSuccess<{ products: PublicShopProduct[] }>>(
+    `/api/v1/products/u/${encodeURIComponent(username)}`,
+  );
+
+  return json?.data.products ?? [];
 }
 
 /**

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import type { PublicLink, PublicProfile } from "@/lib/types";
+import type { PublicLink, PublicProfile, PublicShopProduct } from "@/lib/types";
 
 function initials(name: string) {
   return name
@@ -23,6 +23,7 @@ function isRemote(url: string | undefined) {
 type Props = {
   profile: PublicProfile;
   links: PublicLink[];
+  products?: PublicShopProduct[];
   /** page = visitor /u/... · preview = owner dashboard card */
   variant: "page" | "preview";
 };
@@ -31,7 +32,7 @@ type Props = {
  * One public profile UI — used by /u/[username] and the owner preview.
  * Change spacing/styles here so both stay in sync.
  */
-export function PublicProfileView({ profile, links, variant }: Props) {
+export function PublicProfileView({ profile, links, products = [], variant }: Props) {
   const name = profile.displayName || profile.username;
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
   const cover = isRemote(profile.coverUrl) ? profile.coverUrl : null;
@@ -164,6 +165,57 @@ export function PublicProfileView({ profile, links, variant }: Props) {
     </section>
   );
 
+  const shopSection =
+    variant === "page" && products.length > 0 ? (
+      <section className="mt-10 border-t border-border pt-8" aria-label="Shop">
+        <div className="mb-4 text-center">
+          <h2 className="text-lg font-semibold tracking-tight text-text">Shop</h2>
+          <p className="mt-1 text-sm text-text-muted">
+            Products and buy links from @{profile.username}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {products.map((product) => (
+            <article
+              key={product._id}
+              className="rounded-xl border border-border bg-surface p-4"
+            >
+              {isRemote(product.imageUrl) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={product.imageUrl}
+                  alt={product.title}
+                  className="mb-4 h-40 w-full rounded-lg object-cover"
+                />
+              ) : null}
+
+              <h3 className="text-base font-semibold text-text">{product.title}</h3>
+              {product.description ? (
+                <p className="mt-1.5 text-sm leading-relaxed text-text-muted">
+                  {product.description}
+                </p>
+              ) : null}
+
+              <div className="mt-4 flex flex-col gap-2">
+                {product.links.map((productLink) => (
+                  <a
+                    key={productLink._id}
+                    href={productLink.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-md border border-border px-4 py-3 text-center text-sm font-medium text-text transition-colors hover:bg-bg hover:text-brand"
+                  >
+                    {productLink.title}
+                  </a>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    ) : null;
+
   if (variant === "preview") {
     return (
       <div className="lh-panel overflow-hidden rounded-xl">
@@ -180,6 +232,7 @@ export function PublicProfileView({ profile, links, variant }: Props) {
       <div className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-12">
         {identity}
         {linkList}
+        {shopSection}
         <footer className="mt-auto flex flex-col items-center gap-1.5 pt-20">
           <Image
             src="/linkhub-mark.png"
