@@ -63,8 +63,8 @@ export default function OnboardingLinksPage() {
   }, [router]);
 
   async function goNext(token: string) {
-    await setOnboardingStep(token, "wallets");
-    router.push("/onboarding/wallets");
+    await setOnboardingStep(token, "tags");
+    router.push("/onboarding/tags");
   }
 
   async function createLinks(
@@ -144,7 +144,7 @@ export default function OnboardingLinksPage() {
     try {
       await goNext(token);
     } catch {
-      router.push("/onboarding/wallets");
+      router.push("/onboarding/tags");
     } finally {
       setLoading(false);
     }

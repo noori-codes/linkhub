@@ -11,12 +11,16 @@ import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
 
+/**
+ * Dashboard nav — Linktree-style priority:
+ * content first → identity → look → monetize → insights → account
+ */
 const MENU = [
   {
-    href: "/profile/avatar",
-    label: "Design",
-    hint: "Theme",
-    icon: "/avatar.svg",
+    href: "/profile/links",
+    label: "Links",
+    hint: "Your list",
+    icon: "/link.svg",
   },
   {
     href: "/profile/about",
@@ -25,10 +29,10 @@ const MENU = [
     icon: "/about.svg",
   },
   {
-    href: "/profile/links",
-    label: "Links",
-    hint: "Your list",
-    icon: "/link.svg",
+    href: "/profile/avatar",
+    label: "Design",
+    hint: "Theme",
+    icon: "/avatar.svg",
   },
   {
     href: "/profile/shop",
@@ -52,39 +56,46 @@ const MENU = [
 
 function sectionTitle(pathname: string) {
   if (
+    pathname === "/profile" ||
+    pathname.startsWith("/profile/links")
+  )
+    return "Links";
+  if (pathname.startsWith("/profile/about")) return "Profile";
+  if (
     pathname.startsWith("/profile/avatar") ||
     pathname.startsWith("/profile/photos")
   )
     return "Design";
-  if (pathname.startsWith("/profile/links")) return "Links";
   if (pathname.startsWith("/profile/shop")) return "Shop";
   if (pathname.startsWith("/profile/analytics")) return "Analytics";
   if (pathname.startsWith("/profile/settings")) return "Settings";
-  if (pathname.startsWith("/profile/about")) return "Profile";
-  return "Profile";
+  return "Links";
 }
 
 function sectionHint(pathname: string) {
+  if (
+    pathname === "/profile" ||
+    pathname.startsWith("/profile/links")
+  ) {
+    return "Add, reorder, and show or hide your links.";
+  }
+  if (pathname.startsWith("/profile/about")) {
+    return "Photos, name, username, and bio visitors see on your page.";
+  }
   if (
     pathname.startsWith("/profile/avatar") ||
     pathname.startsWith("/profile/photos")
   ) {
     return "Pick a look for your public page — preview updates live.";
   }
-  if (pathname.startsWith("/profile/about")) {
-    return "Photos, name, username, and bio visitors see on your page.";
+  if (pathname.startsWith("/profile/shop")) {
+    return "Products and affiliate buy links.";
   }
   if (pathname.startsWith("/profile/analytics")) {
     return "Views and clicks from your published page.";
   }
-  if (pathname.startsWith("/profile/shop")) {
-    return "Products and affiliate buy links.";
-  }
   if (pathname.startsWith("/profile/settings")) {
     return "Publish status, signature, and account.";
-  }
-  if (pathname.startsWith("/profile/links")) {
-    return "Add, reorder, and show or hide your links.";
   }
   return "Edits update the live preview.";
 }

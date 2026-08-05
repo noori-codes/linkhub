@@ -6,7 +6,6 @@ export type OnboardingStepId =
   | "socials"
   | "theme"
   | "links"
-  | "wallets"
   | "tags";
 
 /** Ordered wizard screens (UI). Maps to user.onboardingStep where noted. */
@@ -15,14 +14,13 @@ export const ONBOARDING_STEPS: Array<{
   label: string;
   href: string;
   /** Value stored on user.onboardingStep when entering / leaving this screen */
-  apiStep: "profile" | "socials" | "theme" | "links" | "wallets" | "tags" | "done";
+  apiStep: "profile" | "socials" | "theme" | "links" | "tags" | "done";
 }> = [
   { id: "profile", label: "Username", href: "/onboarding", apiStep: "profile" },
   { id: "about", label: "About", href: "/onboarding/about", apiStep: "profile" },
   { id: "socials", label: "Socials", href: "/onboarding/socials", apiStep: "socials" },
   { id: "theme", label: "Theme", href: "/onboarding/theme", apiStep: "theme" },
   { id: "links", label: "Links", href: "/onboarding/links", apiStep: "links" },
-  { id: "wallets", label: "Wallets", href: "/onboarding/wallets", apiStep: "wallets" },
   { id: "tags", label: "Tags", href: "/onboarding/tags", apiStep: "tags" },
 ];
 
@@ -37,7 +35,7 @@ export function nextStep(id: OnboardingStepId) {
 
 export async function setOnboardingStep(
   token: string,
-  step: "profile" | "socials" | "theme" | "links" | "wallets" | "tags" | "done",
+  step: "profile" | "socials" | "theme" | "links" | "tags" | "done",
 ) {
   await fetch(`${CLIENT_API_BASE}/api/v1/users/updateMe`, {
     method: "PATCH",
@@ -85,7 +83,8 @@ export function resumeOnboardingHref(
     case "links":
       return "/onboarding/links";
     case "wallets":
-      return "/onboarding/wallets";
+      // Removed step — send anyone mid-flow to tags
+      return "/onboarding/tags";
     case "tags":
       return "/onboarding/tags";
     case "done":
