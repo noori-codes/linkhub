@@ -71,27 +71,27 @@ export function AnalyticsPanel() {
         description="Views and clicks from your published public page."
       >
         <dl className="grid grid-cols-2 gap-3">
-          <div className="rounded-md border border-border bg-bg px-3 py-3">
-            <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+          <div className="rounded-xl bg-bg px-4 py-4">
+            <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
               Page views
             </dt>
-            <dd className="mt-1 text-2xl font-semibold tracking-tight text-text">
+            <dd className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-text">
               {summary.profileViews}
             </dd>
           </div>
-          <div className="rounded-md border border-border bg-bg px-3 py-3">
-            <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+          <div className="rounded-xl bg-bg px-4 py-4">
+            <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
               Total clicks
             </dt>
-            <dd className="mt-1 text-2xl font-semibold tracking-tight text-text">
+            <dd className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-text">
               {summary.totalClicks}
             </dd>
           </div>
-          <div className="col-span-2 rounded-md border border-border bg-bg px-3 py-3">
-            <dt className="text-[10px] uppercase tracking-wide text-text-muted">
+          <div className="col-span-2 rounded-xl bg-bg px-4 py-4">
+            <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
               Recorded click events
             </dt>
-            <dd className="mt-1 text-2xl font-semibold tracking-tight text-text">
+            <dd className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-text">
               {summary.eventCount}
             </dd>
           </div>
@@ -111,7 +111,7 @@ export function AnalyticsPanel() {
             {topLinks.map((link, index) => (
               <li
                 key={link._id}
-                className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2.5"
+                className="flex items-center justify-between gap-3 rounded-xl border border-border px-3.5 py-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-text">
@@ -142,7 +142,7 @@ export function AnalyticsPanel() {
             {recentClicks.map((event) => (
               <li
                 key={event._id}
-                className="rounded-md border border-border px-3 py-2.5"
+                className="rounded-xl border border-border px-3.5 py-3"
               >
                 <p className="truncate text-sm font-medium text-text">
                   {event.link?.title || "Deleted link"}

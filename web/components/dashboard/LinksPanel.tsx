@@ -295,7 +295,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
           {links.length > 0
             ? ` · ${links.reduce((sum, link) => sum + link.clickCount, 0)} clicks`
             : ""}
-          {links.length > 0 ? " · Drag the handle to reorder" : ""}
+          {links.length > 0 ? " · Drag to reorder" : ""}
           {reordering ? " · Saving…" : ""}
         </p>
 
@@ -306,7 +306,12 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
         ) : null}
 
         {links.length === 0 ? (
-          <p className="text-sm text-text-muted">No links yet.</p>
+          <div className="rounded-2xl border border-dashed border-border bg-surface/60 px-5 py-10 text-center">
+            <p className="text-sm font-medium text-text">No links yet</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Add your first link for the public page.
+            </p>
+          </div>
         ) : (
           <SortableLinkList
             links={links}
@@ -338,14 +343,18 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
             setShowAddForm(true);
             setAddError("");
           }}
-          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+          className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover"
         >
           Add link
         </button>
       ) : (
-        <form onSubmit={onAddLink} className="flex flex-col gap-3">
+        <form
+          onSubmit={onAddLink}
+          className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-5"
+        >
+          <p className="text-sm font-semibold text-text">New link</p>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-text-muted">Title</span>
+            <span className="font-medium text-text">Title</span>
             <input
               type="text"
               required
@@ -354,18 +363,18 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="My portfolio"
               autoFocus
-              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+              className="rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-text-muted">URL</span>
+            <span className="font-medium text-text">URL</span>
             <input
               type="url"
               required
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://example.com"
-              className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+              className="rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
             />
           </label>
           {addError ? <p className="text-sm text-danger">{addError}</p> : null}
@@ -373,7 +382,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
             <button
               type="submit"
               disabled={adding}
-              className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
             >
               {adding ? "Adding…" : "Save link"}
             </button>
@@ -386,7 +395,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
                 setNewUrl("");
                 setAddError("");
               }}
-              className="rounded-md border border-border px-4 py-2.5 text-sm text-text-muted hover:border-brand hover:text-text disabled:opacity-50"
+              className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-muted hover:text-text disabled:opacity-50"
             >
               Cancel
             </button>

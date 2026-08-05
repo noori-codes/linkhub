@@ -19,11 +19,10 @@ function publicPageUrl(username: string) {
 /**
  * Preview card: View + Share (modal) + Live/Draft badge.
  */
-export function PreviewShareActions({ username, status }: Props) {
+export function PreviewShareActions({ username }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const isLive = status === "published";
   const pathLabel = `/u/${username}`;
   const fullUrl = publicPageUrl(username);
 
@@ -57,29 +56,20 @@ export function PreviewShareActions({ username, status }: Props) {
 
   return (
     <>
-      <div className="mt-7 flex flex-wrap items-center gap-2">
+      <div className="mt-0 flex flex-wrap items-center justify-center gap-2">
         <Link
           href={`/u/${username}`}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+          className="rounded-xl bg-brand px-3.5 py-2 text-xs font-semibold text-text-inverse transition-colors hover:bg-brand-hover"
         >
           View public page
         </Link>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-text hover:border-brand"
+          className="rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-text hover:border-brand/40"
         >
           Share
         </button>
-        <span
-          className={
-            isLive
-              ? "rounded-md bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
-              : "rounded-md bg-bg px-2.5 py-1 text-xs font-medium text-text-muted"
-          }
-        >
-          {isLive ? "Live" : "Draft"}
-        </span>
       </div>
 
       {open ? (

@@ -10,9 +10,9 @@ import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 const inputClass =
-  "w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand";
+  "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand";
 
-/** Avatar + cover uploads. Live preview lives in the right column. */
+/** Avatar + cover — visual upload zones (Linktree Design-style). */
 export function PhotosEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
@@ -140,26 +140,97 @@ export function PhotosEditor() {
   const busy = uploadingAvatar || uploadingCover || saving;
   const hasAvatar = Boolean(avatarUrl.startsWith("http"));
   const hasCover = Boolean(coverUrl.startsWith("http"));
+  const initials = (profile.displayName || profile.username || "?")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
 
   return (
-    <div className="flex flex-col gap-4">
-      <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-text">Profile photo</h2>
-            <p className="mt-1 text-xs text-text-muted">
-              Square crop works best · max 2 MB
-            </p>
+    <div className="flex flex-col gap-5">
+      {/* Cover zone */}
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,20,26,0.04)]">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => coverInputRef.current?.click()}
+          className="group relative block w-full text-left disabled:opacity-60"
+        >
+          <div className="relative h-36 w-full bg-[linear-gradient(135deg,#dfe4ec,#eef0f4)] sm:h-44">
+            {hasCover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={coverUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : null}
+            <div className="absolute inset-0 flex items-end bg-linear-to-t from-black/45 via-transparent to-transparent p-4 opacity-100 transition-opacity group-hover:from-black/55">
+              <div>
+                <p className="text-sm font-semibold text-white">Cover image</p>
+                <p className="mt-0.5 text-xs text-white/80">
+                  {uploadingCover
+                    ? "Uploading…"
+                    : hasCover
+                      ? "Click to replace · max 5 MB"
+                      : "Click to upload a wide banner · max 5 MB"}
+                </p>
+              </div>
+            </div>
           </div>
-          <span
-            className={
-              hasAvatar
-                ? "text-[10px] uppercase tracking-wide text-brand"
-                : "text-[10px] uppercase tracking-wide text-text-muted"
-            }
+        </button>
+
+        {/* Avatar overlapping cover */}
+        <div className="relative px-5 pb-5">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => avatarInputRef.current?.click()}
+            className="group absolute -top-12 left-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg shadow-md transition-transform hover:scale-[1.02] disabled:opacity-60"
+            aria-label={hasAvatar ? "Replace avatar" : "Upload avatar"}
           >
-            {hasAvatar ? "set" : "missing"}
-          </span>
+            {hasAvatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl font-semibold text-text-muted">
+                {initials || "?"}
+              </span>
+            )}
+            <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+              {uploadingAvatar ? "…" : "Edit"}
+            </span>
+          </button>
+
+          <div className="pt-16">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-text">
+                  Profile photo
+                </h2>
+                <p className="mt-1 text-xs text-text-muted">
+                  Square crop works best · max 2 MB
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => avatarInputRef.current?.click()}
+                className="rounded-xl bg-brand px-3.5 py-2 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              >
+                {uploadingAvatar
+                  ? "Uploading…"
+                  : hasAvatar
+                    ? "Replace"
+                    : "Upload"}
+              </button>
+            </div>
+          </div>
         </div>
 
         <input
@@ -172,40 +243,6 @@ export function PhotosEditor() {
             if (file) void uploadImage("avatar", file);
           }}
         />
-
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => avatarInputRef.current?.click()}
-          className="mt-4 w-full rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
-        >
-          {uploadingAvatar
-            ? "Uploading…"
-            : hasAvatar
-              ? "Replace avatar"
-              : "Upload avatar"}
-        </button>
-      </section>
-
-      <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-text">Cover image</h2>
-            <p className="mt-1 text-xs text-text-muted">
-              Wide banner · max 5 MB
-            </p>
-          </div>
-          <span
-            className={
-              hasCover
-                ? "text-[10px] uppercase tracking-wide text-brand"
-                : "text-[10px] uppercase tracking-wide text-text-muted"
-            }
-          >
-            {hasCover ? "set" : "missing"}
-          </span>
-        </div>
-
         <input
           ref={coverInputRef}
           type="file"
@@ -216,37 +253,35 @@ export function PhotosEditor() {
             if (file) void uploadImage("cover", file);
           }}
         />
-
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => coverInputRef.current?.click()}
-          className="mt-4 w-full rounded-md border border-border bg-bg px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
-        >
-          {uploadingCover
-            ? "Uploading…"
-            : hasCover
-              ? "Replace cover"
-              : "Upload cover"}
-        </button>
       </section>
 
-      <div>
+      {/* URL fallback — clearer affordance */}
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-5">
         <button
           type="button"
           onClick={() => setShowUrlFields((open) => !open)}
-          className="text-xs font-medium text-text-muted hover:text-text"
+          className="flex w-full items-center justify-between gap-3 text-left"
         >
-          {showUrlFields ? "Hide URL paste" : "Or paste image URLs…"}
+          <div>
+            <p className="text-sm font-semibold text-text">
+              Paste image URLs instead
+            </p>
+            <p className="mt-0.5 text-xs text-text-muted">
+              Use a direct https link if you already host the files
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-brand">
+            {showUrlFields ? "Hide" : "Show"}
+          </span>
         </button>
 
         {showUrlFields ? (
           <form
             onSubmit={onSaveUrls}
-            className="mt-3 flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+            className="mt-4 flex flex-col gap-3 border-t border-border pt-4"
           >
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-text-muted">Avatar URL</span>
+              <span className="font-medium text-text">Avatar URL</span>
               <input
                 type="url"
                 value={avatarUrl}
@@ -256,7 +291,7 @@ export function PhotosEditor() {
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-text-muted">Cover URL</span>
+              <span className="font-medium text-text">Cover URL</span>
               <input
                 type="url"
                 value={coverUrl}
@@ -268,13 +303,13 @@ export function PhotosEditor() {
             <button
               type="submit"
               disabled={busy}
-              className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save URLs"}
             </button>
           </form>
         ) : null}
-      </div>
+      </section>
     </div>
   );
 }

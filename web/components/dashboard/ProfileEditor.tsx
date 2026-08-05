@@ -10,9 +10,9 @@ import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 const inputClass =
-  "w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand";
+  "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand";
 
-// About fields — rendered inside the left sidebar
+/** Profile identity fields — name, username, bio, tags. */
 export function ProfileEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
@@ -23,7 +23,6 @@ export function ProfileEditor() {
   const [tagsText, setTagsText] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Sync local form when profile loads / updates from elsewhere
   useEffect(() => {
     if (!profile) return;
     setDisplayName(profile.displayName);
@@ -86,9 +85,19 @@ export function ProfileEditor() {
   }
 
   return (
-    <form onSubmit={onSave} className="flex flex-col gap-4">
+    <form
+      onSubmit={onSave}
+      className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-5 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-6"
+    >
+      <div>
+        <h2 className="text-sm font-semibold text-text">Public identity</h2>
+        <p className="mt-1 text-xs text-text-muted">
+          Shown on your page and in the phone preview.
+        </p>
+      </div>
+
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Display name</span>
+        <span className="font-medium text-text">Display name</span>
         <input
           type="text"
           maxLength={60}
@@ -99,33 +108,39 @@ export function ProfileEditor() {
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Username</span>
-        <input
-          type="text"
-          required
-          minLength={3}
-          maxLength={30}
-          pattern="[a-z0-9._]+"
-          value={username}
-          onChange={(e) => setUsername(e.target.value.toLowerCase())}
-          className={inputClass}
-        />
+        <span className="font-medium text-text">Username</span>
+        <div className="flex overflow-hidden rounded-xl border border-border focus-within:border-brand">
+          <span className="flex items-center bg-bg px-3 text-sm text-text-muted">
+            @
+          </span>
+          <input
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9._]+"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            className="min-w-0 flex-1 border-0 bg-bg px-2 py-2.5 text-sm text-text outline-none"
+          />
+        </div>
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">About me</span>
+        <span className="font-medium text-text">Bio</span>
         <textarea
           maxLength={300}
           rows={4}
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          placeholder="Tell the world who you are…"
+          placeholder="Tell visitors who you are…"
           className={`${inputClass} resize-y`}
         />
+        <span className="text-xs text-text-muted">{bio.length}/300</span>
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-text-muted">Tags</span>
+        <span className="font-medium text-text">Tags</span>
         <input
           type="text"
           value={tagsText}
@@ -134,16 +149,16 @@ export function ProfileEditor() {
           className={inputClass}
         />
         <span className="text-xs text-text-muted">
-          Comma-separated, up to 8. Shown in your editor preview.
+          Comma-separated, up to 8. Visible in the editor preview.
         </span>
       </label>
 
       <button
         type="submit"
         disabled={saving}
-        className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+        className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
       >
-        {saving ? "Saving…" : "Save"}
+        {saving ? "Saving…" : "Save profile"}
       </button>
     </form>
   );
