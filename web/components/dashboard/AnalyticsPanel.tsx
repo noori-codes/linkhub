@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -11,6 +11,16 @@ import {
   HttpError,
   queryKeys,
 } from "@/lib/dashboard-queries";
+import type { AnalyticsSummary } from "@/lib/types";
+
+type RecentClick = AnalyticsSummary["recentClicks"][number];
+
+type ClickGroup = {
+  key: string;
+  title: string;
+  url: string;
+  events: RecentClick[];
+};
 
 function formatWhen(iso: string | undefined) {
   if (!iso) return "—";
@@ -24,9 +34,125 @@ function formatWhen(iso: string | undefined) {
   }
 }
 
+function formatRelative(iso: string | undefined) {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const diffSec = Math.round((Date.now() - then) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  if (Math.abs(diffSec) < 60) return rtf.format(-diffSec, "second");
+  const diffMin = Math.round(diffSec / 60);
+  if (Math.abs(diffMin) < 60) return rtf.format(-diffMin, "minute");
+  const diffHr = Math.round(diffMin / 60);
+  if (Math.abs(diffHr) < 48) return rtf.format(-diffHr, "hour");
+  const diffDay = Math.round(diffHr / 24);
+  return rtf.format(-diffDay, "day");
+}
+
+function groupRecentClicks(events: RecentClick[]): ClickGroup[] {
+  const map = new Map<string, ClickGroup>();
+
+  for (const event of events) {
+    const key = event.link?._id
+      ? String(event.link._id)
+      : `deleted:${event._id}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.events.push(event);
+    } else {
+      map.set(key, {
+        key,
+        title: event.link?.title || "Deleted link",
+        url: event.link?.url || "",
+        events: [event],
+      });
+    }
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const aTime = a.events[0]?.createdAt
+      ? new Date(a.events[0].createdAt).getTime()
+      : 0;
+    const bTime = b.events[0]?.createdAt
+      ? new Date(b.events[0].createdAt).getTime()
+      : 0;
+    return bTime - aTime;
+  });
+}
+
+function RecentClickGroup({ group }: { group: ClickGroup }) {
+  const [open, setOpen] = useState(false);
+  const latest = group.events[0];
+  const count = group.events.length;
+  const canExpand = count > 1;
+
+  return (
+    <li className="overflow-hidden rounded-xl border border-border">
+      <button
+        type="button"
+        onClick={() => canExpand && setOpen((v) => !v)}
+        disabled={!canExpand}
+        aria-expanded={canExpand ? open : undefined}
+        className={`flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors ${
+          canExpand ? "hover:bg-bg" : ""
+        } disabled:cursor-default`}
+      >
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-xs font-semibold text-brand"
+          aria-hidden
+        >
+          {count}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-text">{group.title}</p>
+          <p className="mt-0.5 truncate text-xs text-text-muted">
+            {formatRelative(latest?.createdAt) || formatWhen(latest?.createdAt)}
+            {count > 1 ? ` · ${count} clicks` : ""}
+            {group.url ? ` · ${group.url.replace(/^https?:\/\//, "")}` : ""}
+          </p>
+        </div>
+        {canExpand ? (
+          <span
+            className={`shrink-0 text-text-muted transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+            aria-hidden
+          >
+            ▾
+          </span>
+        ) : null}
+      </button>
+
+      {open && canExpand ? (
+        <ul className="border-t border-border bg-bg/60 px-3.5 py-2">
+          {group.events.map((event, index) => (
+            <li
+              key={event._id}
+              className="flex items-start justify-between gap-3 py-2 text-xs"
+            >
+              <span className="text-text-muted">
+                #{count - index}
+                {event.referrer ? (
+                  <span className="mt-0.5 block truncate text-[11px] text-text-muted/80">
+                    from {event.referrer}
+                  </span>
+                ) : null}
+              </span>
+              <span className="shrink-0 text-right text-text">
+                {formatWhen(event.createdAt)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
+
 /** Owner-only summary of public page views + link clicks (cached via React Query). */
 export function AnalyticsPanel() {
   const router = useRouter();
+  const [showAllGroups, setShowAllGroups] = useState(false);
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.analyticsMe,
@@ -40,6 +166,11 @@ export function AnalyticsPanel() {
       router.replace("/login");
     }
   }, [error, router]);
+
+  const groups = useMemo(
+    () => (data ? groupRecentClicks(data.recentClicks) : []),
+    [data],
+  );
 
   if (isLoading) {
     return <p className="text-sm text-text-muted">Loading analytics…</p>;
@@ -62,7 +193,8 @@ export function AnalyticsPanel() {
     return <p className="text-sm text-text-muted">No analytics yet.</p>;
   }
 
-  const { summary, topLinks, recentClicks } = data;
+  const { summary, topLinks } = data;
+  const visibleGroups = showAllGroups ? groups : groups.slice(0, 5);
 
   return (
     <div className="flex flex-col gap-4">
@@ -141,27 +273,29 @@ export function AnalyticsPanel() {
 
       <SettingsCard
         title="Recent clicks"
-        description="Latest tracked visits from /u/… (newest first)."
+        description="Grouped by link — expand a row to see each visit."
       >
-        {recentClicks.length === 0 ? (
+        {groups.length === 0 ? (
           <p className="text-sm text-text-muted">No click events logged yet.</p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {recentClicks.map((event) => (
-              <li
-                key={event._id}
-                className="rounded-xl border border-border px-3.5 py-3"
+          <div className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-2">
+              {visibleGroups.map((group) => (
+                <RecentClickGroup key={group.key} group={group} />
+              ))}
+            </ul>
+            {groups.length > 5 ? (
+              <button
+                type="button"
+                onClick={() => setShowAllGroups((v) => !v)}
+                className="mt-1 text-sm font-medium text-brand hover:text-brand-hover"
               >
-                <p className="truncate text-sm font-medium text-text">
-                  {event.link?.title || "Deleted link"}
-                </p>
-                <p className="mt-0.5 text-xs text-text-muted">
-                  {formatWhen(event.createdAt)}
-                  {event.referrer ? ` · from ${event.referrer}` : ""}
-                </p>
-              </li>
-            ))}
-          </ul>
+                {showAllGroups
+                  ? "Show fewer"
+                  : `Show all ${groups.length} links`}
+              </button>
+            ) : null}
+          </div>
         )}
       </SettingsCard>
     </div>
