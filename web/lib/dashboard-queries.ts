@@ -5,6 +5,7 @@ import type {
   ApiSuccess,
   PublicLink,
   PublicProfile,
+  ShopCollection,
   ShopProduct,
   ShopProductLink,
 } from "@/lib/types";
@@ -14,6 +15,7 @@ export const queryKeys = {
   linksMe: ["links", "me"] as const,
   analyticsMe: ["analytics", "me"] as const,
   productsMe: ["products", "me"] as const,
+  collectionsMe: ["collections", "me"] as const,
   themes: ["themes"] as const,
   productLinks: (productId: string) =>
     ["products", productId, "links"] as const,
@@ -103,6 +105,26 @@ export async function fetchMyProducts(): Promise<ShopProduct[]> {
   }
 
   return json.data.products;
+}
+
+export async function fetchMyCollections(): Promise<ShopCollection[]> {
+  const token = requireToken();
+  const res = await fetch(`${CLIENT_API_BASE}/api/v1/collections/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const json = (await res.json()) as ApiSuccess<{
+    collections: ShopCollection[];
+  }> & { message?: string };
+
+  if (!res.ok) {
+    throw new HttpError(
+      json.message || "Could not load collections",
+      res.status,
+    );
+  }
+
+  return json.data.collections;
 }
 
 export async function fetchProductLinks(

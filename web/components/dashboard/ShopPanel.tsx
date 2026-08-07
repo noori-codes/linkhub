@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
+import { CollectionsSection } from "@/components/dashboard/CollectionsSection";
 import { Loader } from "@/components/Loader";
 import {
   fetchMyProducts,
@@ -578,9 +579,13 @@ export function ShopPanel() {
         }}
       />
 
-      <p className="text-xs text-text-muted">
-        {products.length} product{products.length === 1 ? "" : "s"}
-      </p>
+      <CollectionsSection products={products} />
+
+      <div className="border-t border-border pt-4">
+        <p className="text-xs text-text-muted">
+          {products.length} product{products.length === 1 ? "" : "s"}
+        </p>
+      </div>
 
       {panelError ? (
         <p className="text-sm text-danger" role="alert">

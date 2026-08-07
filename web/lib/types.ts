@@ -57,6 +57,24 @@ export interface ShopProduct {
   linkCount: number;
 }
 
+/** Product fields returned when a collection populates `products`. */
+export interface ShopCollectionProduct {
+  _id: string;
+  title: string;
+  imageUrl: string;
+  isVisible: boolean;
+  order: number;
+}
+
+export interface ShopCollection {
+  _id: string;
+  title: string;
+  description: string;
+  products: ShopCollectionProduct[];
+  order: number;
+  isVisible: boolean;
+}
+
 export interface ShopProductLink {
   _id: string;
   title: string;
