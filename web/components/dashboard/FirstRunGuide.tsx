@@ -49,7 +49,7 @@ export function FirstRunGuide({
 
   return (
     <section
-      className="rounded-md border border-brand/40 bg-brand-muted px-4 py-4"
+      className="rounded-xl border border-brand/40 bg-brand-muted px-4 py-4"
       aria-label="Getting started"
     >
       <div className="flex items-baseline justify-between gap-2">

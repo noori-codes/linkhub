@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { SettingsCard } from "@/components/dashboard/SettingsCard";
+import { EmptyState } from "@/components/EmptyState";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { Loader } from "@/components/Loader";
@@ -14,6 +16,7 @@ import {
   queryKeys,
 } from "@/lib/dashboard-queries";
 import type { ApiSuccess, ShopCollection, ShopProduct } from "@/lib/types";
+import { uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
 
 function authHeaders(token: string) {
   return {
@@ -21,6 +24,8 @@ function authHeaders(token: string) {
     Authorization: `Bearer ${token}`,
   };
 }
+
+const inputClass = uiInput;
 
 function ProductPicker({
   products,
@@ -33,23 +38,30 @@ function ProductPicker({
 }) {
   if (products.length === 0) {
     return (
-      <p className="text-xs text-text-muted">
+      <p className="rounded-xl border border-dashed border-border bg-bg/60 px-3 py-3 text-xs text-text-muted">
         Add products first, then assign them here.
       </p>
     );
   }
 
   return (
-    <ul className="flex max-h-48 flex-col gap-1.5 overflow-y-auto rounded-xl border border-border bg-bg p-2">
+    <ul className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-xl border border-border bg-bg p-1.5">
       {products.map((product) => {
         const checked = selected.includes(product._id);
         return (
           <li key={product._id}>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-text hover:bg-surface">
+            <label
+              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
+                checked
+                  ? "bg-brand-muted text-text"
+                  : "text-text hover:bg-surface"
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggle(product._id)}
+                className="accent-brand"
               />
               <span className="min-w-0 truncate">{product.title}</span>
             </label>
@@ -114,9 +126,7 @@ export function CollectionsSection({ products }: Props) {
     list: string[],
     setList: (next: string[]) => void,
   ) {
-    setList(
-      list.includes(id) ? list.filter((x) => x !== id) : [...list, id],
-    );
+    setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
   }
 
   const createCollection = useMutation({
@@ -276,7 +286,14 @@ export function CollectionsSection({ products }: Props) {
   }
 
   if (collectionsQuery.isLoading) {
-    return <Loader label="Loading collections…" size="sm" className="py-6" />;
+    return (
+      <SettingsCard
+        title="Collections"
+        description="Group products into sections on your public shop."
+      >
+        <Loader label="Loading collections…" size="sm" className="py-6" />
+      </SettingsCard>
+    );
   }
 
   if (collectionsQuery.isError) {
@@ -285,233 +302,243 @@ export function CollectionsSection({ products }: Props) {
         ? collectionsQuery.error.message
         : "Cannot reach API. Is the backend running?";
     return (
-      <p className="text-sm text-danger" role="alert">
-        {message}
-      </p>
+      <SettingsCard
+        title="Collections"
+        description="Group products into sections on your public shop."
+      >
+        <p className="text-sm text-danger" role="alert">
+          {message}
+        </p>
+      </SettingsCard>
     );
   }
 
   const collections = collectionsQuery.data ?? [];
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold text-text">Collections</h2>
-          <p className="mt-0.5 text-xs text-text-muted">
-            Group products into sections on your public shop.
-          </p>
-        </div>
-        {!showAdd && !editingId ? (
+    <SettingsCard
+      title="Collections"
+      description="Group products into sections on your public shop."
+      badge={
+        !showAdd && !editingId ? (
           <button
             type="button"
             onClick={() => {
               setShowAdd(true);
               setFormError("");
             }}
-            className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text hover:border-brand"
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text transition-colors hover:border-brand"
           >
             Add collection
           </button>
-        ) : null}
-      </div>
+        ) : null
+      }
+    >
+      <div className="flex flex-col gap-3">
+        {collections.length === 0 && !showAdd ? (
+          <EmptyState
+            title="No collections yet"
+            hint="Create a collection to group products into sections on your public shop."
+          />
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {collections.map((collection) => {
+              const isEditing = editingId === collection._id;
 
-      {collections.length === 0 && !showAdd ? (
-        <p className="text-sm text-text-muted">No collections yet.</p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {collections.map((collection) => {
-            const isEditing = editingId === collection._id;
+              if (isEditing) {
+                return (
+                  <li
+                    key={collection._id}
+                    className="rounded-xl border border-border bg-bg/50 px-4 py-3.5"
+                  >
+                    <form onSubmit={onSaveEdit} className="flex flex-col gap-3">
+                      <input
+                        type="text"
+                        required
+                        maxLength={120}
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Collection title"
+                        className={inputClass}
+                      />
+                      <textarea
+                        maxLength={500}
+                        rows={2}
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Short description (optional)"
+                        className={inputClass}
+                      />
+                      <div>
+                        <p className="mb-1.5 text-xs font-medium text-text">
+                          Products
+                        </p>
+                        <ProductPicker
+                          products={products}
+                          selected={editSelectedIds}
+                          onToggle={(id) =>
+                            toggleId(id, editSelectedIds, setEditSelectedIds)
+                          }
+                        />
+                      </div>
+                      <label className="flex items-center gap-2 text-xs text-text-muted">
+                        <input
+                          type="checkbox"
+                          checked={editVisible}
+                          onChange={(e) => setEditVisible(e.target.checked)}
+                          className="accent-brand"
+                        />
+                        Visible on public page
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="submit"
+                          disabled={updateCollection.isPending}
+                          className={uiBtnPrimary}
+                        >
+                          {updateCollection.isPending ? "Saving…" : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          className={uiBtnSecondary}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </li>
+                );
+              }
 
-            if (isEditing) {
               return (
                 <li
                   key={collection._id}
-                  className="rounded-xl border border-border bg-surface px-4 py-3"
+                  className="rounded-xl border border-border bg-bg/40 px-4 py-3.5"
                 >
-                  <form onSubmit={onSaveEdit} className="flex flex-col gap-3">
-                    <input
-                      type="text"
-                      required
-                      maxLength={120}
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="Collection title"
-                      className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-                    />
-                    <textarea
-                      maxLength={500}
-                      rows={2}
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder="Short description (optional)"
-                      className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-                    />
-                    <div>
-                      <p className="mb-1.5 text-xs font-medium text-text">
-                        Products
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-medium text-text">
+                          {collection.title}
+                        </p>
+                        {!collection.isVisible ? (
+                          <span className="rounded-full bg-border/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                            Hidden
+                          </span>
+                        ) : null}
+                      </div>
+                      {collection.description ? (
+                        <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">
+                          {collection.description}
+                        </p>
+                      ) : null}
+                      <p className="mt-1.5 text-[11px] text-text-muted">
+                        {collection.products.length} product
+                        {collection.products.length === 1 ? "" : "s"}
+                        {collection.products.length > 0
+                          ? ` · ${collection.products.map((p) => p.title).join(", ")}`
+                          : ""}
                       </p>
-                      <ProductPicker
-                        products={products}
-                        selected={editSelectedIds}
-                        onToggle={(id) =>
-                          toggleId(id, editSelectedIds, setEditSelectedIds)
-                        }
-                      />
                     </div>
-                    <label className="flex items-center gap-2 text-xs text-text-muted">
-                      <input
-                        type="checkbox"
-                        checked={editVisible}
-                        onChange={(e) => setEditVisible(e.target.checked)}
-                      />
-                      Visible on public page
-                    </label>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex shrink-0 gap-1.5">
                       <button
-                        type="submit"
-                        disabled={updateCollection.isPending}
-                        className="rounded-md bg-brand px-3 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+                        type="button"
+                        onClick={() => startEdit(collection)}
+                        className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-text transition-colors hover:border-brand"
                       >
-                        {updateCollection.isPending ? "Saving…" : "Save"}
+                        Edit
                       </button>
                       <button
                         type="button"
-                        onClick={() => setEditingId(null)}
-                        className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text"
+                        disabled={deleteCollection.isPending}
+                        onClick={() => {
+                          if (
+                            !window.confirm(
+                              `Delete “${collection.title}”? Products stay in your shop.`,
+                            )
+                          ) {
+                            return;
+                          }
+                          deleteCollection.mutate(collection._id);
+                        }}
+                        className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-danger transition-colors hover:border-danger disabled:opacity-50"
                       >
-                        Cancel
+                        Delete
                       </button>
                     </div>
-                  </form>
+                  </div>
                 </li>
               );
-            }
+            })}
+          </ul>
+        )}
 
-            return (
-              <li
-                key={collection._id}
-                className="rounded-xl border border-border bg-surface/90 px-4 py-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text">
-                      {collection.title}
-                      {!collection.isVisible ? (
-                        <span className="ml-2 text-[11px] font-normal text-text-muted">
-                          Hidden
-                        </span>
-                      ) : null}
-                    </p>
-                    {collection.description ? (
-                      <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">
-                        {collection.description}
-                      </p>
-                    ) : null}
-                    <p className="mt-1 text-[11px] text-text-muted">
-                      {collection.products.length} product
-                      {collection.products.length === 1 ? "" : "s"}
-                      {collection.products.length > 0
-                        ? ` · ${collection.products.map((p) => p.title).join(", ")}`
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => startEdit(collection)}
-                      className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-text hover:border-brand"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      disabled={deleteCollection.isPending}
-                      onClick={() => {
-                        if (
-                          !window.confirm(
-                            `Delete “${collection.title}”? Products stay in your shop.`,
-                          )
-                        ) {
-                          return;
-                        }
-                        deleteCollection.mutate(collection._id);
-                      }}
-                      className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-danger hover:border-danger disabled:opacity-50"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {showAdd ? (
-        <form
-          onSubmit={onCreate}
-          className="flex flex-col gap-3 rounded-xl border border-border bg-surface px-4 py-4"
-        >
-          <p className="text-sm font-semibold text-text">New collection</p>
-          <input
-            type="text"
-            required
-            maxLength={120}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Favorites, Merch, Gear"
-            autoFocus
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-          />
-          <textarea
-            maxLength={500}
-            rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Short description (optional)"
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
-          />
-          <div>
-            <p className="mb-1.5 text-xs font-medium text-text">Products</p>
-            <ProductPicker
-              products={products}
-              selected={selectedIds}
-              onToggle={(id) => toggleId(id, selectedIds, setSelectedIds)}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-xs text-text-muted">
+        {showAdd ? (
+          <form
+            onSubmit={onCreate}
+            className="flex flex-col gap-3 rounded-xl border border-border bg-bg/50 px-4 py-4"
+          >
+            <p className="text-sm font-semibold text-text">New collection</p>
             <input
-              type="checkbox"
-              checked={visible}
-              onChange={(e) => setVisible(e.target.checked)}
+              type="text"
+              required
+              maxLength={120}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Favorites, Merch, Gear"
+              autoFocus
+              className={inputClass}
             />
-            Visible on public page
-          </label>
-          {formError ? (
-            <p className="text-sm text-danger" role="alert">
-              {formError}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="submit"
-              disabled={createCollection.isPending}
-              className="rounded-md bg-brand px-3 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
-            >
-              {createCollection.isPending ? "Creating…" : "Create"}
-            </button>
-            <button
-              type="button"
-              onClick={resetAdd}
-              className="rounded-md border border-border px-3 py-2 text-sm font-medium text-text"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      ) : null}
-    </div>
+            <textarea
+              maxLength={500}
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short description (optional)"
+              className={inputClass}
+            />
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-text">Products</p>
+              <ProductPicker
+                products={products}
+                selected={selectedIds}
+                onToggle={(id) => toggleId(id, selectedIds, setSelectedIds)}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-text-muted">
+              <input
+                type="checkbox"
+                checked={visible}
+                onChange={(e) => setVisible(e.target.checked)}
+                className="accent-brand"
+              />
+              Visible on public page
+            </label>
+            {formError ? (
+              <p className="text-sm text-danger" role="alert">
+                {formError}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                disabled={createCollection.isPending}
+                className={uiBtnPrimary}
+              >
+                {createCollection.isPending ? "Creating…" : "Create"}
+              </button>
+              <button
+                type="button"
+                onClick={resetAdd}
+                className={uiBtnSecondary}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : null}
+      </div>
+    </SettingsCard>
   );
 }

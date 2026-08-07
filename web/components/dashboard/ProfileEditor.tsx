@@ -8,10 +8,10 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import { uiBtnPrimary, uiInput } from "@/lib/ui";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
-const inputClass =
-  "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand";
+const inputClass = uiInput;
 
 /** Profile identity fields — name, username, bio, tags. */
 export function ProfileEditor() {
@@ -157,7 +157,7 @@ export function ProfileEditor() {
       <button
         type="submit"
         disabled={saving}
-        className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+        className={uiBtnPrimary}
       >
         {saving ? "Saving…" : "Save profile"}
       </button>

@@ -8,10 +8,10 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import { uiBtnPrimary, uiInput } from "@/lib/ui";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
-const inputClass =
-  "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand";
+const inputClass = uiInput;
 
 /** Avatar + cover — visual upload zones on Profile. */
 export function PhotosEditor() {
@@ -218,7 +218,7 @@ export function PhotosEditor() {
               type="button"
               disabled={busy}
               onClick={() => avatarInputRef.current?.click()}
-              className="rounded-xl bg-brand px-3.5 py-2 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              className={uiBtnPrimary}
             >
               {uploadingAvatar
                 ? "Uploading…"
@@ -299,7 +299,7 @@ export function PhotosEditor() {
             <button
               type="submit"
               disabled={busy}
-              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              className={uiBtnPrimary}
             >
               {saving ? "Saving…" : "Save URLs"}
             </button>

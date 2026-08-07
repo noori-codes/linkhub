@@ -15,7 +15,9 @@ export function SiteFooter() {
             unoptimized
           />
           <div>
-            <p className="text-sm font-medium text-text">LinkHub</p>
+            <p className="font-display text-sm font-semibold tracking-tight text-text">
+              LinkHub
+            </p>
             <p className="mt-1 max-w-xs text-sm text-text-muted">
               Your bio and links on one public page.
             </p>
@@ -26,10 +28,16 @@ export function SiteFooter() {
           className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-text-muted"
           aria-label="Legal"
         >
-          <Link href="/privacy" className="hover:text-text">
+          <Link
+            href="/privacy"
+            className="rounded-lg px-1 py-0.5 transition-colors hover:bg-bg hover:text-text"
+          >
             Privacy
           </Link>
-          <Link href="/terms" className="hover:text-text">
+          <Link
+            href="/terms"
+            className="rounded-lg px-1 py-0.5 transition-colors hover:bg-bg hover:text-text"
+          >
             Terms
           </Link>
         </nav>

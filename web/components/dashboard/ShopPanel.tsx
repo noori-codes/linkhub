@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
 import { CollectionsSection } from "@/components/dashboard/CollectionsSection";
+import { EmptyState } from "@/components/EmptyState";
 import { Loader } from "@/components/Loader";
 import {
   fetchMyProducts,
@@ -17,6 +18,12 @@ import {
   queryKeys,
 } from "@/lib/dashboard-queries";
 import type { ApiSuccess, ShopProduct, ShopProductLink } from "@/lib/types";
+import {
+  uiBtnIcon,
+  uiBtnPrimary,
+  uiBtnSecondary,
+  uiInput,
+} from "@/lib/ui";
 
 function authHeaders(token: string) {
   return {
@@ -581,11 +588,16 @@ export function ShopPanel() {
 
       <CollectionsSection products={products} />
 
-      <div className="border-t border-border pt-4">
-        <p className="text-xs text-text-muted">
-          {products.length} product{products.length === 1 ? "" : "s"}
-        </p>
-      </div>
+      <div className="mt-2 flex flex-col gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-text">Products</h2>
+          <p className="mt-0.5 text-xs text-text-muted">
+            {products.length} product{products.length === 1 ? "" : "s"}
+            {products.length === 0
+              ? " — add one with a buy link to show on your page."
+              : " in your shop."}
+          </p>
+        </div>
 
       {panelError ? (
         <p className="text-sm text-danger" role="alert">
@@ -594,7 +606,10 @@ export function ShopPanel() {
       ) : null}
 
       {products.length === 0 ? (
-        <p className="text-sm text-text-muted">No products yet.</p>
+        <EmptyState
+          title="No products yet"
+          hint="Add a product with a buy link to show it on your public page."
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {products.map((product) => {
@@ -614,27 +629,27 @@ export function ShopPanel() {
                       maxLength={120}
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      className={uiInput}
                     />
                     <textarea
                       maxLength={1000}
                       rows={3}
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
-                      className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                      className={uiInput}
                     />
                     <div className="flex gap-2 pt-1">
                       <button
                         type="submit"
                         disabled={updateProduct.isPending}
-                        className="rounded-md bg-brand px-3 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+                        className={uiBtnPrimary}
                       >
                         {updateProduct.isPending ? "Saving…" : "Save"}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="rounded-md border border-border px-3 py-2 text-sm text-text-muted hover:text-text"
+                        className={uiBtnSecondary}
                       >
                         Cancel
                       </button>
@@ -742,7 +757,7 @@ export function ShopPanel() {
                               setEditTitle(product.title);
                               setEditDescription(product.description || "");
                             }}
-                            className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg hover:opacity-100"
+                            className={uiBtnIcon}
                           >
                             <Image
                               src="/edit.svg"
@@ -756,7 +771,7 @@ export function ShopPanel() {
                             onClick={() =>
                               setExpandedId(isExpanded ? null : product._id)
                             }
-                            className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
                               isExpanded
                                 ? "bg-brand-muted text-text"
                                 : product.isVisible && product.linkCount === 0
@@ -781,7 +796,7 @@ export function ShopPanel() {
                               );
                               if (ok) deleteProduct.mutate(product._id);
                             }}
-                            className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg hover:opacity-100 disabled:opacity-40"
+                            className={uiBtnIcon}
                           >
                             <Image
                               src="/delete.svg"
@@ -834,7 +849,7 @@ export function ShopPanel() {
             setProductError("");
             setNewLinkTitle("Shop");
           }}
-          className="rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+          className="rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover"
         >
           Add product
         </button>
@@ -1081,6 +1096,7 @@ export function ShopPanel() {
           </div>
         </form>
       )}
+      </div>
     </section>
   );
 }
@@ -1139,7 +1155,7 @@ function ProductLinksSection({
           {(linksQuery.data ?? []).map((link) => (
             <li
               key={link._id}
-              className="flex items-center justify-between gap-2 rounded-md border border-border px-2.5 py-2"
+              className="flex items-center justify-between gap-2 rounded-xl border border-border px-2.5 py-2"
             >
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium text-text">
@@ -1179,7 +1195,7 @@ function ProductLinksSection({
           value={linkTitle}
           onChange={(e) => onLinkTitleChange(e.target.value)}
           placeholder="Buy on Amazon"
-          className="rounded-md border border-border bg-bg px-3 py-2 text-xs text-text outline-none focus:border-brand"
+          className={uiInput}
         />
         <input
           type="url"
@@ -1187,7 +1203,7 @@ function ProductLinksSection({
           value={linkUrl}
           onChange={(e) => onLinkUrlChange(e.target.value)}
           placeholder="https://…"
-          className="rounded-md border border-border bg-bg px-3 py-2 text-xs text-text outline-none focus:border-brand"
+          className={uiInput}
         />
         <label className="flex items-center gap-2 text-xs text-text-muted">
           <input
@@ -1201,7 +1217,7 @@ function ProductLinksSection({
         <button
           type="submit"
           disabled={adding}
-          className="self-start rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text hover:border-brand disabled:opacity-50"
+          className={`self-start ${uiBtnSecondary} px-3 py-1.5 text-xs`}
         >
           {adding ? "Adding…" : "Add link"}
         </button>

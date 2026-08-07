@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ShareQr } from "@/components/dashboard/ShareQr";
 import { trackProfileShare } from "@/lib/track-share";
 import type { ProfileStatus } from "@/lib/types";
+import { uiBtnGhost, uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
 
 type Props = {
   username: string;
@@ -128,7 +129,7 @@ export function PreviewShareActions({ username, status }: Props) {
                 ref={closeRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-1 text-sm text-text-muted hover:bg-bg hover:text-text"
+                className={uiBtnGhost}
               >
                 Close
               </button>
@@ -140,13 +141,13 @@ export function PreviewShareActions({ username, status }: Props) {
                 readOnly
                 value={pathLabel}
                 aria-label="Public page path"
-                className="min-w-0 flex-1 rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm text-text outline-none"
+                className={`${uiInput} min-w-0 flex-1 font-mono`}
                 onFocus={(e) => e.currentTarget.select()}
               />
               <button
                 type="button"
                 onClick={() => void onCopy()}
-                className="shrink-0 rounded-md bg-brand px-4 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover"
+                className={`shrink-0 ${uiBtnPrimary}`}
               >
                 Copy
               </button>
@@ -156,7 +157,7 @@ export function PreviewShareActions({ username, status }: Props) {
               <button
                 type="button"
                 onClick={() => void onNativeShare()}
-                className="mt-3 w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand/40"
+                className={`mt-3 w-full ${uiBtnSecondary}`}
               >
                 Share via device…
               </button>

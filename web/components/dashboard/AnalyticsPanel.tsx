@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
+import { EmptyState } from "@/components/EmptyState";
 import { AnalyticsSkeleton } from "@/components/Skeleton";
 import { clearToken } from "@/lib/auth";
 import {
@@ -191,7 +192,12 @@ export function AnalyticsPanel() {
   }
 
   if (!data) {
-    return <p className="text-sm text-text-muted">No analytics yet.</p>;
+    return (
+      <EmptyState
+        title="No analytics yet"
+        hint="Publish your page and share it to start collecting views and clicks."
+      />
+    );
   }
 
   const { summary, topLinks } = data;
@@ -244,9 +250,11 @@ export function AnalyticsPanel() {
         description="Ranked by click count on each link."
       >
         {topLinks.length === 0 ? (
-          <p className="text-sm text-text-muted">
-            No clicks yet. Share your public page and wait for visitors.
-          </p>
+          <EmptyState
+            title="No clicks yet"
+            hint="Share your public page and wait for visitors."
+            className="py-6"
+          />
         ) : (
           <ul className="flex flex-col gap-2">
             {topLinks.map((link, index) => (
@@ -277,7 +285,11 @@ export function AnalyticsPanel() {
         description="Grouped by link — expand a row to see each visit."
       >
         {groups.length === 0 ? (
-          <p className="text-sm text-text-muted">No click events logged yet.</p>
+          <EmptyState
+            title="No click events yet"
+            hint="Clicks on your public links will show up here."
+            className="py-6"
+          />
         ) : (
           <div className="flex flex-col gap-2">
             <ul className="flex flex-col gap-2">

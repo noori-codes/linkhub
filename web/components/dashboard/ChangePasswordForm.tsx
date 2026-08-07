@@ -8,6 +8,7 @@ import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
+import { uiBtnSecondary } from "@/lib/ui";
 
 // Logged-in password change — different from forgot/reset (needs current password + JWT)
 export function ChangePasswordForm() {
@@ -90,7 +91,7 @@ export function ChangePasswordForm() {
             value={passwordCurrent}
             onChange={(e) => setPasswordCurrent(e.target.value)}
             autoComplete="current-password"
-            wrapperClassName="rounded-md"
+            wrapperClassName="rounded-xl"
           />
         </label>
 
@@ -102,7 +103,7 @@ export function ChangePasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
-            wrapperClassName="rounded-md"
+            wrapperClassName="rounded-xl"
           />
         </label>
 
@@ -114,14 +115,14 @@ export function ChangePasswordForm() {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             autoComplete="new-password"
-            wrapperClassName="rounded-md"
+            wrapperClassName="rounded-xl"
           />
         </label>
 
         <button
           type="submit"
           disabled={saving}
-          className="mt-1 rounded-md border border-border px-4 py-2.5 text-sm font-medium text-text hover:border-brand disabled:opacity-50"
+          className={`mt-1 ${uiBtnSecondary}`}
         >
           {saving ? "Updating…" : "Update password"}
         </button>

@@ -4,9 +4,11 @@ import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { SortableLinkList } from "@/components/SortableLinkList";
+import { EmptyState } from "@/components/EmptyState";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicLink } from "@/lib/types";
+import { uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
 
 type Props = {
   initialLinks: PublicLink[];
@@ -306,12 +308,11 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
         ) : null}
 
         {links.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-surface/60 px-5 py-10 text-center">
-            <p className="text-sm font-medium text-text">No links yet</p>
-            <p className="mt-1 text-xs text-text-muted">
-              Add your first link for the public page.
-            </p>
-          </div>
+          <EmptyState
+            title="No links yet"
+            hint="Add your first link for the public page."
+            className="py-10"
+          />
         ) : (
           <SortableLinkList
             links={links}
@@ -343,7 +344,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
             setShowAddForm(true);
             setAddError("");
           }}
-          className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover"
+          className={uiBtnPrimary}
         >
           Add link
         </button>
@@ -363,7 +364,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="My portfolio"
               autoFocus
-              className="rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
+              className={uiInput}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
@@ -374,7 +375,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://example.com"
-              className="rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
+              className={uiInput}
             />
           </label>
           {addError ? <p className="text-sm text-danger">{addError}</p> : null}
@@ -382,7 +383,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
             <button
               type="submit"
               disabled={adding}
-              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+              className={uiBtnPrimary}
             >
               {adding ? "Adding…" : "Save link"}
             </button>
@@ -395,7 +396,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
                 setNewUrl("");
                 setAddError("");
               }}
-              className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-muted hover:text-text disabled:opacity-50"
+              className={uiBtnSecondary}
             >
               Cancel
             </button>

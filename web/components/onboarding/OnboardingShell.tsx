@@ -31,9 +31,13 @@ export function OnboardingShell({
   const total = ONBOARDING_STEPS.length;
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-bg">
+    <div className="relative flex min-h-full flex-1 flex-col bg-bg">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,transparent_50%)]"
+      />
       <SiteHeader />
-      <main className="flex flex-1 flex-col items-center px-5 py-10 sm:px-6 sm:py-14">
+      <main className="relative flex flex-1 flex-col items-center px-5 py-10 sm:px-6 sm:py-14">
         <div className={`w-full ${wide ? "max-w-lg" : "max-w-md"}`}>
           <div className="mb-8">
             <div className="flex items-center justify-between gap-3">

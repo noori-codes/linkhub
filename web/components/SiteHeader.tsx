@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { clearToken, getToken } from "@/lib/auth";
+import { uiBtnGhost, uiBtnPrimary } from "@/lib/ui";
 
 /**
  * Top bar like a real product site — brand left, account actions right.
@@ -23,7 +24,7 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-5 sm:px-8">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-surface/80 px-5 backdrop-blur-sm sm:px-8">
       <Link href="/" className="flex items-center gap-2.5">
         <Image
           src="/linkhub-mark.png"
@@ -32,39 +33,32 @@ export function SiteHeader() {
           height={22}
           unoptimized
         />
-        <span className="text-sm font-semibold tracking-wide text-text">
+        <span className="font-display text-sm font-semibold tracking-tight text-text">
           LinkHub
         </span>
       </Link>
 
-      <nav className="flex items-center gap-1 sm:gap-2" aria-label="Account">
+      <nav className="flex items-center gap-1 sm:gap-1.5" aria-label="Account">
         {loggedIn ? (
           <>
             <Link
               href="/profile"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-text transition-colors hover:text-brand"
+              className={`${uiBtnGhost} text-text hover:bg-bg`}
             >
               Profile
             </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-md px-3 py-1.5 text-sm text-text-muted transition-colors hover:text-text"
-            >
+            <button type="button" onClick={logout} className={uiBtnGhost}>
               Log out
             </button>
           </>
         ) : (
           <>
-            <Link
-              href="/login"
-              className="rounded-md px-3 py-1.5 text-sm text-text-muted transition-colors hover:text-text"
-            >
+            <Link href="/login" className={uiBtnGhost}>
               Log in
             </Link>
             <Link
               href="/signup"
-              className="rounded-md bg-brand px-3.5 py-1.5 text-sm font-medium text-text-inverse transition-colors hover:bg-brand-hover"
+              className={`${uiBtnPrimary} px-3.5 py-1.5 text-sm font-medium`}
             >
               Sign up
             </Link>

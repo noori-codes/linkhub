@@ -1,4 +1,9 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import {
+  uiBtnPrimaryBlock,
+  uiCard,
+  uiInput,
+} from "@/lib/ui";
 
 export type OnboardingStepId =
   | "profile"
@@ -114,14 +119,11 @@ export async function skipToDashboard(token: string) {
   await completeOnboarding(token);
 }
 
-export const onboardingInputClass =
-  "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none transition-colors focus:border-brand";
+export const onboardingInputClass = uiInput;
 
-export const onboardingPrimaryBtnClass =
-  "w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-60";
+export const onboardingPrimaryBtnClass = uiBtnPrimaryBlock;
 
-export const onboardingCardClass =
-  "flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-6";
+export const onboardingCardClass = `flex flex-col gap-4 ${uiCard}`;
 
 /** Where to send a user who logged in mid-wizard. */
 export function resumeOnboardingHref(

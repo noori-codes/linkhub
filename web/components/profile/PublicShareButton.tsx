@@ -133,7 +133,7 @@ export function PublicShareButton({ username, displayName }: Props) {
                 ref={closeRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-1 text-sm text-text-muted hover:bg-bg hover:text-text"
+                className="rounded-lg px-2 py-1 text-sm text-text-muted hover:bg-bg hover:text-text"
               >
                 Close
               </button>

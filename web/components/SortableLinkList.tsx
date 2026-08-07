@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import type { PublicLink } from "@/lib/types";
+import { uiBtnPrimary, uiBtnSecondary, uiBtnIcon, uiInput } from "@/lib/ui";
 
 type Props = {
   links: PublicLink[];
@@ -115,20 +116,20 @@ export function SortableLinkList({
                   maxLength={100}
                   value={editTitle}
                   onChange={(e) => onEditTitleChange(e.target.value)}
-                  className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                  className={uiInput}
                 />
                 <input
                   type="url"
                   required
                   value={editUrl}
                   onChange={(e) => onEditUrlChange(e.target.value)}
-                  className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-text outline-none focus:border-brand"
+                  className={uiInput}
                 />
                 <div className="flex gap-2 pt-1">
                   <button
                     type="submit"
                     disabled={savingEdit}
-                    className="rounded-md bg-brand px-3 py-2 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+                    className={uiBtnPrimary}
                   >
                     {savingEdit ? "Saving…" : "Save"}
                   </button>
@@ -136,7 +137,7 @@ export function SortableLinkList({
                     type="button"
                     disabled={savingEdit}
                     onClick={onCancelEdit}
-                    className="rounded-md border border-border px-3 py-2 text-sm text-text-muted hover:border-brand hover:text-text disabled:opacity-50"
+                    className={uiBtnSecondary}
                   >
                     Cancel
                   </button>
@@ -228,7 +229,7 @@ function RowActions({
           e.stopPropagation();
           onStartEdit(link);
         }}
-        className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg-elevated hover:opacity-100 disabled:opacity-40"
+        className={uiBtnIcon}
       >
         <Image src="/edit.svg" alt="" width={16} height={16} />
       </button>
@@ -242,7 +243,7 @@ function RowActions({
           e.stopPropagation();
           onDelete(link);
         }}
-        className="rounded-md p-1.5 opacity-70 transition-opacity hover:bg-bg-elevated hover:opacity-100 disabled:opacity-40"
+        className={uiBtnIcon}
       >
         <Image src="/delete.svg" alt="" width={16} height={16} />
       </button>

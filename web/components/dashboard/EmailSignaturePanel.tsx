@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import type { PublicProfile } from "@/lib/types";
+import { uiBtnSecondary } from "@/lib/ui";
 
 type Props = {
   profile: PublicProfile;
@@ -90,14 +91,14 @@ export function EmailSignaturePanel({ profile }: Props) {
       description="Built from your profile. Paste into Gmail or Outlook → Signature."
     >
       <div
-        className="overflow-x-auto rounded-md border border-border bg-bg p-3"
+        className="overflow-x-auto rounded-xl border border-border bg-bg p-3"
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
       <button
         type="button"
         onClick={() => void onCopy()}
-        className="mt-3 rounded-md border border-border px-4 py-2 text-sm font-medium text-text hover:border-brand"
+        className={`mt-3 ${uiBtnSecondary}`}
       >
         Copy HTML
       </button>
