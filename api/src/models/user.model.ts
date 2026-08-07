@@ -8,7 +8,6 @@ export type OnboardingStep =
   | "socials"
   | "theme"
   | "links"
-  | "wallets"
   | "tags"
   | "done";
 
@@ -108,7 +107,7 @@ const userSchema = new Schema<IUser>(
 
     onboardingStep: {
       type: String,
-      enum: ["profile", "socials", "theme", "links", "wallets", "tags", "done"],
+      enum: ["profile", "socials", "theme", "links", "tags", "done"],
       default: "profile",
     },
   },

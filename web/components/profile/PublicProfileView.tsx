@@ -2,8 +2,9 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
+import { PublicShareButton } from "@/components/profile/PublicShareButton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import { resolveThemeTokens, themeStyleVars } from "@/lib/theme";
+import { resolveButtonShape, resolveThemeTokens, themeStyleVars } from "@/lib/theme";
 import type { PublicLink, PublicProfile, PublicShopProduct } from "@/lib/types";
 
 function initials(name: string) {
@@ -39,7 +40,8 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
   const cover = isRemote(profile.coverUrl) ? profile.coverUrl : null;
   const tokens = resolveThemeTokens(profile);
-  const themeStyle = themeStyleVars(tokens);
+  const buttonShape = resolveButtonShape(profile);
+  const themeStyle = themeStyleVars(tokens, buttonShape);
   const visible =
     variant === "preview"
       ? links.filter((link) => link.isVisible)
@@ -164,11 +166,12 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full rounded-2xl px-4 py-3 text-center text-[13px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.05)]"
+                  className="block w-full px-4 py-3 text-center text-[13px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.05)]"
                   style={{
                     backgroundColor: tokens.buttonColor,
                     color: tokens.buttonTextColor,
                     fontFamily: tokens.fontFamily,
+                    borderRadius: "var(--profile-button-radius)",
                   }}
                 >
                   {link.title}
@@ -306,11 +309,12 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
             href={trackedHref(link)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-between gap-3 rounded-xl px-5 py-4 text-[15px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.04)] transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-md active:translate-y-0"
+            className="flex w-full items-center justify-between gap-3 px-5 py-4 text-[15px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.04)] transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-md active:translate-y-0"
             style={{
               backgroundColor: tokens.buttonColor,
               color: tokens.buttonTextColor,
               fontFamily: tokens.fontFamily,
+              borderRadius: "var(--profile-button-radius)",
             }}
           >
             <span className="truncate">{link.title}</span>
@@ -427,10 +431,11 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                         href={primary.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+                        className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
                         style={{
                           backgroundColor: tokens.buttonColor,
                           color: tokens.buttonTextColor,
+                          borderRadius: "var(--profile-button-radius)",
                         }}
                       >
                         <span className="truncate">
@@ -448,11 +453,12 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                         href={productLink.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
+                        className="inline-flex w-full items-center justify-center gap-1.5 border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
                         style={{
                           borderColor: "var(--profile-border)",
                           backgroundColor: tokens.backgroundColor,
                           color: "var(--profile-text)",
+                          borderRadius: "var(--profile-button-radius)",
                         }}
                       >
                         <span className="truncate">{productLink.title}</span>
@@ -478,52 +484,58 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
   const contentBg = `color-mix(in srgb, ${tokens.backgroundColor} 88%, #ffffff)`;
 
   return (
-    <div
-      className="flex min-h-full flex-1 flex-col lg:min-h-screen lg:grid lg:grid-cols-[minmax(300px,38%)_1fr]"
-      style={themeStyle}
-    >
-      <aside className="relative flex flex-col lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:overflow-hidden">
-        <div className="relative h-44 shrink-0 sm:h-52 lg:absolute lg:inset-0 lg:h-full">
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cover}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
+    <>
+      <PublicShareButton
+        username={profile.username}
+        displayName={name}
+      />
+      <div
+        className="flex min-h-full flex-1 flex-col lg:min-h-screen lg:grid lg:grid-cols-[minmax(300px,38%)_1fr]"
+        style={themeStyle}
+      >
+        <aside className="relative flex flex-col lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:overflow-hidden">
+          <div className="relative h-44 shrink-0 sm:h-52 lg:absolute lg:inset-0 lg:h-full">
+            {cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={cover}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div
+                aria-hidden
+                className="h-full w-full"
+                style={{
+                  background: `linear-gradient(160deg, color-mix(in srgb, ${tokens.buttonColor} 55%, #000) 0%, color-mix(in srgb, ${tokens.buttonColor} 30%, ${tokens.backgroundColor}) 50%, ${tokens.backgroundColor} 100%)`,
+                }}
+              />
+            )}
             <div
               aria-hidden
-              className="h-full w-full"
-              style={{
-                background: `linear-gradient(160deg, color-mix(in srgb, ${tokens.buttonColor} 55%, #000) 0%, color-mix(in srgb, ${tokens.buttonColor} 30%, ${tokens.backgroundColor}) 50%, ${tokens.backgroundColor} 100%)`,
-              }}
+              className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/25 via-black/10 to-black/75 lg:from-black/30 lg:via-black/20 lg:to-black/80"
             />
-          )}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/25 via-black/10 to-black/75 lg:from-black/30 lg:via-black/20 lg:to-black/80"
-          />
-        </div>
+          </div>
 
-        <div className="-mt-14 sm:-mt-16 lg:mt-auto lg:flex lg:flex-1 lg:flex-col lg:justify-end">
-          {identity}
-        </div>
-      </aside>
+          <div className="-mt-14 sm:-mt-16 lg:mt-auto lg:flex lg:flex-1 lg:flex-col lg:justify-end">
+            {identity}
+          </div>
+        </aside>
 
-      <main
-        className="flex min-w-0 flex-1 flex-col border-l-0 lg:border-l"
-        style={{
-          backgroundColor: contentBg,
-          borderColor: "var(--profile-border)",
-        }}
-      >
-        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-10 sm:px-8 sm:py-12 lg:px-10 lg:py-14 xl:px-14">
-          {linkList}
-          {shopSection}
-          {pageFooter}
-        </div>
-      </main>
-    </div>
+        <main
+          className="flex min-w-0 flex-1 flex-col border-l-0 lg:border-l"
+          style={{
+            backgroundColor: contentBg,
+            borderColor: "var(--profile-border)",
+          }}
+        >
+          <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-10 sm:px-8 sm:py-12 lg:px-10 lg:py-14 xl:px-14">
+            {linkList}
+            {shopSection}
+            {pageFooter}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }

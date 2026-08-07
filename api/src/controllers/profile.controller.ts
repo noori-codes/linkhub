@@ -113,6 +113,7 @@ export const updateMyProfile = catchAsync(
       "status", // draft | published
       "tags",
       "theme",
+      "buttonShape",
       "emailSignatureHtml",
     ] as const;
 
@@ -122,6 +123,18 @@ export const updateMyProfile = catchAsync(
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
+      }
+    }
+
+    if (updates.buttonShape !== undefined) {
+      const shape = updates.buttonShape;
+      if (
+        typeof shape !== "string" ||
+        !["square", "rounded", "pill"].includes(shape)
+      ) {
+        return next(
+          new AppError("buttonShape must be square, rounded, or pill.", 400),
+        );
       }
     }
 

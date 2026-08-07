@@ -1,11 +1,6 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
-export type LinkType =
-  | "custom"
-  | "social"
-  | "wallet"
-  | "alt_profile"
-  | "product";
+export type LinkType = "custom" | "social" | "alt_profile" | "product";
 
 export interface ILink extends Document {
   profile: Types.ObjectId;
@@ -42,7 +37,7 @@ const linkSchema = new Schema<ILink>(
 
     type: {
       type: String,
-      enum: ["custom", "social", "wallet", "alt_profile", "product"],
+      enum: ["custom", "social", "alt_profile", "product"],
       default: "custom",
     },
 

@@ -1,6 +1,7 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
 export type ProfileStatus = "draft" | "published";
+export type ButtonShape = "square" | "rounded" | "pill";
 
 export interface IProfile extends Document {
   user: Types.ObjectId;
@@ -13,6 +14,7 @@ export interface IProfile extends Document {
   website: string;
   status: ProfileStatus;
   theme: Types.ObjectId | undefined;
+  buttonShape: ButtonShape;
   tags: string[];
   emailSignatureHtml: string;
 }
@@ -86,6 +88,12 @@ const profileSchema = new Schema<IProfile>(
     theme: {
       type: Schema.Types.ObjectId,
       ref: "Theme",
+    },
+
+    buttonShape: {
+      type: String,
+      enum: ["square", "rounded", "pill"],
+      default: "rounded",
     },
 
     tags: {

@@ -86,7 +86,7 @@ function sectionHint(pathname: string) {
     pathname.startsWith("/profile/avatar") ||
     pathname.startsWith("/profile/photos")
   ) {
-    return "Pick a look for your public page — preview updates live.";
+    return "Pick a theme and button shape — preview updates live.";
   }
   if (pathname.startsWith("/profile/shop")) {
     return "Products and affiliate buy links.";

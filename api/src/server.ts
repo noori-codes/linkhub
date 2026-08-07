@@ -1,6 +1,7 @@
 import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./config/database.js";
+import { cleanupLegacyWalletData } from "./utils/cleanupLegacyWalletData.js";
 import { ensureThemes } from "./utils/ensureThemes.js";
 
 // 1. Handle synchronous errors
@@ -14,6 +15,7 @@ async function startServer() {
   try {
     await connectDB();
     await ensureThemes();
+    await cleanupLegacyWalletData();
 
     const PORT = process.env.PORT || 3000;
 

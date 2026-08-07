@@ -137,7 +137,7 @@ export function resumeOnboardingHref(
     case "links":
       return "/onboarding/links";
     case "wallets":
-      // Removed step — send anyone mid-flow to tags
+      // Legacy step removed — send anyone mid-flow to tags
       return "/onboarding/tags";
     case "tags":
       return "/onboarding/tags";

@@ -1,6 +1,7 @@
 // Types shaped like the API responses (Profile + Link models)
 
 export type ProfileStatus = "draft" | "published";
+export type ButtonShape = "square" | "rounded" | "pill";
 
 export interface ThemeTokens {
   backgroundColor: string;
@@ -29,6 +30,7 @@ export interface PublicProfile {
   website: string;
   status: ProfileStatus;
   tags: string[];
+  buttonShape?: ButtonShape;
   /** Populated Theme doc, or raw ObjectId string before populate */
   theme?: ProfileTheme | string | null;
 }
