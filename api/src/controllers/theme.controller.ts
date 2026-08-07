@@ -9,7 +9,11 @@ import catchAsync from "../utils/catchAsync.js";
 // =============================
 
 export const getAllThemes = catchAsync(async (_req: Request, res: Response) => {
-  const themes = await Theme.find().sort({ isDefault: -1, name: 1 });
+  const themes = await Theme.find().sort({
+    isDefault: -1,
+    slug: 1,
+    name: 1,
+  });
 
   res.status(200).json({
     status: "success",

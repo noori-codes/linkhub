@@ -18,15 +18,11 @@ export async function ensureThemes() {
     );
   }
 
-  // Exactly one default
-  const defaults = await Theme.find({ isDefault: true });
-  if (defaults.length === 0) {
-    await Theme.findOneAndUpdate({ slug: "classic" }, { isDefault: true });
-  } else if (defaults.length > 1) {
-    const keep = defaults.find((t) => t.slug === "classic") ?? defaults[0];
-    await Theme.updateMany(
-      { _id: { $ne: keep!._id }, isDefault: true },
-      { isDefault: false },
-    );
-  }
+  // Classic is always the sole default (by slug, not just isDefault flag)
+  await Theme.updateMany({ slug: { $ne: "classic" } }, { isDefault: false });
+  await Theme.findOneAndUpdate(
+    { slug: "classic" },
+    { $set: { isDefault: true } },
+    { upsert: false },
+  );
 }

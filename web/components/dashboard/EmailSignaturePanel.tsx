@@ -55,7 +55,7 @@ export function buildEmailSignatureHtml(
         <tr><td style="padding-top:2px;font-size:12px;color:#5c6470;">${handle}</td></tr>
         ${bioRow}
         <tr><td style="padding-top:8px;font-size:13px;">
-          <a href="${safeUrl}" style="color:#2f6fed;text-decoration:none;">${safeUrl}</a>
+          <a href="${safeUrl}" style="color:#12141a;text-decoration:none;">${safeUrl}</a>
         </td></tr>
       </table>
     </td>

@@ -78,7 +78,9 @@ export default function OnboardingThemePage() {
   useEffect(() => {
     if (selectedId || !themesQuery.data?.length) return;
     const fallback =
-      themesQuery.data.find((t) => t.isDefault) ?? themesQuery.data[0];
+      themesQuery.data.find((t) => t.slug === "classic") ??
+      themesQuery.data.find((t) => t.isDefault) ??
+      themesQuery.data[0];
     if (fallback) setSelectedId(fallback._id);
   }, [themesQuery.data, selectedId]);
 
@@ -131,7 +133,9 @@ export default function OnboardingThemePage() {
     try {
       // Apply default theme explicitly when skipping
       const defaultTheme =
-        themesQuery.data?.find((t) => t.isDefault) ?? themesQuery.data?.[0];
+        themesQuery.data?.find((t) => t.slug === "classic") ??
+        themesQuery.data?.find((t) => t.isDefault) ??
+        themesQuery.data?.[0];
       if (defaultTheme) {
         await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
           method: "PATCH",

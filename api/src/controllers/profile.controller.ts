@@ -5,6 +5,7 @@ import Profile from "../models/profile.model.js";
 import Theme from "../models/theme.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { findDefaultTheme } from "../utils/findDefaultTheme.js";
 
 // =============================
 // CREATE MY PROFILE
@@ -30,7 +31,7 @@ export const createProfile = catchAsync(
         return next(new AppError("Theme not found.", 404));
       }
     } else {
-      const defaultTheme = await Theme.findOne({ isDefault: true }).select("_id");
+      const defaultTheme = await findDefaultTheme();
       themeId = defaultTheme?._id;
     }
 
@@ -75,9 +76,9 @@ export const getMyProfile = catchAsync(
       return next(new AppError("You do not have a profile yet.", 404));
     }
 
-    // Backfill default theme for older profiles
+    // Backfill Classic theme for older profiles
     if (!profile.theme) {
-      const defaultTheme = await Theme.findOne({ isDefault: true });
+      const defaultTheme = await findDefaultTheme();
       if (defaultTheme) {
         profile.theme = defaultTheme._id;
         await profile.save();

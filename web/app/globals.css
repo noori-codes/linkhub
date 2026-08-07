@@ -3,13 +3,13 @@
 
 /*
   LinkHub — Paper & Ink
-  Light product UI, quiet surfaces, blue only for actions.
+  Light product UI; ink for actions (same family as text).
 */
 :root {
-  /* Brand — blue for buttons / text links only */
-  --brand: #2f6fed;
-  --brand-hover: #1f5ad6;
-  --brand-muted: #2f6fed12;
+  /* Brand — ink, not SaaS blue */
+  --brand: #12141a;
+  --brand-hover: #2a2f3a;
+  --brand-muted: #12141a12;
 
   /* Surfaces — paper, not dark startup chrome */
   --bg: #f3f4f6;

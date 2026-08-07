@@ -87,11 +87,13 @@ export async function skipToDashboard(token: string) {
         const themesRes = await fetch(`${CLIENT_API_BASE}/api/v1/themes`);
         if (themesRes.ok) {
           const themesJson = (await themesRes.json()) as {
-            data?: { themes?: Array<{ _id: string; isDefault?: boolean }> };
+            data?: { themes?: Array<{ _id: string; slug?: string; isDefault?: boolean }> };
           };
           const themes = themesJson.data?.themes ?? [];
           const fallback =
-            themes.find((t) => t.isDefault) ?? themes[0];
+            themes.find((t) => t.slug === "classic") ??
+            themes.find((t) => t.isDefault) ??
+            themes[0];
           if (fallback) {
             await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
               method: "PATCH",
