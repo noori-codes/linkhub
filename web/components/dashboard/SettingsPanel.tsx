@@ -6,6 +6,7 @@ import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
 import { DashboardActions } from "@/components/dashboard/DashboardActions";
 import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
+import { Loader } from "@/components/Loader";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
@@ -43,7 +44,7 @@ export function SettingsPanel() {
   }, []);
 
   if (!profile) {
-    return <p className="text-sm text-text-muted">Loading…</p>;
+    return <Loader label="Loading…" className="py-12" />;
   }
 
   return (

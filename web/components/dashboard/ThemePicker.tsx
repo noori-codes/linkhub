@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
+import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
@@ -91,7 +92,7 @@ export function ThemePicker() {
       </div>
 
       {themesQuery.isLoading ? (
-        <p className="text-sm text-text-muted">Loading themes…</p>
+        <Loader label="Loading themes…" className="py-8" />
       ) : themesQuery.isError ? (
         <p className="text-sm text-danger">
           {themesQuery.error instanceof Error

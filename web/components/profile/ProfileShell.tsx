@@ -10,6 +10,7 @@ import { PhoneFrame } from "@/components/profile/PhoneFrame";
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
+import { PreviewSkeleton } from "@/components/Skeleton";
 
 /**
  * Dashboard nav — Linktree-style priority:
@@ -147,11 +148,9 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
   const preview = (
     <>
-      {loading ? (
-        <p className="text-sm text-text-muted">Loading preview…</p>
-      ) : null}
+      {loading ? <PreviewSkeleton /> : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
-      {profile ? (
+      {!loading && profile ? (
         <PublicProfileView
           profile={profile}
           links={links}

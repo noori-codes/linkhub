@@ -8,6 +8,7 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
+import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
@@ -163,7 +164,7 @@ export default function OnboardingLinksPage() {
       }
     >
       {!ready ? (
-        <p className="text-sm text-text-muted">Loading…</p>
+        <Loader label="Loading…" className="py-12" />
       ) : (
         <form onSubmit={onSubmit} className={onboardingCardClass}>
           {links.map((link, index) => (

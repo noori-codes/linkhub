@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
+import { Loader } from "@/components/Loader";
 import {
   fetchMyProducts,
   fetchProductLinks,
@@ -548,7 +549,7 @@ export function ShopPanel() {
   }
 
   if (productsQuery.isLoading) {
-    return <p className="text-sm text-text-muted">Loading shop…</p>;
+    return <Loader label="Loading shop…" className="py-12" />;
   }
 
   if (productsQuery.isError) {
@@ -1121,7 +1122,7 @@ function ProductLinksSection({
       </p>
 
       {linksQuery.isLoading ? (
-        <p className="text-xs text-text-muted">Loading links…</p>
+        <Loader label="Loading links…" size="sm" className="py-4" />
       ) : null}
 
       {linksQuery.isError ? (

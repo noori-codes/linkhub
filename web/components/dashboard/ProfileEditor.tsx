@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
+import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
@@ -32,7 +33,7 @@ export function ProfileEditor() {
   }, [profile]);
 
   if (!profile) {
-    return <p className="text-sm text-text-muted">Loading…</p>;
+    return <Loader label="Loading…" className="py-12" />;
   }
 
   async function onSave(event: FormEvent<HTMLFormElement>) {

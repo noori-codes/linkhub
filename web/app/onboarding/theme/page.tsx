@@ -8,6 +8,7 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
+import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
@@ -169,11 +170,11 @@ export default function OnboardingThemePage() {
       }
     >
       {!ready ? (
-        <p className="text-sm text-text-muted">Loading…</p>
+        <Loader label="Loading…" className="py-12" />
       ) : (
         <div className={onboardingCardClass}>
           {themesQuery.isLoading ? (
-            <p className="text-sm text-text-muted">Loading themes…</p>
+            <Loader label="Loading themes…" className="py-8" />
           ) : themesQuery.isError ? (
             <p className="text-sm text-danger">
               {themesQuery.error instanceof Error

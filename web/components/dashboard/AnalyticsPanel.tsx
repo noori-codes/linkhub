@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
+import { AnalyticsSkeleton } from "@/components/Skeleton";
 import { clearToken } from "@/lib/auth";
 import {
   fetchMyAnalytics,
@@ -173,7 +174,7 @@ export function AnalyticsPanel() {
   );
 
   if (isLoading) {
-    return <p className="text-sm text-text-muted">Loading analytics…</p>;
+    return <AnalyticsSkeleton />;
   }
 
   if (isError) {
