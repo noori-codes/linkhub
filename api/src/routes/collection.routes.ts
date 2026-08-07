@@ -5,11 +5,16 @@ import {
   createCollection,
   deleteCollection,
   getMyCollections,
+  getPublicCollectionsByUsername,
   updateCollection,
 } from "../controllers/collection.controller.js";
 
 const router = Router();
 
+// Public shop groupings for published profiles
+router.get("/u/:username", getPublicCollectionsByUsername);
+
+// Owner-only below
 router.use(protect);
 
 router.get("/me", getMyCollections);

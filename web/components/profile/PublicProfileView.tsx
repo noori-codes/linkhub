@@ -4,8 +4,14 @@ import type { CSSProperties } from "react";
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { PublicShareButton } from "@/components/profile/PublicShareButton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { buildShopSections } from "@/lib/shop-sections";
 import { resolveButtonShape, resolveThemeTokens, themeStyleVars } from "@/lib/theme";
-import type { PublicLink, PublicProfile, PublicShopProduct } from "@/lib/types";
+import type {
+  PublicLink,
+  PublicProfile,
+  PublicShopCollection,
+  PublicShopProduct,
+} from "@/lib/types";
 
 function initials(name: string) {
   return name
@@ -26,6 +32,7 @@ type Props = {
   profile: PublicProfile;
   links: PublicLink[];
   products?: PublicShopProduct[];
+  collections?: PublicShopCollection[];
   /** page = visitor /u/... · preview = owner dashboard card */
   variant: "page" | "preview";
 };
@@ -35,7 +42,13 @@ type Props = {
  * Preview = compact centered phone layout (Linktree-style).
  * Page = desktop split / mobile stack visitor layout.
  */
-export function PublicProfileView({ profile, links, products = [], variant }: Props) {
+export function PublicProfileView({
+  profile,
+  links,
+  products = [],
+  collections = [],
+  variant,
+}: Props) {
   const name = profile.displayName || profile.username;
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
   const cover = isRemote(profile.coverUrl) ? profile.coverUrl : null;
@@ -327,49 +340,72 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
     </section>
   );
 
+  const shopSections = buildShopSections(
+    products,
+    collections,
+    profile.username,
+  );
+
   const shopSection =
-    products.length > 0 ? (
-      <section className="mt-12" aria-label="Shop">
-        <div className="mb-6">
-          <h2
-            className="font-display text-xl font-semibold tracking-tight sm:text-2xl"
-            style={{ color: "var(--profile-text)", fontFamily: tokens.fontFamily }}
-          >
-            Shop
-          </h2>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: "var(--profile-text-muted)" }}
-          >
-            Picks from @{profile.username}
-          </p>
-        </div>
-
-        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-stretch">
-          {products.map((product) => {
-            const primary = product.links[0];
-            const extraLinks = product.links.slice(1);
-            const hasAffiliate = product.links.some((l) => l.isAffiliate);
-
-            return (
-              <li
-                key={product._id}
-                className="group flex flex-col overflow-hidden rounded-2xl transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(18,20,26,0.08)]"
-                style={{
-                  border: "1px solid var(--profile-border)",
-                  backgroundColor: "var(--profile-surface)",
-                }}
+    shopSections.length > 0 ? (
+      <div className="mt-12 flex flex-col gap-12" aria-label="Shop">
+        {shopSections.map((section) => (
+          <section key={section.key} aria-label={section.title}>
+            <div className="mb-6">
+              <h2
+                className="font-display text-xl font-semibold tracking-tight sm:text-2xl"
+                style={{ color: "var(--profile-text)", fontFamily: tokens.fontFamily }}
               >
-                <div
-                  className="relative aspect-square w-full overflow-hidden"
-                  style={{ backgroundColor: tokens.backgroundColor }}
+                {section.title}
+              </h2>
+              {section.description ? (
+                <p
+                  className="mt-1 text-sm"
+                  style={{ color: "var(--profile-text-muted)" }}
                 >
-                  {isRemote(product.imageUrl) ? (
-                    <SafeRemoteImage
-                      src={product.imageUrl}
-                      alt=""
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                      fallback={
+                  {section.description}
+                </p>
+              ) : null}
+            </div>
+
+            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-stretch">
+              {section.products.map((product) => {
+                const primary = product.links[0];
+                const extraLinks = product.links.slice(1);
+                const hasAffiliate = product.links.some((l) => l.isAffiliate);
+
+                return (
+                  <li
+                    key={product._id}
+                    className="group flex flex-col overflow-hidden rounded-2xl transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(18,20,26,0.08)]"
+                    style={{
+                      border: "1px solid var(--profile-border)",
+                      backgroundColor: "var(--profile-surface)",
+                    }}
+                  >
+                    <div
+                      className="relative aspect-square w-full overflow-hidden"
+                      style={{ backgroundColor: tokens.backgroundColor }}
+                    >
+                      {isRemote(product.imageUrl) ? (
+                        <SafeRemoteImage
+                          src={product.imageUrl}
+                          alt=""
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          fallback={
+                            <div
+                              aria-hidden
+                              className="flex h-full w-full items-center justify-center text-lg font-semibold"
+                              style={{
+                                ...coverFallbackStyle,
+                                color: "var(--profile-text-muted)",
+                              }}
+                            >
+                              {initials(product.title)}
+                            </div>
+                          }
+                        />
+                      ) : (
                         <div
                           aria-hidden
                           className="flex h-full w-full items-center justify-center text-lg font-semibold"
@@ -378,107 +414,96 @@ export function PublicProfileView({ profile, links, products = [], variant }: Pr
                             color: "var(--profile-text-muted)",
                           }}
                         >
-                          {initials(product.title)}
+                          {initials(product.title) || product.title.slice(0, 1)}
                         </div>
-                      }
-                    />
-                  ) : (
-                    <div
-                      aria-hidden
-                      className="flex h-full w-full items-center justify-center text-lg font-semibold"
-                      style={{
-                        ...coverFallbackStyle,
-                        color: "var(--profile-text-muted)",
-                      }}
-                    >
-                      {initials(product.title) || product.title.slice(0, 1)}
+                      )}
+                      {hasAffiliate ? (
+                        <span
+                          className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shadow-sm backdrop-blur-sm"
+                          style={{
+                            backgroundColor: "color-mix(in srgb, var(--profile-surface) 95%, transparent)",
+                            color: "var(--profile-text)",
+                          }}
+                        >
+                          Affiliate
+                        </span>
+                      ) : null}
                     </div>
-                  )}
-                  {hasAffiliate ? (
-                    <span
-                      className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shadow-sm backdrop-blur-sm"
-                      style={{
-                        backgroundColor: "color-mix(in srgb, var(--profile-surface) 95%, transparent)",
-                        color: "var(--profile-text)",
-                      }}
-                    >
-                      Affiliate
-                    </span>
-                  ) : null}
-                </div>
 
-                <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
-                  <div className="min-h-[4.75rem]">
-                    <h3
-                      className="line-clamp-2 text-[15px] font-semibold leading-snug"
-                      style={{ color: "var(--profile-text)" }}
-                    >
-                      {product.title}
-                    </h3>
-                    {product.description ? (
-                      <p
-                        className="mt-1.5 line-clamp-2 text-sm leading-relaxed"
-                        style={{ color: "var(--profile-text-muted)" }}
-                      >
-                        {product.description}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-2">
-                    {primary ? (
-                      <a
-                        href={primary.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
-                        style={{
-                          backgroundColor: tokens.buttonColor,
-                          color: tokens.buttonTextColor,
-                          borderRadius: "var(--profile-button-radius)",
-                        }}
-                      >
-                        <span className="truncate">
-                          {product.links.length === 1 ? "Shop" : primary.title}
-                        </span>
-                        <span aria-hidden className="opacity-70">
-                          →
-                        </span>
-                      </a>
-                    ) : null}
-
-                    {extraLinks.map((productLink) => (
-                      <a
-                        key={productLink._id}
-                        href={productLink.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-1.5 border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
-                        style={{
-                          borderColor: "var(--profile-border)",
-                          backgroundColor: tokens.backgroundColor,
-                          color: "var(--profile-text)",
-                          borderRadius: "var(--profile-button-radius)",
-                        }}
-                      >
-                        <span className="truncate">{productLink.title}</span>
-                        {productLink.isAffiliate ? (
-                          <span
-                            className="shrink-0 text-[10px] uppercase tracking-wide"
+                    <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
+                      <div className="min-h-[4.75rem]">
+                        <h3
+                          className="line-clamp-2 text-[15px] font-semibold leading-snug"
+                          style={{ color: "var(--profile-text)" }}
+                        >
+                          {product.title}
+                        </h3>
+                        {product.description ? (
+                          <p
+                            className="mt-1.5 line-clamp-2 text-sm leading-relaxed"
                             style={{ color: "var(--profile-text-muted)" }}
                           >
-                            · aff
-                          </span>
+                            {product.description}
+                          </p>
                         ) : null}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                      </div>
+
+                      <div className="mt-4 flex flex-col gap-2">
+                        {primary ? (
+                          <a
+                            href={primary.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+                            style={{
+                              backgroundColor: tokens.buttonColor,
+                              color: tokens.buttonTextColor,
+                              borderRadius: "var(--profile-button-radius)",
+                            }}
+                          >
+                            <span className="truncate">
+                              {product.links.length === 1 ? "Shop" : primary.title}
+                            </span>
+                            <span aria-hidden className="opacity-70">
+                              →
+                            </span>
+                          </a>
+                        ) : null}
+
+                        {extraLinks.map((productLink) => (
+                          <a
+                            key={productLink._id}
+                            href={productLink.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex w-full items-center justify-center gap-1.5 border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
+                            style={{
+                              borderColor: "var(--profile-border)",
+                              backgroundColor: tokens.backgroundColor,
+                              color: "var(--profile-text)",
+                              borderRadius: "var(--profile-button-radius)",
+                            }}
+                          >
+                            <span className="truncate">{productLink.title}</span>
+                            {productLink.isAffiliate ? (
+                              <span
+                                className="shrink-0 text-[10px] uppercase tracking-wide"
+                                style={{ color: "var(--profile-text-muted)" }}
+                              >
+                                · aff
+                              </span>
+                            ) : null}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
     ) : null;
 
   const contentBg = `color-mix(in srgb, ${tokens.backgroundColor} 88%, #ffffff)`;

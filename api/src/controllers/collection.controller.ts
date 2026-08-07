@@ -209,3 +209,51 @@ export const deleteCollection = catchAsync(
     res.status(204).send();
   },
 );
+
+// =============================
+// GET PUBLIC COLLECTIONS BY USERNAME
+// Visible groupings for /u/:username shop
+// =============================
+
+export const getPublicCollectionsByUsername = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username } = req.params;
+
+    if (!username) {
+      return next(new AppError("Please provide a username.", 400));
+    }
+
+    const profile = await Profile.findOne({
+      username: username.toString().toLowerCase(),
+      status: "published",
+    }).select("_id");
+
+    if (!profile) {
+      return next(
+        new AppError("No published profile found with that username.", 404),
+      );
+    }
+
+    const collections = await Collection.find({
+      profile: profile._id,
+      isVisible: true,
+    })
+      .sort({ order: 1 })
+      .select("title description order products")
+      .lean();
+
+    res.status(200).json({
+      status: "success",
+      results: collections.length,
+      data: {
+        collections: collections.map((collection) => ({
+          _id: collection._id,
+          title: collection.title,
+          description: collection.description,
+          order: collection.order,
+          products: (collection.products ?? []).map((id) => String(id)),
+        })),
+      },
+    });
+  },
+);

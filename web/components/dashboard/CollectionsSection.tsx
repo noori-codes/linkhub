@@ -65,7 +65,7 @@ type Props = {
 };
 
 /**
- * Group products into named collections for the public shop (later).
+ * Group products into named collections for the public shop.
  * Create / edit / hide / delete + assign products via checkboxes.
  */
 export function CollectionsSection({ products }: Props) {

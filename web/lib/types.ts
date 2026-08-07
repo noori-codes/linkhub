@@ -94,6 +94,15 @@ export interface PublicShopProduct {
   links: ShopProductLink[];
 }
 
+/** Visible collection grouping on a public profile (product ids only). */
+export interface PublicShopCollection {
+  _id: string;
+  title: string;
+  description: string;
+  order: number;
+  products: string[];
+}
+
 export interface AnalyticsSummary {
   summary: {
     profileViews: number;

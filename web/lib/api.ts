@@ -2,6 +2,7 @@ import type {
   ApiSuccess,
   PublicLink,
   PublicProfile,
+  PublicShopCollection,
   PublicShopProduct,
 } from "./types";
 
@@ -60,6 +61,14 @@ export async function getPublicProducts(username: string) {
   );
 
   return json?.data.products ?? [];
+}
+
+export async function getPublicCollections(username: string) {
+  const json = await getJson<
+    ApiSuccess<{ collections: PublicShopCollection[] }>
+  >(`/api/v1/collections/u/${encodeURIComponent(username)}`);
+
+  return json?.data.collections ?? [];
 }
 
 /**
