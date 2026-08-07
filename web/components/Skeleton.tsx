@@ -2,7 +2,6 @@ type SkeletonProps = {
   className?: string;
 };
 
-/** Pulse block for layout-aware loading states. */
 export function Skeleton({ className = "" }: SkeletonProps) {
   return (
     <div
@@ -12,7 +11,6 @@ export function Skeleton({ className = "" }: SkeletonProps) {
   );
 }
 
-/** Phone-preview placeholder: avatar + link bars. */
 export function PreviewSkeleton() {
   return (
     <div
@@ -34,7 +32,6 @@ export function PreviewSkeleton() {
   );
 }
 
-/** Analytics overview + list placeholders. */
 export function AnalyticsSkeleton() {
   return (
     <div

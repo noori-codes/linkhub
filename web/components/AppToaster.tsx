@@ -2,7 +2,6 @@
 
 import { Toaster } from "sonner";
 
-/** Global toast host — quiet paper style, not glowing dark chrome. */
 export function AppToaster() {
   return (
     <Toaster

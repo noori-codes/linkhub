@@ -21,7 +21,6 @@ import {
 
 const router = Router();
 
-// Public routes
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/logout", logout);
@@ -29,10 +28,8 @@ router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/verifyEmail/:token", verifyEmail);
 
-// Protect everything below
 router.use(protect);
 
-// Protected routes
 router.post("/resendVerifyEmail", resendVerifyEmail);
 router.patch("/updateMyPassword", updatePassword);
 router.patch("/updateMe", updateMe);

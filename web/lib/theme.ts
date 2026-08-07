@@ -66,7 +66,6 @@ export function themeIdOf(profile: Pick<PublicProfile, "theme">): string | null 
   return profile.theme._id ?? null;
 }
 
-/** CSS variables applied to the public/preview profile root. */
 export function themeStyleVars(
   tokens: ThemeTokens,
   shape: ButtonShape = "rounded",

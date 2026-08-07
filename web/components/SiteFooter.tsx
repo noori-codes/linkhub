@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-/** Closes marketing pages so they feel finished. */
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-border bg-bg-elevated px-6 py-10 sm:px-10">

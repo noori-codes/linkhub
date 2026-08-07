@@ -13,12 +13,9 @@ import {
 
 const router = Router();
 
-// Public first — no JWT required
-// Only returns visible links for a published profile
 router.get("/u/:username", getPublicLinksByUsername);
 router.get("/r/:id", redirectPublicLink);
 
-// Everything below this line requires a valid JWT (protect sets req.user)
 router.use(protect);
 
 router.post("/", createLink);

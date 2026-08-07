@@ -53,6 +53,7 @@ async function assertOwnedProductIds(
   return ids;
 }
 
+
 // =============================
 // GET MY COLLECTIONS (owner)
 // =============================
@@ -75,6 +76,7 @@ export const getMyCollections = catchAsync(
     });
   },
 );
+
 
 // =============================
 // CREATE COLLECTION
@@ -122,6 +124,7 @@ export const createCollection = catchAsync(
     });
   },
 );
+
 
 // =============================
 // UPDATE COLLECTION
@@ -182,9 +185,9 @@ export const updateCollection = catchAsync(
   },
 );
 
+
 // =============================
 // DELETE COLLECTION
-// Products are left intact — only the grouping is removed
 // =============================
 
 export const deleteCollection = catchAsync(
@@ -210,9 +213,9 @@ export const deleteCollection = catchAsync(
   },
 );
 
+
 // =============================
 // GET PUBLIC COLLECTIONS BY USERNAME
-// Visible groupings for /u/:username shop
 // =============================
 
 export const getPublicCollectionsByUsername = catchAsync(

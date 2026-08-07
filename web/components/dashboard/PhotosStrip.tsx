@@ -3,8 +3,6 @@ import type { PublicProfile } from "@/lib/types";
 type Props = {
   profile: PublicProfile;
 };
-
-// Simple photo strip for now — avatar (+ cover) until a real gallery/S3 exists
 export function PhotosStrip({ profile }: Props) {
   const shots: { src: string; label: string }[] = [];
 

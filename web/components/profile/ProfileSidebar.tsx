@@ -19,8 +19,6 @@ function isActive(pathname: string, href: string, match: "exact" | "prefix") {
   if (match === "exact") return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
-
-// Gravatar-style left nav — shell only in Step 2
 export function ProfileSidebar() {
   const pathname = usePathname();
   const [username, setUsername] = useState("");

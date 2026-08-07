@@ -11,7 +11,6 @@ import AppError from "../utils/appError.js";
 const getMyProfileOrFail = async (userId: string) => {
   const profile = await Profile.findOne({ user: userId });
 
-  // Can't manage links if onboarding never created a profile
   if (!profile) {
     throw new AppError("Create a profile before managing links.", 404);
   }
@@ -25,18 +24,14 @@ const getMyProfileOrFail = async (userId: string) => {
 
 export const createLink = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    // req.user comes from the protect middleware (JWT)
     const profile = await getMyProfileOrFail(req.user._id.toString());
 
-    // If client didn't send order, append this link to the end of the list
     let order = req.body.order;
     if (order === undefined) {
-      // Highest order first → last item on the page
       const lastLink = await Link.findOne({ profile: profile._id })
         .sort({ order: -1 })
         .select("order");
 
-      // First link starts at 0; next ones are last + 1
       order = lastLink ? lastLink.order + 1 : 0;
     }
 
@@ -67,8 +62,6 @@ export const getMyLinks = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const profile = await getMyProfileOrFail(req.user._id.toString());
 
-    // Owner sees ALL links, including hidden ones (isVisible: false)
-    // Sorted by order so the dashboard matches the public page order
     const links = await Link.find({ profile: profile._id }).sort({ order: 1 });
 
     res.status(200).json({
@@ -89,7 +82,6 @@ export const updateLink = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    // Express types params as string | undefined — guard before using
     if (!id) {
       return next(new AppError("Please provide a link id.", 400));
     }
@@ -103,26 +95,24 @@ export const updateLink = catchAsync(
       "type",
       "platform",
       "order",
-      "isVisible", // visibility toggle lives here
+      "isVisible",
     ] as const;
 
     const updates: Record<string, unknown> = {};
 
-    // Only copy fields that were actually sent (partial updates)
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
     }
 
-    // Only update if this link belongs to MY profile
     // Filtering by both _id AND profile prevents editing someone else's link
     const link = await Link.findOneAndUpdate(
       { _id: id, profile: profile._id },
       updates,
       {
-        new: true, // return the updated document
-        runValidators: true, // re-check schema rules (maxlength, enum, etc.)
+        new: true,
+        runValidators: true,
       },
     );
 
@@ -153,7 +143,6 @@ export const deleteLink = catchAsync(
 
     const profile = await getMyProfileOrFail(req.user._id.toString());
 
-    // Same ownership filter as update — only delete MY links
     const link = await Link.findOneAndDelete({
       _id: id,
       profile: profile._id,
@@ -163,7 +152,6 @@ export const deleteLink = catchAsync(
       return next(new AppError("No link found with that ID.", 404));
     }
 
-    // 204 = success, no response body
     res.status(204).json({
       status: "success",
       data: null,
@@ -173,7 +161,6 @@ export const deleteLink = catchAsync(
 
 // =============================
 // REORDER LINKS
-// Body: { links: [{ id: "...", order: 0 }, { id: "...", order: 1 }] }
 // =============================
 
 export const reorderLinks = catchAsync(
@@ -181,14 +168,12 @@ export const reorderLinks = catchAsync(
     const profile = await getMyProfileOrFail(req.user._id.toString());
     const items = req.body.links;
 
-    // Frontend usually sends the full new order after drag-and-drop
     if (!Array.isArray(items) || items.length === 0) {
       return next(
         new AppError("Please provide links: [{ id, order }, ...].", 400),
       );
     }
 
-    // Update each link's order in parallel (still scoped to MY profile)
     await Promise.all(
       items.map((item: { id: string; order: number }) =>
         Link.findOneAndUpdate(
@@ -199,7 +184,6 @@ export const reorderLinks = catchAsync(
       ),
     );
 
-    // Return the fresh sorted list so the UI can re-render immediately
     const links = await Link.find({ profile: profile._id }).sort({ order: 1 });
 
     res.status(200).json({
@@ -214,7 +198,6 @@ export const reorderLinks = catchAsync(
 
 // =============================
 // GET PUBLIC LINKS BY USERNAME
-// Visitors on /u/:username use this
 // =============================
 
 export const getPublicLinksByUsername = catchAsync(
@@ -237,7 +220,6 @@ export const getPublicLinksByUsername = catchAsync(
       );
     }
 
-    // Public page: hide links where isVisible is false
     const links = await Link.find({
       profile: profile._id,
       isVisible: true,
@@ -255,7 +237,6 @@ export const getPublicLinksByUsername = catchAsync(
 
 // =============================
 // TRACK + REDIRECT PUBLIC LINK
-// Visitors click /api/v1/links/r/:id, we count then forward
 // =============================
 
 export const redirectPublicLink = catchAsync(

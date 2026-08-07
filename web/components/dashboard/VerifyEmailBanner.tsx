@@ -22,8 +22,6 @@ function toSameOriginVerifyPath(verifyURL: string): string | null {
   }
   return null;
 }
-
-// Soft nudge — account still works; just reminds them to confirm email
 export function VerifyEmailBanner({ email }: Props) {
   const [devPath, setDevPath] = useState("");
   const [sending, setSending] = useState(false);

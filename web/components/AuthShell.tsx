@@ -2,7 +2,6 @@
 
 import { SiteHeader } from "@/components/SiteHeader";
 
-/** Shared chrome for login / signup / reset flows — header + centered form column. */
 export function AuthShell({
   title,
   description,

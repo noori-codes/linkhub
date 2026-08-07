@@ -40,7 +40,6 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(express.json({ limit: "10kb" }));
 
-// Routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/profiles", profileRouter);
 app.use("/api/v1/links", linkRouter);
@@ -49,12 +48,10 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/themes", themeRouter);
 app.use("/api/v1/collections", collectionRouter);
 
-// 404 handler
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 
-// Global error handler
 app.use(globalErrorHandler);
 
 export default app;

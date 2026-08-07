@@ -43,11 +43,9 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
-  /** Extra classes on the outer border wrapper */
   wrapperClassName?: string;
 };
 
-/** Password field with show / hide eye toggle. */
 export function PasswordInput({
   className = "",
   wrapperClassName = "",

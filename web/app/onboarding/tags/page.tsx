@@ -30,7 +30,6 @@ const SUGGESTED_TAGS = [
   "Marketer",
 ];
 
-/** Step 7: tags, then finish onboarding → dashboard. */
 export default function OnboardingTagsPage() {
   const router = useRouter();
   const [tags, setTags] = useState<string[]>([]);

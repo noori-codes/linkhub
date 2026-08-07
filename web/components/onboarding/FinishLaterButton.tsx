@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/auth";
 import { skipToDashboard } from "@/lib/onboarding";
 
-/** Completes onboarding with defaults and opens the Links dashboard. */
 export function FinishLaterButton() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

@@ -26,7 +26,6 @@ async function fetchThemes(): Promise<ProfileTheme[]> {
   return json.data.themes;
 }
 
-/** Pick a built-in appearance — updates profile.theme and live preview. */
 export function ThemePicker() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();

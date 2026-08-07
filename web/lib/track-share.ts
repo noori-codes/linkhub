@@ -1,6 +1,5 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
 
-/** Fire-and-forget share analytics for a published profile. */
 export function trackProfileShare(
   username: string,
   method: "copy" | "native" | "qr" | "open" = "copy",

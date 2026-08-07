@@ -13,7 +13,6 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 const inputClass = uiInput;
 
-/** Avatar + cover — visual upload zones on Profile. */
 export function PhotosEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();

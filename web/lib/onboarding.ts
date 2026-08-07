@@ -13,12 +13,10 @@ export type OnboardingStepId =
   | "links"
   | "tags";
 
-/** Ordered wizard screens (UI). Maps to user.onboardingStep where noted. */
 export const ONBOARDING_STEPS: Array<{
   id: OnboardingStepId;
   label: string;
   href: string;
-  /** Value stored on user.onboardingStep when entering / leaving this screen */
   apiStep: "profile" | "socials" | "theme" | "links" | "tags" | "done";
 }> = [
   { id: "profile", label: "Username", href: "/onboarding", apiStep: "profile" },
@@ -63,10 +61,6 @@ export async function completeOnboarding(token: string) {
   });
 }
 
-/**
- * Skip rest of wizard → apply defaults (theme) and open dashboard.
- * Safe to call from any step once a profile exists.
- */
 export async function skipToDashboard(token: string) {
   // Ensure Classic (or any default) theme if profile has none
   try {
@@ -125,7 +119,6 @@ export const onboardingPrimaryBtnClass = uiBtnPrimaryBlock;
 
 export const onboardingCardClass = `flex flex-col gap-4 ${uiCard}`;
 
-/** Where to send a user who logged in mid-wizard. */
 export function resumeOnboardingHref(
   apiStep: string | undefined,
   hasProfile: boolean,

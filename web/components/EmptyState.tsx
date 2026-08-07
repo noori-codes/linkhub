@@ -9,7 +9,6 @@ type Props = {
   children?: ReactNode;
 };
 
-/** Dashed empty panel used across dashboard lists. */
 export function EmptyState({ title, hint, className = "", children }: Props) {
   return (
     <div className={`${uiEmpty} ${className}`.trim()}>

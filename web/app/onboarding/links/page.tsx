@@ -21,7 +21,6 @@ import {
 type CustomLink = { title: string; url: string };
 type AltProfile = { title: string; url: string };
 
-/** Step 5: custom links + optional alt profiles. */
 export default function OnboardingLinksPage() {
   const router = useRouter();
   const [links, setLinks] = useState<CustomLink[]>([

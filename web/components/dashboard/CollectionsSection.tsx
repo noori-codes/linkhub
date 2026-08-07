@@ -76,10 +76,6 @@ type Props = {
   products: ShopProduct[];
 };
 
-/**
- * Group products into named collections for the public shop.
- * Create / edit / hide / delete + assign products via checkboxes.
- */
 export function CollectionsSection({ products }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();

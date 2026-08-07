@@ -116,15 +116,12 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-// Hash password before saving
 userSchema.pre("save", async function () {
-  // Only run if password was modified
   if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 12);
 });
 
-// Compare password
 userSchema.methods.correctPassword = async function (
   candidatePassword: string,
   userPassword: string,
@@ -132,7 +129,6 @@ userSchema.methods.correctPassword = async function (
   return bcrypt.compare(candidatePassword, userPassword);
 };
 
-// Create password reset token
 userSchema.methods.createPasswordResetToken = function (): string {
   const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -146,7 +142,6 @@ userSchema.methods.createPasswordResetToken = function (): string {
   return resetToken;
 };
 
-// Create email verification token
 userSchema.methods.createEmailVerifyToken = function (): string {
   const verifyToken = crypto.randomBytes(32).toString("hex");
 

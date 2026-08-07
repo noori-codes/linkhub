@@ -7,14 +7,13 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { findDefaultTheme } from "../utils/findDefaultTheme.js";
 
+
 // =============================
 // CREATE MY PROFILE
-// One public page per user (User 1 → 1 Profile)
 // =============================
 
 export const createProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Enforce 1 profile per account
     const existing = await Profile.findOne({ user: req.user._id });
 
     if (existing) {
@@ -37,8 +36,7 @@ export const createProfile = catchAsync(
 
     const profile = await Profile.create({
       user: req.user._id, // owner from JWT — never take user id from the body
-      username: req.body.username, // becomes the public URL /u/:username
-      // Fallback display name from account first/last name
+      username: req.body.username,
       displayName:
         req.body.displayName ||
         `${req.user.firstName} ${req.user.lastName}`.trim(),
@@ -48,7 +46,6 @@ export const createProfile = catchAsync(
       website: req.body.website,
       tags: req.body.tags,
       theme: themeId,
-      // status defaults to "draft" in the schema (not public yet)
     });
 
     res.status(201).json({
@@ -60,14 +57,13 @@ export const createProfile = catchAsync(
   },
 );
 
+
 // =============================
 // GET MY PROFILE (owner / dashboard)
-// Includes draft profiles
 // =============================
 
 export const getMyProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // populate("theme") replaces theme ObjectId with the full Theme document
     let profile = await Profile.findOne({ user: req.user._id }).populate(
       "theme",
     );
@@ -95,9 +91,9 @@ export const getMyProfile = catchAsync(
   },
 );
 
+
 // =============================
 // UPDATE MY PROFILE
-// Also used to publish: { "status": "published" }
 // =============================
 
 export const updateMyProfile = catchAsync(
@@ -120,7 +116,6 @@ export const updateMyProfile = catchAsync(
 
     const updates: Record<string, unknown> = {};
 
-    // Partial update: only apply fields that were sent
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
@@ -160,7 +155,6 @@ export const updateMyProfile = catchAsync(
       );
     }
 
-    // Scope by user so you can only update YOUR profile
     const profile = await Profile.findOneAndUpdate(
       { user: req.user._id },
       updates,
@@ -183,14 +177,13 @@ export const updateMyProfile = catchAsync(
   },
 );
 
+
 // =============================
 // GET PUBLIC PROFILE BY USERNAME
-// Visitors use this — drafts are NOT returned
 // =============================
 
 export const getProfileByUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // TypeScript: req.params.username may be undefined — check first
     if (!req.params.username) {
       return next(new AppError("Please provide a username.", 400));
     }

@@ -47,6 +47,7 @@ const getMyProfileOrFail = async (userId: string) => {
   return profile;
 };
 
+
 // =============================
 // GET ALL PRODUCTS
 // =============================
@@ -66,6 +67,7 @@ export const getAllProducts = catchAsync(
     });
   },
 );
+
 
 // =============================
 // CREATE PRODUCT
@@ -101,6 +103,7 @@ export const createProduct = catchAsync(
     });
   },
 );
+
 
 // =============================
 // GET MY PRODUCTS (owner)
@@ -149,9 +152,9 @@ export const getMyProducts = catchAsync(
   },
 );
 
+
 // =============================
 // GET PUBLIC PRODUCTS BY USERNAME
-// Visitors on /u/:username use this
 // =============================
 
 export const getPublicProductsByUsername = catchAsync(
@@ -216,6 +219,7 @@ export const getPublicProductsByUsername = catchAsync(
     });
   },
 );
+
 
 // =============================
 // UPLOAD PRODUCT IMAGE
@@ -304,6 +308,7 @@ export const uploadProductImage = catchAsync(
   },
 );
 
+
 // =============================
 // LINK PREVIEW (og:image etc.)
 // =============================
@@ -331,9 +336,9 @@ export const previewProductLink = catchAsync(
   },
 );
 
+
 // =============================
 // SET PRODUCT IMAGE FROM REMOTE URL
-// Downloads og/product image into MinIO
 // =============================
 
 export const uploadProductImageFromUrl = catchAsync(
@@ -425,6 +430,7 @@ export const uploadProductImageFromUrl = catchAsync(
   },
 );
 
+
 // =============================
 // UPDATE PRODUCT
 // =============================
@@ -476,9 +482,9 @@ export const updateProduct = catchAsync(
   },
 );
 
+
 // =============================
 // DELETE PRODUCT
-// Also removes buy/affiliate ProductLinks under it
 // =============================
 
 export const deleteProduct = catchAsync(

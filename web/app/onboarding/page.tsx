@@ -27,8 +27,6 @@ export default function OnboardingPage() {
       router.replace("/login");
       return;
     }
-
-    // Resume: if profile already exists, skip to about
     async function check() {
       const token = getToken();
       if (!token) return;

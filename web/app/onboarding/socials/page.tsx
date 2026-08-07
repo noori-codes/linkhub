@@ -58,7 +58,6 @@ const SOCIALS: SocialField[] = [
   },
 ];
 
-/** Step 3: optional social links → theme. */
 export default function OnboardingSocialsPage() {
   const router = useRouter();
   const [urls, setUrls] = useState<Record<string, string>>(() =>

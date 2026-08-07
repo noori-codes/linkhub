@@ -29,7 +29,6 @@ async function fetchThemes(): Promise<ProfileTheme[]> {
   return json.data.themes;
 }
 
-/** Step 4: pick a theme preset (default if skipped). */
 export default function OnboardingThemePage() {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -74,8 +73,6 @@ export default function OnboardingThemePage() {
 
     void load();
   }, [router]);
-
-  // When themes load and nothing selected, pick default
   useEffect(() => {
     if (selectedId || !themesQuery.data?.length) return;
     const fallback =
@@ -132,7 +129,6 @@ export default function OnboardingThemePage() {
     }
     setLoading(true);
     try {
-      // Apply default theme explicitly when skipping
       const defaultTheme =
         themesQuery.data?.find((t) => t.slug === "classic") ??
         themesQuery.data?.find((t) => t.isDefault) ??

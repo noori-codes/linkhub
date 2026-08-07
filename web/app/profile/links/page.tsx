@@ -3,8 +3,6 @@
 import { LinksPanel } from "@/components/dashboard/LinksPanel";
 import { Loader } from "@/components/Loader";
 import { useProfile } from "@/components/profile/ProfileProvider";
-
-// Sidebar form for Links — opened from the main menu
 export default function ProfileLinksPage() {
   const { links, setLinks, loading } = useProfile();
 

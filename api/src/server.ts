@@ -4,7 +4,6 @@ import { connectDB } from "./config/database.js";
 import { cleanupLegacyWalletData } from "./utils/cleanupLegacyWalletData.js";
 import { ensureThemes } from "./utils/ensureThemes.js";
 
-// 1. Handle synchronous errors
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT EXCEPTION! 💥");
   console.error(err);
@@ -23,7 +22,6 @@ async function startServer() {
       console.log(`🚀 Server running on port ${PORT}`);
     });
 
-    // 2. Handle rejected promises
     process.on("unhandledRejection", (err) => {
       console.error("UNHANDLED REJECTION! 💥");
       console.error(err);

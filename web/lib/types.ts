@@ -1,4 +1,3 @@
-// Types shaped like the API responses (Profile + Link models)
 
 export type ProfileStatus = "draft" | "published";
 export type ButtonShape = "square" | "rounded" | "pill";

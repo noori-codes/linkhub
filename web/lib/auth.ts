@@ -1,6 +1,5 @@
 const TOKEN_KEY = "linkhub_token";
 
-// Save JWT from login response (browser only)
 export function saveToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
 }

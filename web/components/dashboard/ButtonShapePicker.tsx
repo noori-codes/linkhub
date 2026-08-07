@@ -10,7 +10,6 @@ import { getToken } from "@/lib/auth";
 import { BUTTON_SHAPES, resolveButtonShape } from "@/lib/theme";
 import type { ApiSuccess, ButtonShape, PublicProfile } from "@/lib/types";
 
-/** Linktree-style button corner options — lives on the profile, not the theme. */
 export function ButtonShapePicker() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();

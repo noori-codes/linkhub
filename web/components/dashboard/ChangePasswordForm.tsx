@@ -9,8 +9,6 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
 import { uiBtnSecondary } from "@/lib/ui";
-
-// Logged-in password change — different from forgot/reset (needs current password + JWT)
 export function ChangePasswordForm() {
   const router = useRouter();
   const [passwordCurrent, setPasswordCurrent] = useState("");

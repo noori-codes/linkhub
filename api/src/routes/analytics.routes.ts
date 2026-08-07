@@ -9,11 +9,9 @@ import {
 
 const router = Router();
 
-// Public — visitors on /u/:username
 router.post("/u/:username/view", recordProfileView);
 router.post("/u/:username/share", recordProfileShare);
 
-// Owner-only below
 router.use(protect);
 
 router.get("/me", getMyAnalytics);

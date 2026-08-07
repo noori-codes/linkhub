@@ -31,19 +31,16 @@ function imageUpload(options: {
   });
 }
 
-/** Avatar — smaller, square-ish profile photo */
 export const avatarUpload = imageUpload({
   maxBytes: 2 * 1024 * 1024,
   label: "Avatar",
 });
 
-/** Cover / header — wider banner, allow a bit more size */
 export const coverUpload = imageUpload({
   maxBytes: 5 * 1024 * 1024,
   label: "Cover",
 });
 
-/** Product card image on shop */
 export const productUpload = imageUpload({
   maxBytes: 5 * 1024 * 1024,
   label: "Product image",

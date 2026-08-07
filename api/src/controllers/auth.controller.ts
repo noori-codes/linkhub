@@ -15,9 +15,6 @@ interface JwtPayload {
   exp: number;
 }
 
-// =============================
-// CREATE JWT TOKEN
-// =============================
 
 const signToken = (id: string): string => {
   const options: SignOptions = {};
@@ -29,16 +26,12 @@ const signToken = (id: string): string => {
   return jwt.sign({ id }, config.jwtSecret, options);
 };
 
-// =============================
-// SEND TOKEN
-// =============================
 
 const createSendToken = (
   user: IUser,
   statusCode: number,
   req: Request,
   res: Response,
-  // Optional extras (e.g. verifyURL in development)
   extras: Record<string, unknown> = {},
 ) => {
   const token = signToken(user._id.toString());
@@ -77,9 +70,9 @@ const createSendToken = (
   });
 };
 
+
 // =============================
 // SIGNUP
-// Soft email verify: account works immediately; token emailed for later
 // =============================
 
 export const signup = catchAsync(
@@ -109,11 +102,11 @@ export const signup = catchAsync(
       201,
       req,
       res,
-      // Dev only: copy this into Bruno Verify Email (no need to open Mailtrap)
       process.env.NODE_ENV === "development" ? { verifyURL } : {},
     );
   },
 );
+
 
 // =============================
 // LOGIN
@@ -137,6 +130,7 @@ export const login = catchAsync(
   },
 );
 
+
 // =============================
 // LOGOUT
 // =============================
@@ -152,9 +146,9 @@ export const logout = (req: Request, res: Response) => {
   });
 };
 
+
 // =============================
 // PROTECT ROUTES
-// Accept JWT from Authorization header OR from the jwt cookie set on login
 // =============================
 
 export const protect = catchAsync(
@@ -175,12 +169,10 @@ export const protect = catchAsync(
       }
     }
 
-    // 2) Fallback to cookie from login/signup (browser / Bruno cookie jar)
     if (!token && req.cookies && req.cookies.jwt) {
       token = req.cookies.jwt;
     }
 
-    // No usable token in header or cookie
     if (!token || token === "loggedout") {
       return next(
         new AppError(
@@ -219,12 +211,12 @@ export const protect = catchAsync(
       );
     }
 
-    // Grant access — attach user for downstream controllers
     req.user = currentUser;
 
     next();
   },
 );
+
 
 // =============================
 // FORGOT PASSWORD
@@ -259,7 +251,6 @@ export const forgotPassword = catchAsync(
       res.status(200).json({
         status: "success",
         message: "Password reset token sent to email.",
-        // Dev only: open this URL without checking Mailtrap
         ...(process.env.NODE_ENV === "development" ? { resetURL } : {}),
       });
     } catch (err) {
@@ -290,6 +281,7 @@ export const forgotPassword = catchAsync(
     }
   },
 );
+
 
 // =============================
 // RESET PASSWORD
@@ -324,9 +316,9 @@ export const resetPassword = catchAsync(
   },
 );
 
+
 // =============================
 // VERIFY EMAIL
-// Public — same idea as resetPassword, but only flips emailVerified
 // =============================
 
 export const verifyEmail = catchAsync(
@@ -363,9 +355,9 @@ export const verifyEmail = catchAsync(
   },
 );
 
+
 // =============================
 // RESEND VERIFY EMAIL
-// Protected — mint a fresh token for the logged-in user
 // =============================
 
 export const resendVerifyEmail = catchAsync(
@@ -419,6 +411,7 @@ export const resendVerifyEmail = catchAsync(
     }
   },
 );
+
 
 // =============================
 // UPDATE PASSWORD

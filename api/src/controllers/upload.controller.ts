@@ -142,14 +142,12 @@ async function uploadProfileImage(
   });
 }
 
-/** POST /api/v1/profiles/me/avatar — multipart field "avatar" */
 export const uploadMyAvatar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     await uploadProfileImage(req, res, next, "avatar");
   },
 );
 
-/** POST /api/v1/profiles/me/cover — multipart field "cover" */
 export const uploadMyCover = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     await uploadProfileImage(req, res, next, "cover");

@@ -10,9 +10,6 @@ type Props = {
   displayName?: string;
 };
 
-/**
- * Floating share control on the public /u/[username] page.
- */
 export function PublicShareButton({ username, displayName }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();

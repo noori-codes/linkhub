@@ -11,8 +11,6 @@ type Step = {
   label: string;
   hint: string;
 };
-
-// Derived from live profile/links — no extra API. Answers “what do I do next?”
 export function FirstRunGuide({
   hasAvatar,
   hasLinks,
@@ -41,8 +39,6 @@ export function FirstRunGuide({
   ];
 
   const doneCount = steps.filter((s) => s.done).length;
-
-  // All three done — checklist can disappear
   if (doneCount === steps.length) {
     return null;
   }

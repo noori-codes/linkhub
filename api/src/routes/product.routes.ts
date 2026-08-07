@@ -22,10 +22,8 @@ import {
 
 const router = Router();
 
-// Public shop for published profiles
 router.get("/u/:username", getPublicProductsByUsername);
 
-// Owner-only below
 router.use(protect);
 
 router.get("/", getAllProducts);

@@ -7,7 +7,6 @@ type Props = {
   url: string;
 };
 
-/** Renders a QR for the public page URL (generated in the browser). */
 export function ShareQr({ url }: Props) {
   const [dataUrl, setDataUrl] = useState("");
   const [failed, setFailed] = useState(false);

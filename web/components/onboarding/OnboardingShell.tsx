@@ -14,11 +14,9 @@ type Props = {
   description: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  /** Wider for theme grid */
   wide?: boolean;
 };
 
-/** Shared onboarding chrome: header, progress, title, form column. */
 export function OnboardingShell({
   step,
   title,

@@ -32,9 +32,9 @@ const getMyProductOrFail = async (userId: string, productId: string) => {
   return product;
 };
 
+
 // =============================
 // CREATE PRODUCT LINK
-// POST /products/:productId/links
 // =============================
 
 export const createProductLink = catchAsync(
@@ -77,9 +77,9 @@ export const createProductLink = catchAsync(
   },
 );
 
+
 // =============================
 // GET LINKS FOR ONE PRODUCT (owner)
-// GET /products/:productId/links
 // =============================
 
 export const getProductLinks = catchAsync(
@@ -109,9 +109,9 @@ export const getProductLinks = catchAsync(
   },
 );
 
+
 // =============================
 // UPDATE PRODUCT LINK
-// PATCH /products/:productId/links/:linkId
 // =============================
 
 export const updateProductLink = catchAsync(
@@ -165,9 +165,9 @@ export const updateProductLink = catchAsync(
   },
 );
 
+
 // =============================
 // DELETE PRODUCT LINK
-// DELETE /products/:productId/links/:linkId
 // =============================
 
 export const deleteProductLink = catchAsync(

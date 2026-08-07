@@ -14,8 +14,6 @@ type Props = {
   initialLinks: PublicLink[];
   onLinksChange?: (links: PublicLink[]) => void;
 };
-
-// All link CRUD + reorder — used in the profile Links sidebar
 export function LinksPanel({ initialLinks, onLinksChange }: Props) {
   const router = useRouter();
 
@@ -160,7 +158,6 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
           const data = (await res.json()) as { message?: string };
           message = data.message || message;
         } catch {
-          // empty body
         }
         setPanelError(message);
         return;

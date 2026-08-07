@@ -13,9 +13,7 @@ import { uiBtnPrimary, uiBtnSecondary, uiBtnIcon, uiInput } from "@/lib/ui";
 
 type Props = {
   links: PublicLink[];
-  // Live reorder while dragging (local state only)
   onMove: (next: PublicLink[]) => void;
-  // Finger/mouse released — parent should PATCH /links/reorder
   onDragEndCommit: () => void;
   reordering: boolean;
   disabled: boolean;
@@ -62,7 +60,6 @@ export function SortableLinkList({
   onToggleVisibility,
   onDelete,
 }: Props) {
-  // Which row was picked up (HTML5 Drag and Drop API)
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
   function onDragStart(event: DragEvent<HTMLButtonElement>, id: string) {
@@ -83,14 +80,12 @@ export function SortableLinkList({
     const to = links.findIndex((l) => l._id === overId);
     if (from < 0 || to < 0 || from === to) return;
 
-    // Optimistic: rearrange in React state while the pointer moves
     onMove(moveItem(links, from, to));
   }
 
   function onDragEnd() {
     const wasDragging = draggingId !== null;
     setDraggingId(null);
-    // Persist only when a drag actually happened (not a random mouseup)
     if (wasDragging) onDragEndCommit();
   }
 

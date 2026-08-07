@@ -13,7 +13,6 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 const inputClass = uiInput;
 
-/** Profile identity fields — name, username, bio, tags. */
 export function ProfileEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();

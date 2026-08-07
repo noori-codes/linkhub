@@ -9,7 +9,6 @@ type Props = {
   fallback?: React.ReactNode;
 };
 
-/** Hides broken remote URLs instead of showing a torn image icon. */
 export function SafeRemoteImage({ src, alt, className, fallback = null }: Props) {
   const [failed, setFailed] = useState(false);
 

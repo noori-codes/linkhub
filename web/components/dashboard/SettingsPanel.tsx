@@ -17,7 +17,6 @@ type MeUser = {
   emailVerified: boolean;
 };
 
-/** Settings: stacked section cards (standard product settings layout). */
 export function SettingsPanel() {
   const { profile, setProfile } = useProfile();
   const [me, setMe] = useState<MeUser | null>(null);

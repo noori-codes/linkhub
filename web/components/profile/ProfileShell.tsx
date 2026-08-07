@@ -12,10 +12,6 @@ import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { PreviewSkeleton } from "@/components/Skeleton";
 
-/**
- * Dashboard nav — Linktree-style priority:
- * content first → identity → look → monetize → insights → account
- */
 const MENU = [
   {
     href: "/profile/links",
@@ -118,10 +114,6 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/**
- * Three-column dashboard (Linktree-style):
- * nav · editor · phone preview
- */
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { profile, links, loading, error } = useProfile();

@@ -8,7 +8,6 @@ import AppError from "../utils/appError.js";
 
 // =============================
 // RECORD PUBLIC PROFILE VIEW
-// Fired once from /u/:username (client)
 // =============================
 
 export const recordProfileView = catchAsync(
@@ -45,7 +44,6 @@ export const recordProfileView = catchAsync(
 
 // =============================
 // RECORD PUBLIC PROFILE SHARE
-// Fired when someone copies / shares the page link
 // =============================
 
 export const recordProfileShare = catchAsync(
@@ -85,7 +83,6 @@ export const recordProfileShare = catchAsync(
 
 // =============================
 // GET MY ANALYTICS (owner)
-// Totals + top links + recent clicks
 // =============================
 
 export const getMyAnalytics = catchAsync(
@@ -93,7 +90,9 @@ export const getMyAnalytics = catchAsync(
     const profile = await Profile.findOne({ user: req.user._id }).select("_id");
 
     if (!profile) {
-      return next(new AppError("Create a profile before viewing analytics.", 404));
+      return next(
+        new AppError("Create a profile before viewing analytics.", 404),
+      );
     }
 
     const [links, recentEvents, clickEventCount, profileViews, shares] =

@@ -7,10 +7,6 @@ import { useEffect, useState } from "react";
 import { clearToken, getToken } from "@/lib/auth";
 import { uiBtnGhost, uiBtnPrimary } from "@/lib/ui";
 
-/**
- * Top bar like a real product site — brand left, account actions right.
- * Avoids the “empty centered poster” feel of a logo-only first screen.
- */
 export function SiteHeader() {
   const [loggedIn, setLoggedIn] = useState(false);
 

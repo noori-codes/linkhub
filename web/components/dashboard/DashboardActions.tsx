@@ -16,7 +16,6 @@ type Props = {
   emailVerified?: boolean;
 };
 
-/** Settings: publish controls only (Share is on the preview card). */
 export function DashboardActions({
   profile,
   onProfileChange,

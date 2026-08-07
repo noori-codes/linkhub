@@ -6,8 +6,6 @@ import type {
   PublicShopProduct,
 } from "./types";
 
-// Server-side: talk to the Express API.
-// Default assumes API on :3000 and Next on :3001.
 const API_BASE =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -18,7 +16,6 @@ async function getJson<T>(path: string): Promise<T | null> {
 
   try {
     res = await fetch(`${API_BASE}${path}`, {
-      // Always fresh while building the public page in development
       cache: "no-store",
     });
   } catch {

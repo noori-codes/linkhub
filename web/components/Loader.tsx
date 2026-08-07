@@ -13,7 +13,6 @@ const sizeMap: Record<Size, { mark: number; ring: string }> = {
   md: { mark: 28, ring: "h-10 w-10" },
 };
 
-/** Branded ink-mark loader for data waits. Prefer over plain “Loading…” text. */
 export function Loader({ label, size = "md", className = "" }: Props) {
   const { mark, ring } = sizeMap[size];
 

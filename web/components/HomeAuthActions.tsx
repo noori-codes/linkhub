@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 import { getToken } from "@/lib/auth";
 
-/** Primary hero CTA — header already has Log in / Sign up. */
 export default function HomeAuthActions() {
   const [loggedIn, setLoggedIn] = useState(false);
 

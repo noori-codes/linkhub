@@ -18,9 +18,6 @@ function publicPageUrl(username: string) {
   return `${window.location.origin}/u/${username}`;
 }
 
-/**
- * Preview card: View + Share (modal) + Live/Draft badge.
- */
 export function PreviewShareActions({ username, status }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();

@@ -43,8 +43,6 @@ export default function LoginPage() {
       }
 
       saveToken(data.token);
-
-      // Resume wizard if they never finished onboarding
       try {
         const meRes = await fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
           headers: { Authorization: `Bearer ${data.token}` },

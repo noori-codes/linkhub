@@ -26,10 +26,6 @@ function OfflineFallback() {
   );
 }
 
-/**
- * Marketing product shot — same centered phone layout as the dashboard preview
- * (Linktree/Beacons pattern: avatar → identity → link buttons).
- */
 export async function LandingProfilePreview() {
   const demo = await getLandingDemo(LANDING_DEMO_USERNAME);
 

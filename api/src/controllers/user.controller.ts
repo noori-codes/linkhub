@@ -10,9 +10,9 @@ import User from "../models/user.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
+
 // =============================
 // GET CURRENT USER (GET /users/me)
-// Safe shape only — no password, no verify/reset tokens
 // =============================
 
 export const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -22,7 +22,6 @@ export const getMe = catchAsync(async (req: Request, res: Response, next: NextFu
     return next(new AppError("No user found with that ID", 404));
   }
 
-  // Explicit fields so emailVerified is ready for the dashboard later
   res.status(200).json({
     status: "success",
     data: {
@@ -40,9 +39,9 @@ export const getMe = catchAsync(async (req: Request, res: Response, next: NextFu
   });
 });
 
+
 // =============================
 // GET ALL USERS
-// Safe fields only — never return password / tokens
 // =============================
 
 export const getAllUsers = catchAsync(
@@ -62,6 +61,7 @@ export const getAllUsers = catchAsync(
     });
   },
 );
+
 
 // =============================
 // UPDATE CURRENT USER
@@ -121,9 +121,9 @@ export const updateMe = catchAsync(
   },
 );
 
+
 // =============================
 // DELETE CURRENT USER
-// Hard delete — frees email + username for reuse
 // =============================
 
 export const deleteMe = catchAsync(

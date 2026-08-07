@@ -151,7 +151,6 @@ function RecentClickGroup({ group }: { group: ClickGroup }) {
   );
 }
 
-/** Owner-only summary of public page views + link clicks (cached via React Query). */
 export function AnalyticsPanel() {
   const router = useRouter();
   const [showAllGroups, setShowAllGroups] = useState(false);

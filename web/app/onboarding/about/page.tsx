@@ -19,7 +19,6 @@ import {
 } from "@/lib/onboarding";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
-/** Step 2: display name + bio (tags come later). */
 export default function OnboardingAboutPage() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");

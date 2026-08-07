@@ -72,7 +72,6 @@ function escapeHtml(value: string) {
     .replaceAll('"', "&quot;");
 }
 
-/** Settings: live preview + copy HTML for Gmail/Outlook. */
 export function EmailSignaturePanel({ profile }: Props) {
   const html = buildEmailSignatureHtml(profile, pageUrl(profile.username));
 

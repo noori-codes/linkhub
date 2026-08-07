@@ -36,7 +36,6 @@ function productImageSrc(url: string | undefined) {
   return url?.startsWith("http") ? url : null;
 }
 
-/** Owner shop: products + nested buy/affiliate links. */
 export function ShopPanel() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -254,7 +253,6 @@ export function ShopPanel() {
             const imageJson = (await imageRes.json()) as { message?: string };
             message = imageJson.message || message;
           } catch {
-            // empty
           }
           throw new HttpError(message, imageRes.status);
         }
@@ -273,7 +271,6 @@ export function ShopPanel() {
             const imageJson = (await imageRes.json()) as { message?: string };
             message = imageJson.message || message;
           } catch {
-            // empty
           }
           throw new HttpError(message, imageRes.status);
         }
@@ -298,7 +295,6 @@ export function ShopPanel() {
           const linkJson = (await linkRes.json()) as { message?: string };
           message = linkJson.message || message;
         } catch {
-          // empty
         }
         throw new HttpError(message, linkRes.status);
       }
@@ -385,7 +381,6 @@ export function ShopPanel() {
           const json = (await res.json()) as { message?: string };
           message = json.message || message;
         } catch {
-          // empty body
         }
         throw new HttpError(message, res.status);
       }
@@ -471,7 +466,6 @@ export function ShopPanel() {
           const json = (await res.json()) as { message?: string };
           message = json.message || message;
         } catch {
-          // empty
         }
         throw new HttpError(message, res.status);
       }

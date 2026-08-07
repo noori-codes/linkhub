@@ -37,11 +37,6 @@ type Props = {
   variant: "page" | "preview";
 };
 
-/**
- * One public profile UI — used by /u/[username] and the owner preview.
- * Preview = compact centered phone layout (Linktree-style).
- * Page = desktop split / mobile stack visitor layout.
- */
 export function PublicProfileView({
   profile,
   links,

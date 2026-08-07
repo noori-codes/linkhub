@@ -12,10 +12,8 @@ import { avatarUpload, coverUpload } from "../middleware/upload.js";
 
 const router = Router();
 
-// Public — only published profiles
 router.get("/u/:username", getProfileByUsername);
 
-// Everything below requires login (JWT → req.user)
 router.use(protect);
 
 router.post("/", createProfile);
