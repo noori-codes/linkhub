@@ -44,6 +44,7 @@ export async function LandingProfilePreview() {
           profile={demo.profile}
           links={demo.links}
           variant="preview"
+          inertLinks
         />
       </PhoneFrame>
     </Link>

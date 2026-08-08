@@ -23,7 +23,6 @@ export function DashboardActions({
 }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   const isPublished = profile.status === "published";
   const canPublish = emailVerified;
@@ -45,7 +44,6 @@ export function DashboardActions({
     const nextStatus = isPublished ? "draft" : "published";
 
     setSaving(true);
-    setError("");
 
     try {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
@@ -63,7 +61,6 @@ export function DashboardActions({
 
       if (!res.ok) {
         const msg = data.message || "Could not update status";
-        setError(msg);
         toast.error(msg);
         return;
       }
@@ -73,9 +70,7 @@ export function DashboardActions({
         nextStatus === "published" ? "Page published" : "Page unpublished",
       );
     } catch {
-      const msg = "Cannot reach API. Is the backend running?";
-      setError(msg);
-      toast.error(msg);
+      toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setSaving(false);
     }
@@ -101,12 +96,6 @@ export function DashboardActions({
         </span>
       }
     >
-      {error ? (
-        <p className="mb-3 text-sm text-danger" role="alert">
-          {error}
-        </p>
-      ) : null}
-
       <div className="flex flex-col gap-2 sm:flex-row">
         <button
           type="button"

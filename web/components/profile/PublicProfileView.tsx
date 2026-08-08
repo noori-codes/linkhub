@@ -35,6 +35,8 @@ type Props = {
   collections?: PublicShopCollection[];
   /** page = visitor /u/... · preview = owner dashboard card */
   variant: "page" | "preview";
+  /** Landing hero wraps preview in a Link — use spans instead of nested <a>s */
+  inertLinks?: boolean;
 };
 
 export function PublicProfileView({
@@ -43,6 +45,7 @@ export function PublicProfileView({
   products = [],
   collections = [],
   variant,
+  inertLinks = false,
 }: Props) {
   const name = profile.displayName || profile.username;
   const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
@@ -168,23 +171,41 @@ export function PublicProfileView({
                 No visible links yet
               </p>
             ) : (
-              visible.map((link) => (
-                <a
-                  key={link._id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full px-4 py-3 text-center text-[13px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.05)]"
-                  style={{
-                    backgroundColor: tokens.buttonColor,
-                    color: tokens.buttonTextColor,
-                    fontFamily: tokens.fontFamily,
-                    borderRadius: "var(--profile-button-radius)",
-                  }}
-                >
-                  {link.title}
-                </a>
-              ))
+              visible.map((link) => {
+                const linkClass =
+                  "block w-full px-4 py-3 text-center text-[13px] font-semibold shadow-[0_1px_2px_rgba(18,20,26,0.05)]";
+                const linkStyle = {
+                  backgroundColor: tokens.buttonColor,
+                  color: tokens.buttonTextColor,
+                  fontFamily: tokens.fontFamily,
+                  borderRadius: "var(--profile-button-radius)",
+                } as const;
+
+                if (inertLinks) {
+                  return (
+                    <span
+                      key={link._id}
+                      className={linkClass}
+                      style={linkStyle}
+                    >
+                      {link.title}
+                    </span>
+                  );
+                }
+
+                return (
+                  <a
+                    key={link._id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClass}
+                    style={linkStyle}
+                  >
+                    {link.title}
+                  </a>
+                );
+              })
             )}
           </div>
 

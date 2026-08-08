@@ -189,7 +189,6 @@ export function ShopPanel() {
             ? err.message
             : "Could not import from that link";
       setProductError(message);
-      toast.error(message);
     } finally {
       setFetchingPreview(false);
     }

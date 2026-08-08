@@ -165,7 +165,6 @@ export function CollectionsSection({ products }: Props) {
           ? err.message
           : "Cannot reach API. Is the backend running?";
       setFormError(message);
-      toast.error(message);
     },
   });
 
