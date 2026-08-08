@@ -44,10 +44,10 @@ export function isProfileTheme(
 ): theme is ProfileTheme {
   return Boolean(
     theme &&
-      typeof theme === "object" &&
-      "tokens" in theme &&
-      theme.tokens &&
-      typeof theme.tokens.backgroundColor === "string",
+    typeof theme === "object" &&
+    "tokens" in theme &&
+    theme.tokens &&
+    typeof theme.tokens.backgroundColor === "string",
   );
 }
 
@@ -60,7 +60,9 @@ export function resolveThemeTokens(
   return DEFAULT_THEME_TOKENS;
 }
 
-export function themeIdOf(profile: Pick<PublicProfile, "theme">): string | null {
+export function themeIdOf(
+  profile: Pick<PublicProfile, "theme">,
+): string | null {
   if (!profile.theme) return null;
   if (typeof profile.theme === "string") return profile.theme;
   return profile.theme._id ?? null;

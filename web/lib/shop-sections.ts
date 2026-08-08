@@ -7,11 +7,6 @@ export type ShopSection = {
   products: PublicShopProduct[];
 };
 
-/**
- * Build shop sections from flat public products + collection groupings.
- * Products in a collection appear under that heading; leftovers go under “More”
- * (or a single “Shop” section when there are no collections).
- */
 export function buildShopSections(
   products: PublicShopProduct[],
   collections: PublicShopCollection[],

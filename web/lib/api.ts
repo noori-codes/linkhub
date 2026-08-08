@@ -19,7 +19,6 @@ async function getJson<T>(path: string): Promise<T | null> {
       cache: "no-store",
     });
   } catch {
-    // Common when `cd api && yarn dev` is not running
     throw new Error(
       `Cannot reach API at ${API_BASE}${path}. Start the backend with: cd api && yarn dev`,
     );
@@ -68,10 +67,6 @@ export async function getPublicCollections(username: string) {
   return json?.data.collections ?? [];
 }
 
-/**
- * Soft fetch for marketing surfaces — never throws.
- * Returns null when the API is down or the profile is missing/unpublished.
- */
 export async function getLandingDemo(username: string): Promise<{
   profile: PublicProfile;
   links: PublicLink[];

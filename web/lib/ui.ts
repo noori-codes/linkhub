@@ -1,4 +1,3 @@
-
 export const uiInput =
   "w-full rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none transition-colors focus:border-brand";
 

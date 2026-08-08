@@ -1,9 +1,5 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import {
-  uiBtnPrimaryBlock,
-  uiCard,
-  uiInput,
-} from "@/lib/ui";
+import { uiBtnPrimaryBlock, uiCard, uiInput } from "@/lib/ui";
 
 export type OnboardingStepId =
   | "profile"
@@ -20,8 +16,18 @@ export const ONBOARDING_STEPS: Array<{
   apiStep: "profile" | "socials" | "theme" | "links" | "tags" | "done";
 }> = [
   { id: "profile", label: "Username", href: "/onboarding", apiStep: "profile" },
-  { id: "about", label: "About", href: "/onboarding/about", apiStep: "profile" },
-  { id: "socials", label: "Socials", href: "/onboarding/socials", apiStep: "socials" },
+  {
+    id: "about",
+    label: "About",
+    href: "/onboarding/about",
+    apiStep: "profile",
+  },
+  {
+    id: "socials",
+    label: "Socials",
+    href: "/onboarding/socials",
+    apiStep: "socials",
+  },
   { id: "theme", label: "Theme", href: "/onboarding/theme", apiStep: "theme" },
   { id: "links", label: "Links", href: "/onboarding/links", apiStep: "links" },
   { id: "tags", label: "Tags", href: "/onboarding/tags", apiStep: "tags" },
@@ -76,17 +82,23 @@ export async function skipToDashboard(token: string) {
       const profile = profileJson.data?.profile;
       const hasTheme = Boolean(
         profile?.theme &&
-          (typeof profile.theme === "string" ||
-            (typeof profile.theme === "object" &&
-              profile.theme !== null &&
-              "_id" in profile.theme)),
+        (typeof profile.theme === "string" ||
+          (typeof profile.theme === "object" &&
+            profile.theme !== null &&
+            "_id" in profile.theme)),
       );
 
       if (!hasTheme) {
         const themesRes = await fetch(`${CLIENT_API_BASE}/api/v1/themes`);
         if (themesRes.ok) {
           const themesJson = (await themesRes.json()) as {
-            data?: { themes?: Array<{ _id: string; slug?: string; isDefault?: boolean }> };
+            data?: {
+              themes?: Array<{
+                _id: string;
+                slug?: string;
+                isDefault?: boolean;
+              }>;
+            };
           };
           const themes = themesJson.data?.themes ?? [];
           const fallback =
