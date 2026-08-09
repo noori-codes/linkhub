@@ -8,6 +8,17 @@ function required(name: keyof NodeJS.ProcessEnv): string {
   return value;
 }
 
+/** Prefer standard AWS names; accept short aliases people often paste. */
+function requiredCred(primary: keyof NodeJS.ProcessEnv, alias: string): string {
+  const value = process.env[primary] || process.env[alias];
+  if (!value) {
+    throw new Error(
+      `${primary} is missing — needed for avatar uploads (also accepts ${alias})`,
+    );
+  }
+  return value;
+}
+
 /** Lazy so the API can boot without S3 until someone uploads. */
 let client: S3Client | null = null;
 
@@ -28,8 +39,8 @@ export function getS3Client() {
   const config: S3ClientConfig = {
     region,
     credentials: {
-      accessKeyId: required("S3_ACCESS_KEY_ID"),
-      secretAccessKey: required("S3_SECRET_ACCESS_KEY"),
+      accessKeyId: requiredCred("S3_ACCESS_KEY_ID", "S3_ACCESS_KEY"),
+      secretAccessKey: requiredCred("S3_SECRET_ACCESS_KEY", "S3_SECRET_KEY"),
     },
   };
 

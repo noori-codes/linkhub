@@ -77,3 +77,14 @@
 
     - Industry = Marketing
     - Revenue Model = Affiliate Marketing for users
+
+## S3
+
+- bucketName/projectName/userId/fileName/klj/ej2/3j2/kljej23j232kj3lk23hkj2.png
+
+## other notes
+
+- use react-select for tags
+- Settings
+- onboarding
+- normalization
