@@ -9,6 +9,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { PasswordInput } from "@/components/PasswordInput";
 import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { normalizeEmailInput } from "@/lib/email";
 import {
   onboardingCardClass,
   onboardingInputClass,
@@ -32,7 +33,7 @@ export default function LoginPage() {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizeEmailInput(email), password }),
       });
 
       const data = await res.json();
@@ -101,8 +102,13 @@ export default function LoginPage() {
           <input
             type="email"
             required
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(normalizeEmailInput(e.target.value))}
             className={onboardingInputClass}
           />
         </label>

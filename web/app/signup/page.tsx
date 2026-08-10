@@ -9,6 +9,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { PasswordInput } from "@/components/PasswordInput";
 import { getToken, saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { normalizeEmailInput } from "@/lib/email";
 import {
   onboardingCardClass,
   onboardingInputClass,
@@ -67,7 +68,7 @@ export default function SignupPage() {
           body: JSON.stringify({
             firstName: firstName.trim(),
             lastName: lastName.trim(),
-            email: email.trim(),
+            email: normalizeEmailInput(email),
             password,
             passwordConfirm,
           }),
@@ -158,8 +159,13 @@ export default function SignupPage() {
           <input
             type="email"
             required
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(normalizeEmailInput(e.target.value))}
             disabled={accountCreated}
             className={`${onboardingInputClass} disabled:opacity-60`}
           />

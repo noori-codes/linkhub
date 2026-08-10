@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { normalizeEmailInput } from "@/lib/email";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/forgotPassword`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: normalizeEmailInput(email) }),
       });
 
       const data = (await res.json()) as {
@@ -70,8 +71,13 @@ export default function ForgotPasswordPage() {
           <input
             type="email"
             required
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(normalizeEmailInput(e.target.value))}
             className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
           />
         </label>

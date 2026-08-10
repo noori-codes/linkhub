@@ -60,6 +60,11 @@ const userSchema = new Schema<IUser>(
       required: [true, "Please provide your email."],
       unique: true,
       lowercase: true,
+      trim: true,
+      set: (value: string) =>
+        typeof value === "string"
+          ? value.toLowerCase().replace(/\s/g, "")
+          : value,
       validate: [validator.isEmail, "Please provide a valid email."],
     },
 

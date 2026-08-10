@@ -114,7 +114,11 @@ export const signup = catchAsync(
 
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
+    const email =
+      typeof req.body.email === "string"
+        ? req.body.email.toLowerCase().replace(/\s/g, "")
+        : "";
+    const { password } = req.body;
 
     if (!email || !password) {
       return next(new AppError("Please provide email and password", 400));
@@ -224,9 +228,12 @@ export const protect = catchAsync(
 
 export const forgotPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findOne({
-      email: req.body.email,
-    });
+    const email =
+      typeof req.body.email === "string"
+        ? req.body.email.toLowerCase().replace(/\s/g, "")
+        : "";
+
+    const user = await User.findOne({ email });
 
     if (!user) {
       return next(
