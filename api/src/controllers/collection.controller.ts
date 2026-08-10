@@ -6,6 +6,40 @@ import Product from "../models/product.model.js";
 import Profile from "../models/profile.model.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
+import { withSignedProductMediaList } from "../utils/s3SignedUrl.js";
+
+type CollectionProductLean = {
+  title?: string;
+  imageUrl?: string;
+  isVisible?: boolean;
+  order?: number;
+  [key: string]: unknown;
+};
+
+async function withSignedCollectionProducts<T extends { products?: unknown }>(
+  collection: T,
+): Promise<T> {
+  const products = collection.products;
+  if (!Array.isArray(products) || products.length === 0) return collection;
+
+  // Only populated product docs have imageUrl — skip bare ObjectIds
+  if (typeof products[0] !== "object" || products[0] === null) {
+    return collection;
+  }
+
+  const signed = await withSignedProductMediaList(
+    products as CollectionProductLean[],
+  );
+  return { ...collection, products: signed };
+}
+
+async function withSignedCollectionsList<T extends { products?: unknown }>(
+  collections: T[],
+): Promise<T[]> {
+  return Promise.all(
+    collections.map((collection) => withSignedCollectionProducts(collection)),
+  );
+}
 
 const getMyProfileOrFail = async (userId: string) => {
   const profile = await Profile.findOne({ user: userId });
@@ -71,7 +105,7 @@ export const getMyCollections = catchAsync(
       status: "success",
       results: collections.length,
       data: {
-        collections,
+        collections: await withSignedCollectionsList(collections),
       },
     });
   },
@@ -119,7 +153,9 @@ export const createCollection = catchAsync(
     res.status(201).json({
       status: "success",
       data: {
-        collection: populated,
+        collection: populated
+          ? await withSignedCollectionProducts(populated)
+          : populated,
       },
     });
   },
@@ -179,7 +215,7 @@ export const updateCollection = catchAsync(
     res.status(200).json({
       status: "success",
       data: {
-        collection,
+        collection: await withSignedCollectionProducts(collection),
       },
     });
   },

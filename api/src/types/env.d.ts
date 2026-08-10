@@ -24,5 +24,7 @@ declare namespace NodeJS {
     S3_SECRET_ACCESS_KEY?: string;
     S3_ENDPOINT?: string;
     S3_PUBLIC_URL?: string;
+    /** Seconds until a signed GET URL expires (default 3600). */
+    S3_SIGNED_URL_EXPIRES?: string;
   }
 }

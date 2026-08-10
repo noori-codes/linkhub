@@ -6,6 +6,10 @@ import Theme from "../models/theme.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { findDefaultTheme } from "../utils/findDefaultTheme.js";
+import {
+  canonicalizeOurObjectUrl,
+  signedProfileJson,
+} from "../utils/s3SignedUrl.js";
 
 
 // =============================
@@ -41,7 +45,7 @@ export const createProfile = catchAsync(
         req.body.displayName ||
         `${req.user.firstName} ${req.user.lastName}`.trim(),
       bio: req.body.bio,
-      avatarUrl: req.body.avatarUrl,
+      avatarUrl: canonicalizeOurObjectUrl(req.body.avatarUrl) ?? req.body.avatarUrl,
       location: req.body.location,
       website: req.body.website,
       tags: req.body.tags,
@@ -51,7 +55,7 @@ export const createProfile = catchAsync(
     res.status(201).json({
       status: "success",
       data: {
-        profile,
+        profile: await signedProfileJson(profile),
       },
     });
   },
@@ -85,7 +89,7 @@ export const getMyProfile = catchAsync(
     res.status(200).json({
       status: "success",
       data: {
-        profile,
+        profile: await signedProfileJson(profile),
       },
     });
   },
@@ -120,6 +124,14 @@ export const updateMyProfile = catchAsync(
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
+    }
+
+    // Never persist expired signed query strings — store the stable object URL
+    if (typeof updates.avatarUrl === "string") {
+      updates.avatarUrl = canonicalizeOurObjectUrl(updates.avatarUrl);
+    }
+    if (typeof updates.coverUrl === "string") {
+      updates.coverUrl = canonicalizeOurObjectUrl(updates.coverUrl);
     }
 
     if (updates.buttonShape !== undefined) {
@@ -171,7 +183,7 @@ export const updateMyProfile = catchAsync(
     res.status(200).json({
       status: "success",
       data: {
-        profile,
+        profile: await signedProfileJson(profile),
       },
     });
   },
@@ -203,7 +215,7 @@ export const getProfileByUsername = catchAsync(
     res.status(200).json({
       status: "success",
       data: {
-        profile,
+        profile: await signedProfileJson(profile),
       },
     });
   },

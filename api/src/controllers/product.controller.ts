@@ -13,6 +13,13 @@ import {
 } from "../utils/linkPreview.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import {
+  canonicalizeOurObjectUrl,
+  keyFromOurPublicUrl,
+  signedProductJson,
+  signStoredObjectUrl,
+  withSignedProductMediaList,
+} from "../utils/s3SignedUrl.js";
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -20,17 +27,6 @@ const EXT_BY_MIME: Record<string, string> = {
   "image/webp": "webp",
   "image/gif": "gif",
 };
-
-function keyFromOurPublicUrl(
-  url: string | undefined,
-  publicUrl: string,
-): string | null {
-  if (!url) return null;
-  const prefix = `${publicUrl}/`;
-  if (!url.startsWith(prefix)) return null;
-  const key = url.slice(prefix.length);
-  return key || null;
-}
 
 function isOwnedProductUploadKey(key: string, userId: string): boolean {
   return key.startsWith(`products/${userId}/`);
@@ -56,13 +52,14 @@ export const getAllProducts = catchAsync(
   async (_req: Request, res: Response, _next: NextFunction) => {
     const products = await Product.find()
       .sort({ createdAt: -1 })
-      .populate("profile", "username displayName status");
+      .populate("profile", "username displayName status")
+      .lean();
 
     res.status(200).json({
       status: "success",
       results: products.length,
       data: {
-        products,
+        products: await withSignedProductMediaList(products),
       },
     });
   },
@@ -90,7 +87,7 @@ export const createProduct = catchAsync(
       profile: profile._id,
       title: req.body.title,
       description: req.body.description,
-      imageUrl: req.body.imageUrl,
+      imageUrl: canonicalizeOurObjectUrl(req.body.imageUrl) ?? req.body.imageUrl,
       order,
       isVisible: req.body.isVisible,
     });
@@ -98,7 +95,7 @@ export const createProduct = catchAsync(
     res.status(201).json({
       status: "success",
       data: {
-        product,
+        product: await signedProductJson(product),
       },
     });
   },
@@ -137,10 +134,12 @@ export const getMyProducts = catchAsync(
       linkCounts.map((row) => [String(row._id), row.count]),
     );
 
-    const productsWithCounts = products.map((product) => ({
-      ...product,
-      linkCount: countByProduct.get(String(product._id)) ?? 0,
-    }));
+    const productsWithCounts = await withSignedProductMediaList(
+      products.map((product) => ({
+        ...product,
+        linkCount: countByProduct.get(String(product._id)) ?? 0,
+      })),
+    );
 
     res.status(200).json({
       status: "success",
@@ -203,12 +202,14 @@ export const getPublicProductsByUsername = catchAsync(
     }
 
     // Only publish products that have at least one buy link — empty cards look broken
-    const publicProducts = products
-      .map((product) => ({
-        ...product,
-        links: linksByProduct.get(String(product._id)) ?? [],
-      }))
-      .filter((product) => product.links.length > 0);
+    const publicProducts = await withSignedProductMediaList(
+      products
+        .map((product) => ({
+          ...product,
+          links: linksByProduct.get(String(product._id)) ?? [],
+        }))
+        .filter((product) => product.links.length > 0),
+    );
 
     res.status(200).json({
       status: "success",
@@ -284,7 +285,7 @@ export const uploadProductImage = catchAsync(
       { new: true, runValidators: true },
     );
 
-    const oldKey = keyFromOurPublicUrl(oldUrl, publicUrl);
+    const oldKey = keyFromOurPublicUrl(oldUrl);
     if (oldKey && isOwnedProductUploadKey(oldKey, userId)) {
       try {
         await s3.send(
@@ -298,11 +299,13 @@ export const uploadProductImage = catchAsync(
       }
     }
 
+    const signedUrl = (await signStoredObjectUrl(url)) ?? url;
+
     res.status(200).json({
       status: "success",
       data: {
-        product: updated,
-        imageUrl: url,
+        product: await signedProductJson(updated),
+        imageUrl: signedUrl,
       },
     });
   },
@@ -406,7 +409,7 @@ export const uploadProductImageFromUrl = catchAsync(
       { new: true, runValidators: true },
     );
 
-    const oldKey = keyFromOurPublicUrl(oldUrl, publicUrl);
+    const oldKey = keyFromOurPublicUrl(oldUrl);
     if (oldKey && isOwnedProductUploadKey(oldKey, userId)) {
       try {
         await s3.send(
@@ -420,11 +423,13 @@ export const uploadProductImageFromUrl = catchAsync(
       }
     }
 
+    const signedUrl = (await signStoredObjectUrl(url)) ?? url;
+
     res.status(200).json({
       status: "success",
       data: {
-        product: updated,
-        imageUrl: url,
+        product: await signedProductJson(updated),
+        imageUrl: signedUrl,
       },
     });
   },
@@ -460,6 +465,10 @@ export const updateProduct = catchAsync(
       }
     }
 
+    if (typeof updates.imageUrl === "string") {
+      updates.imageUrl = canonicalizeOurObjectUrl(updates.imageUrl);
+    }
+
     const product = await Product.findOneAndUpdate(
       { _id: id, profile: profile._id },
       updates,
@@ -476,7 +485,7 @@ export const updateProduct = catchAsync(
     res.status(200).json({
       status: "success",
       data: {
-        product,
+        product: await signedProductJson(product),
       },
     });
   },

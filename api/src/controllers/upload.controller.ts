@@ -6,6 +6,11 @@ import { getS3Client, getS3Config } from "../config/s3.js";
 import Profile from "../models/profile.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import {
+  keyFromOurPublicUrl,
+  signedProfileJson,
+  signStoredObjectUrl,
+} from "../utils/s3SignedUrl.js";
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -15,18 +20,6 @@ const EXT_BY_MIME: Record<string, string> = {
 };
 
 type ImageKind = "avatar" | "cover";
-
-/** Only delete objects we serve from this bucket (never arbitrary URLs). */
-function keyFromOurPublicUrl(
-  url: string | undefined,
-  publicUrl: string,
-): string | null {
-  if (!url) return null;
-  const prefix = `${publicUrl}/`;
-  if (!url.startsWith(prefix)) return null;
-  const key = url.slice(prefix.length);
-  return key || null;
-}
 
 function isOwnedUploadKey(
   key: string,
@@ -42,10 +35,9 @@ async function deleteOldObjectIfOurs(
   userId: string,
   kind: ImageKind,
   bucket: string,
-  publicUrl: string,
   s3: ReturnType<typeof getS3Client>,
 ) {
-  const key = keyFromOurPublicUrl(oldUrl, publicUrl);
+  const key = keyFromOurPublicUrl(oldUrl);
   if (!key || !isOwnedUploadKey(key, userId, kind)) return;
 
   try {
@@ -129,15 +121,16 @@ async function uploadProfileImage(
     req.user._id.toString(),
     kind,
     bucket,
-    publicUrl,
     s3,
   );
+
+  const signedUrl = (await signStoredObjectUrl(url)) ?? url;
 
   res.status(200).json({
     status: "success",
     data: {
-      profile,
-      [field]: url,
+      profile: await signedProfileJson(profile),
+      [field]: signedUrl,
     },
   });
 }
