@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
-import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { Loader } from "@/components/Loader";
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -50,8 +49,6 @@ export function SettingsPanel() {
       {me && !me.emailVerified ? (
         <VerifyEmailBanner email={me.email} />
       ) : null}
-
-      <EmailSignaturePanel profile={profile} />
 
       <ChangePasswordForm />
     </div>

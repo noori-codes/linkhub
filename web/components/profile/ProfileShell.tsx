@@ -17,37 +17,36 @@ const MENU = [
   {
     href: "/profile/links",
     label: "Links",
-    hint: "Your list",
     icon: "/link.svg",
   },
   {
     href: "/profile/about",
     label: "Profile",
-    hint: "Photos & bio",
     icon: "/about.svg",
   },
   {
     href: "/profile/avatar",
     label: "Design",
-    hint: "Theme",
     icon: "/avatar.svg",
   },
   {
     href: "/profile/shop",
     label: "Shop",
-    hint: "Products",
     icon: "/shop.svg",
   },
   {
     href: "/profile/analytics",
     label: "Analytics",
-    hint: "Views & clicks",
     icon: "/analytics.svg",
+  },
+  {
+    href: "/profile/signature",
+    label: "Signature",
+    icon: "/signature.svg",
   },
   {
     href: "/profile/settings",
     label: "Settings",
-    hint: "Account",
     icon: "/settings.svg",
   },
 ];
@@ -66,6 +65,7 @@ function sectionTitle(pathname: string) {
     return "Design";
   if (pathname.startsWith("/profile/shop")) return "Shop";
   if (pathname.startsWith("/profile/analytics")) return "Analytics";
+  if (pathname.startsWith("/profile/signature")) return "Signature";
   if (pathname.startsWith("/profile/settings")) return "Settings";
   return "Links";
 }
@@ -92,8 +92,11 @@ function sectionHint(pathname: string) {
   if (pathname.startsWith("/profile/analytics")) {
     return "Views and clicks from your published page.";
   }
+  if (pathname.startsWith("/profile/signature")) {
+    return "Copy an HTML signature for your email client.";
+  }
   if (pathname.startsWith("/profile/settings")) {
-    return "Signature, password, and account.";
+    return "Password and account.";
   }
   return "Edits update the live preview.";
 }
@@ -179,7 +182,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav
-          className="flex shrink-0 gap-1 overflow-x-auto px-2 pb-2 lg:flex-col lg:gap-0.5 lg:overflow-y-auto lg:px-3 lg:pb-3"
+          className="flex shrink-0 gap-1 overflow-x-auto px-2 pb-2 lg:flex-col lg:gap-0.5 lg:overflow-y-auto lg:px-2.5 lg:pb-3"
           aria-label="Profile"
         >
           {MENU.map((item) => {
@@ -190,30 +193,25 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={
                   active
-                    ? "flex shrink-0 items-center gap-3 rounded-xl bg-brand-muted px-3 py-2.5 text-text lg:py-2.5"
-                    : "flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-text-muted transition-colors hover:bg-bg hover:text-text lg:py-2.5"
+                    ? "flex shrink-0 items-center gap-2.5 rounded-lg bg-brand-muted px-3 py-2 text-text lg:py-2"
+                    : "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-text-muted transition-colors hover:bg-bg hover:text-text lg:py-2"
                 }
               >
+                <Image
+                  src={item.icon}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className={active ? "opacity-100" : "opacity-70"}
+                />
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                    active ? "bg-surface shadow-sm" : "bg-bg"
-                  }`}
+                  className={
+                    active
+                      ? "text-[13px] font-semibold tracking-tight"
+                      : "text-[13px] font-medium tracking-tight"
+                  }
                 >
-                  <Image
-                    src={item.icon}
-                    alt=""
-                    width={16}
-                    height={16}
-                    className="opacity-80"
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium leading-tight">
-                    {item.label}
-                  </span>
-                  <span className="mt-0.5 hidden text-[11px] text-text-muted xl:block">
-                    {item.hint}
-                  </span>
+                  {item.label}
                 </span>
               </Link>
             );
