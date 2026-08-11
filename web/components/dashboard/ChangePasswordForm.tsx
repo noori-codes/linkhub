@@ -4,11 +4,11 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
-import { uiBtnSecondary } from "@/lib/ui";
+import { uiBtnPrimary } from "@/lib/ui";
+
 export function ChangePasswordForm() {
   const router = useRouter();
   const [passwordCurrent, setPasswordCurrent] = useState("");
@@ -76,55 +76,50 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <SettingsCard
-      title="Password"
-      description="Update the password for your account."
-    >
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">Current password</span>
-          <PasswordInput
-            required
-            minLength={8}
-            value={passwordCurrent}
-            onChange={(e) => setPasswordCurrent(e.target.value)}
-            autoComplete="current-password"
-            wrapperClassName="rounded-xl"
-          />
-        </label>
+    <form onSubmit={onSubmit} className="flex flex-col gap-3.5">
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-text">Current password</span>
+        <PasswordInput
+          required
+          minLength={8}
+          value={passwordCurrent}
+          onChange={(e) => setPasswordCurrent(e.target.value)}
+          autoComplete="current-password"
+          wrapperClassName="rounded-xl"
+        />
+      </label>
 
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">New password</span>
-          <PasswordInput
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            wrapperClassName="rounded-xl"
-          />
-        </label>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-text">New password</span>
+        <PasswordInput
+          required
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
+          wrapperClassName="rounded-xl"
+        />
+      </label>
 
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-text-muted">Confirm new password</span>
-          <PasswordInput
-            required
-            minLength={8}
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            autoComplete="new-password"
-            wrapperClassName="rounded-xl"
-          />
-        </label>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-text">Confirm new password</span>
+        <PasswordInput
+          required
+          minLength={8}
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          autoComplete="new-password"
+          wrapperClassName="rounded-xl"
+        />
+      </label>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className={`mt-1 ${uiBtnSecondary}`}
-        >
-          {saving ? "Updating…" : "Update password"}
-        </button>
-      </form>
-    </SettingsCard>
+      <button
+        type="submit"
+        disabled={saving}
+        className={`mt-1 ${uiBtnPrimary}`}
+      >
+        {saving ? "Updating…" : "Update password"}
+      </button>
+    </form>
   );
 }

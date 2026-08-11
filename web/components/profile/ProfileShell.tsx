@@ -74,11 +74,11 @@ const UTILITY_COPY: Record<
 > = {
   settings: {
     title: "Settings",
-    hint: "Password and account.",
+    hint: "Update the password for your account.",
   },
   signature: {
-    title: "Signature",
-    hint: "Copy an HTML signature for your email client.",
+    title: "Email signature",
+    hint: "Built from your profile — paste into Gmail or Outlook.",
   },
 };
 
