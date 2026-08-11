@@ -20,6 +20,7 @@ import {
   signStoredObjectUrl,
   withSignedProductMediaList,
 } from "../utils/s3SignedUrl.js";
+import { compressImageBuffer } from "../middleware/resizeImage.js";
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -388,16 +389,25 @@ export const uploadProductImageFromUrl = catchAsync(
       return next(new AppError(message, 500));
     }
 
+    let compressed: Buffer;
+    try {
+      compressed = await compressImageBuffer(downloaded.buffer, 1200, 1200);
+    } catch {
+      return next(
+        new AppError("Could not process that image. Try another URL.", 400),
+      );
+    }
+
     const userId = req.user._id.toString();
     const oldUrl = product.imageUrl;
-    const key = `products/${userId}/${product._id}/${randomUUID()}.${downloaded.ext}`;
+    const key = `products/${userId}/${product._id}/${randomUUID()}.jpg`;
 
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: key,
-        Body: downloaded.buffer,
-        ContentType: downloaded.contentType,
+        Body: compressed,
+        ContentType: "image/jpeg",
       }),
     );
 
