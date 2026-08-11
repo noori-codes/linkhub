@@ -7,7 +7,6 @@ type Props = {
   hasAvatar: boolean;
   hasLinks: boolean;
   isPublished: boolean;
-  username: string;
 };
 
 type Step = {
@@ -50,7 +49,6 @@ export function FirstRunGuide({
   hasAvatar,
   hasLinks,
   isPublished,
-  username,
 }: Props) {
   const steps: Step[] = [
     {
@@ -69,7 +67,7 @@ export function FirstRunGuide({
       id: "publish",
       done: isPublished,
       label: "Publish your page",
-      hint: `Open Settings and publish /u/${username}.`,
+      hint: "Use Publish at the top of the preview.",
     },
   ];
 

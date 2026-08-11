@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
-import { DashboardActions } from "@/components/dashboard/DashboardActions";
 import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { Loader } from "@/components/Loader";
@@ -18,7 +17,7 @@ type MeUser = {
 };
 
 export function SettingsPanel() {
-  const { profile, setProfile } = useProfile();
+  const { profile } = useProfile();
   const [me, setMe] = useState<MeUser | null>(null);
 
   useEffect(() => {
@@ -51,12 +50,6 @@ export function SettingsPanel() {
       {me && !me.emailVerified ? (
         <VerifyEmailBanner email={me.email} />
       ) : null}
-
-      <DashboardActions
-        profile={profile}
-        onProfileChange={setProfile}
-        emailVerified={me?.emailVerified ?? true}
-      />
 
       <EmailSignaturePanel profile={profile} />
 

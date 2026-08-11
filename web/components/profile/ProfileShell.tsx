@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { PhoneFrame } from "@/components/profile/PhoneFrame";
+import { PreviewPublishControl } from "@/components/profile/PreviewPublishControl";
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
@@ -92,7 +93,7 @@ function sectionHint(pathname: string) {
     return "Views and clicks from your published page.";
   }
   if (pathname.startsWith("/profile/settings")) {
-    return "Publish status, signature, and account.";
+    return "Signature, password, and account.";
   }
   return "Edits update the live preview.";
 }
@@ -116,7 +117,7 @@ function isActive(pathname: string, href: string) {
 
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, links, loading, error } = useProfile();
+  const { profile, links, loading, error, setProfile } = useProfile();
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const title = sectionTitle(pathname);
@@ -134,7 +135,6 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         hasAvatar={hasAvatar}
         hasLinks={hasLinks}
         isPublished={isPublished}
-        username={profile.username}
       />
     ) : null;
 
@@ -257,22 +257,19 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
       {/* Right — fixed column */}
       <aside className="hidden h-full min-w-0 shrink-0 flex-col overflow-hidden bg-[linear-gradient(165deg,#e6e9ef_0%,#f0f2f5_45%,#f3f4f6_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
-        <div className="flex shrink-0 items-center justify-between px-5 py-4">
-          <div>
+        <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
             <p className="text-sm font-semibold text-text">Live preview</p>
             <p className="mt-0.5 text-xs text-text-muted">
               Updates as you edit
             </p>
           </div>
-          {profile?.status === "published" ? (
-            <span className="rounded-full bg-[#e8f6ee] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-success">
-              Live
-            </span>
-          ) : (
-            <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-              Draft
-            </span>
-          )}
+          {profile ? (
+            <PreviewPublishControl
+              profile={profile}
+              onProfileChange={setProfile}
+            />
+          ) : null}
         </div>
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 pb-6 pt-1">
           <PhoneFrame>{preview}</PhoneFrame>
@@ -287,15 +284,23 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
 
       {previewOpen ? (
         <div className="fixed inset-0 z-50 flex flex-col bg-bg lg:hidden">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <p className="text-sm font-semibold text-text">Preview</p>
-            <button
-              type="button"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-text-muted hover:text-text"
-              onClick={() => setPreviewOpen(false)}
-            >
-              Close
-            </button>
+          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+            <p className="shrink-0 text-sm font-semibold text-text">Preview</p>
+            <div className="flex min-w-0 items-center gap-2">
+              {profile ? (
+                <PreviewPublishControl
+                  profile={profile}
+                  onProfileChange={setProfile}
+                />
+              ) : null}
+              <button
+                type="button"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-text-muted hover:text-text"
+                onClick={() => setPreviewOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
           <div className="flex flex-1 flex-col items-center gap-5 overflow-y-auto px-4 py-6">
             <PhoneFrame>{preview}</PhoneFrame>
