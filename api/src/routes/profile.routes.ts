@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { protect } from "../controllers/auth.controller.js";
 import {
+  checkUsernameAvailability,
   createProfile,
   getMyProfile,
   updateMyProfile,
@@ -16,6 +17,7 @@ router.get("/u/:username", getProfileByUsername);
 
 router.use(protect);
 
+router.get("/username-available", checkUsernameAvailability);
 router.post("/", createProfile);
 router.get("/me", getMyProfile);
 router.patch("/me", updateMyProfile);

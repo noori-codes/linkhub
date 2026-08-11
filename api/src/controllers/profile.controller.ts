@@ -97,6 +97,48 @@ export const getMyProfile = catchAsync(
 
 
 // =============================
+// CHECK USERNAME AVAILABILITY
+// =============================
+
+export const checkUsernameAvailability = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const raw =
+      typeof req.query.username === "string" ? req.query.username : "";
+    const username = raw.trim().toLowerCase();
+
+    if (
+      username.length < 3 ||
+      username.length > 30 ||
+      !/^[a-z0-9._]+$/.test(username)
+    ) {
+      return next(
+        new AppError(
+          "Username must be 3–30 characters: lowercase letters, numbers, dots, and underscores.",
+          400,
+        ),
+      );
+    }
+
+    const existing = await Profile.findOne({ username }).select("user");
+
+    const available =
+      !existing || existing.user.toString() === req.user._id.toString();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        username,
+        available,
+        isCurrent: Boolean(
+          existing && existing.user.toString() === req.user._id.toString(),
+        ),
+      },
+    });
+  },
+);
+
+
+// =============================
 // UPDATE MY PROFILE
 // =============================
 
