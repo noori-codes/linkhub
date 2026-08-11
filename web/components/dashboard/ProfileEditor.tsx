@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -13,6 +13,31 @@ import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 const inputClass = uiInput;
 
+function profileFormKey(profile: PublicProfile) {
+  return [
+    profile._id,
+    profile.displayName,
+    profile.username,
+    profile.bio,
+    (profile.tags ?? []).join("\u0001"),
+  ].join("|");
+}
+
+function normalizeTag(raw: string) {
+  const tag = raw.trim().replace(/^#/, "");
+  if (!tag) return null;
+  return tag.slice(0, 24);
+}
+
+function commitTag(list: string[], raw: string) {
+  const normalized = normalizeTag(raw);
+  if (!normalized) return list;
+  if (list.some((t) => t.toLowerCase() === normalized.toLowerCase())) {
+    return list;
+  }
+  return [...list, normalized].slice(0, 8);
+}
+
 export function ProfileEditor() {
   const router = useRouter();
   const { profile, setProfile } = useProfile();
@@ -20,16 +45,97 @@ export function ProfileEditor() {
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [tagsText, setTagsText] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagDraft, setTagDraft] = useState("");
   const [saving, setSaving] = useState(false);
+  const syncedKeyRef = useRef<string | null>(null);
+  const tagsRef = useRef<string[]>([]);
+  const tagsSaveGenRef = useRef(0);
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
 
   useEffect(() => {
     if (!profile) return;
+    // Ignore refetch-only changes (e.g. new signed avatar URLs) so local
+    // edits aren't wiped before Save.
+    const key = profileFormKey(profile);
+    if (syncedKeyRef.current === key) return;
+    syncedKeyRef.current = key;
     setDisplayName(profile.displayName);
     setUsername(profile.username);
     setBio(profile.bio);
-    setTagsText((profile.tags ?? []).join(", "));
+    setTags(profile.tags ?? []);
+    tagsRef.current = profile.tags ?? [];
+    setTagDraft("");
   }, [profile]);
+
+  async function persistTags(nextTags: string[]) {
+    const current = profileRef.current;
+    if (!current) return;
+
+    setTags(nextTags);
+    tagsRef.current = nextTags;
+
+    const optimistic = { ...current, tags: nextTags };
+    syncedKeyRef.current = profileFormKey(optimistic);
+    setProfile(optimistic);
+
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    const gen = ++tagsSaveGenRef.current;
+
+    try {
+      const res = await fetch(`${CLIENT_API_BASE}/api/v1/profiles/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tags: nextTags }),
+      });
+
+      const data = (await res.json()) as ApiSuccess<{
+        profile: PublicProfile;
+      }> & { message?: string };
+
+      if (gen !== tagsSaveGenRef.current) return;
+
+      if (!res.ok) {
+        toast.error(data.message || "Could not update tags");
+        const latest = profileRef.current;
+        if (latest) {
+          setTags(latest.tags ?? []);
+          tagsRef.current = latest.tags ?? [];
+        }
+        return;
+      }
+
+      syncedKeyRef.current = profileFormKey(data.data.profile);
+      setProfile(data.data.profile);
+      setTags(data.data.profile.tags ?? []);
+      tagsRef.current = data.data.profile.tags ?? [];
+    } catch {
+      if (gen !== tagsSaveGenRef.current) return;
+      toast.error("Cannot reach API. Is the backend running?");
+    }
+  }
+
+  function addTag(raw: string) {
+    const next = commitTag(tagsRef.current, raw);
+    setTagDraft("");
+    if (next === tagsRef.current) return;
+    void persistTags(next);
+  }
+
+  function removeTag(tag: string) {
+    const next = tagsRef.current.filter((t) => t !== tag);
+    if (next.length === tagsRef.current.length) return;
+    void persistTags(next);
+  }
 
   if (!profile) {
     return <Loader label="Loading…" className="py-12" />;
@@ -45,6 +151,12 @@ export function ProfileEditor() {
       return;
     }
 
+    const tagsToSave = commitTag(tagsRef.current, tagDraft);
+    if (tagsToSave !== tagsRef.current) {
+      setTagDraft("");
+      void persistTags(tagsToSave);
+    }
+
     setSaving(true);
 
     try {
@@ -58,11 +170,7 @@ export function ProfileEditor() {
           displayName: displayName.trim(),
           username: username.trim().toLowerCase(),
           bio: bio.trim(),
-          tags: tagsText
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-            .slice(0, 8),
+          tags: tagsToSave,
         }),
       });
 
@@ -75,6 +183,7 @@ export function ProfileEditor() {
         return;
       }
 
+      syncedKeyRef.current = profileFormKey(data.data.profile);
       setProfile(data.data.profile);
       toast.success("Profile saved");
     } catch {
@@ -139,19 +248,54 @@ export function ProfileEditor() {
         <span className="text-xs text-text-muted">{bio.length}/300</span>
       </label>
 
-      <label className="flex flex-col gap-1.5 text-sm">
+      <div className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-text">Tags</span>
+        {tags.length > 0 ? (
+          <ul className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <li key={tag}>
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-medium text-text shadow-[0_1px_2px_rgba(18,20,26,0.04)] hover:border-danger hover:text-danger"
+                  title="Remove tag"
+                >
+                  {tag}
+                  <span
+                    aria-hidden
+                    className="text-base leading-none text-text-muted"
+                  >
+                    ×
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <input
           type="text"
-          value={tagsText}
-          onChange={(e) => setTagsText(e.target.value)}
-          placeholder="Developer, Designer, Creator"
+          value={tagDraft}
+          onChange={(e) => setTagDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              addTag(tagDraft);
+            }
+            if (e.key === "Backspace" && !tagDraft && tags.length > 0) {
+              removeTag(tags[tags.length - 1]!);
+            }
+          }}
+          maxLength={24}
+          placeholder={
+            tags.length >= 8 ? "Maximum 8 tags" : "Type a tag and press Enter"
+          }
+          disabled={tags.length >= 8}
           className={inputClass}
         />
         <span className="text-xs text-text-muted">
-          Comma-separated, up to 8. Visible in the editor preview.
+          Enter to add — updates the preview and saves right away. Up to 8.
         </span>
-      </label>
+      </div>
 
       <button
         type="submit"
