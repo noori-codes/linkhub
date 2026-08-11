@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
 type Props = {
@@ -13,37 +15,17 @@ type Props = {
   onProfileChange: (profile: PublicProfile) => void;
 };
 
-type MeUser = {
-  emailVerified: boolean;
-};
-
 export function PreviewPublishControl({ profile, onProfileChange }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(true);
+
+  const meQuery = useQuery({
+    queryKey: queryKeys.userMe,
+    queryFn: fetchMyUser,
+  });
 
   const isPublished = profile.status === "published";
-
-  useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-
-    async function loadMe() {
-      try {
-        const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as ApiSuccess<{ user: MeUser }>;
-        setEmailVerified(data.data.user.emailVerified);
-      } catch {
-        /* keep optimistic default */
-      }
-    }
-
-    void loadMe();
-  }, []);
+  const emailVerified = meQuery.data?.emailVerified ?? true;
 
   async function togglePublish() {
     if (saving) return;

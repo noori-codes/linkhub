@@ -1,6 +1,7 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import type {
+  AccountUser,
   AnalyticsSummary,
   ApiSuccess,
   PublicLink,
@@ -13,6 +14,7 @@ import type {
 export const queryKeys = {
   profileMe: ["profile", "me"] as const,
   linksMe: ["links", "me"] as const,
+  userMe: ["users", "me"] as const,
   analyticsMe: ["analytics", "me"] as const,
   productsMe: ["products", "me"] as const,
   collectionsMe: ["collections", "me"] as const,
@@ -54,6 +56,23 @@ export async function fetchMyProfile(): Promise<PublicProfile> {
   }
 
   return json.data.profile;
+}
+
+export async function fetchMyUser(): Promise<AccountUser> {
+  const token = requireToken();
+  const res = await fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const json = (await res.json()) as ApiSuccess<{ user: AccountUser }> & {
+    message?: string;
+  };
+
+  if (!res.ok) {
+    throw new HttpError(json.message || "Could not load account", res.status);
+  }
+
+  return json.data.user;
 }
 
 export async function fetchMyLinks(): Promise<PublicLink[]> {

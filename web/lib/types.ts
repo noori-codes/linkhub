@@ -34,6 +34,13 @@ export interface PublicProfile {
   theme?: ProfileTheme | string | null;
 }
 
+export interface AccountUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+}
+
 export interface PublicLink {
   _id: string;
   title: string;
