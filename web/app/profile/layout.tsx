@@ -7,8 +7,10 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ProfileProvider>
-      <ProfileShell>{children}</ProfileShell>
-    </ProfileProvider>
+    <div className="h-dvh overflow-hidden">
+      <ProfileProvider>
+        <ProfileShell>{children}</ProfileShell>
+      </ProfileProvider>
+    </div>
   );
 }

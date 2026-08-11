@@ -11,6 +11,7 @@ type Step = {
   label: string;
   hint: string;
 };
+
 export function FirstRunGuide({
   hasAvatar,
   hasLinks,
@@ -34,7 +35,7 @@ export function FirstRunGuide({
       id: "publish",
       done: isPublished,
       label: "Publish your page",
-      hint: `Open Settings and publish so /u/${username} goes live.`,
+      hint: `Open Settings and publish /u/${username}.`,
     },
   ];
 
@@ -43,41 +44,68 @@ export function FirstRunGuide({
     return null;
   }
 
+  const nextId = steps.find((s) => !s.done)?.id;
+
   return (
     <section
-      className="rounded-xl border border-brand/40 bg-brand-muted px-4 py-4"
+      className="rounded-xl border border-brand/40 bg-brand-muted px-3.5 py-3.5"
       aria-label="Getting started"
     >
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-text">Getting started</p>
-        <p className="text-xs text-text-muted">
+        <p className="text-xs tabular-nums text-text-muted">
           {doneCount}/{steps.length}
         </p>
       </div>
 
-      <ol className="mt-3 flex flex-col gap-2.5">
-        {steps.map((step, index) => (
-          <li key={step.id} className="flex gap-2.5 text-sm">
-            <span
-              className={
-                step.done
-                  ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-brand text-xs font-medium text-text-inverse"
-                  : "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border text-xs text-text-muted"
-              }
-              aria-hidden
-            >
-              {step.done ? "✓" : index + 1}
-            </span>
-            <div className="min-w-0">
-              <p className={step.done ? "text-text" : "font-medium text-text"}>
-                {step.label}
-              </p>
-              {!step.done ? (
-                <p className="mt-0.5 text-xs text-text-muted">{step.hint}</p>
-              ) : null}
-            </div>
-          </li>
-        ))}
+      <div
+        className="mt-2.5 h-1 overflow-hidden rounded-full bg-border/60"
+        aria-hidden
+      >
+        <div
+          className="h-full rounded-full bg-brand transition-[width] duration-300"
+          style={{ width: `${(doneCount / steps.length) * 100}%` }}
+        />
+      </div>
+
+      <ol className="mt-3 flex flex-col gap-2">
+        {steps.map((step, index) => {
+          const isNext = step.id === nextId;
+          return (
+            <li key={step.id} className="flex gap-2.5 text-sm">
+              <span
+                className={
+                  step.done
+                    ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-brand text-xs font-medium text-text-inverse"
+                    : isNext
+                      ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-brand bg-surface text-xs font-medium text-brand"
+                      : "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border text-xs text-text-muted"
+                }
+                aria-hidden
+              >
+                {step.done ? "✓" : index + 1}
+              </span>
+              <div className="min-w-0">
+                <p
+                  className={
+                    step.done
+                      ? "text-text-muted line-through decoration-border"
+                      : isNext
+                        ? "font-medium text-text"
+                        : "text-text-muted"
+                  }
+                >
+                  {step.label}
+                </p>
+                {isNext ? (
+                  <p className="mt-0.5 text-xs leading-snug text-text-muted">
+                    {step.hint}
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
