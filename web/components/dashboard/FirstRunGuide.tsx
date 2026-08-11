@@ -1,3 +1,8 @@
+"use client";
+
+import confetti from "canvas-confetti";
+import { useEffect, useRef } from "react";
+
 type Props = {
   hasAvatar: boolean;
   hasLinks: boolean;
@@ -11,6 +16,35 @@ type Step = {
   label: string;
   hint: string;
 };
+
+/** Avoid double-firing when the guide is mounted twice (sidebar + mobile). */
+let celebrationLocked = false;
+
+function fireCelebration() {
+  if (celebrationLocked) return;
+  celebrationLocked = true;
+
+  const defaults: confetti.Options = {
+    startVelocity: 28,
+    spread: 360,
+    ticks: 70,
+    zIndex: 80,
+  };
+
+  const shoot = (particleRatio: number, opts: confetti.Options) => {
+    void confetti({
+      ...defaults,
+      ...opts,
+      particleCount: Math.floor(160 * particleRatio),
+    });
+  };
+
+  shoot(0.25, { spread: 26, startVelocity: 55 });
+  shoot(0.2, { spread: 60 });
+  shoot(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+  shoot(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+  shoot(0.1, { spread: 120, startVelocity: 45 });
+}
 
 export function FirstRunGuide({
   hasAvatar,
@@ -40,7 +74,21 @@ export function FirstRunGuide({
   ];
 
   const doneCount = steps.filter((s) => s.done).length;
-  if (doneCount === steps.length) {
+  const allDone = doneCount === steps.length;
+  const prevDoneCount = useRef<number | null>(null);
+
+  useEffect(() => {
+    const prev = prevDoneCount.current;
+    prevDoneCount.current = doneCount;
+
+    // Only celebrate the moment the last step flips to done (not on reload)
+    if (prev === null) return;
+    if (prev < steps.length && doneCount === steps.length) {
+      fireCelebration();
+    }
+  }, [doneCount, steps.length]);
+
+  if (allDone) {
     return null;
   }
 
