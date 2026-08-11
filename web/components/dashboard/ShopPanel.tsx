@@ -764,19 +764,42 @@ export function ShopPanel() {
                             onClick={() =>
                               setExpandedId(isExpanded ? null : product._id)
                             }
-                            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                            className={
                               isExpanded
-                                ? "bg-brand-muted text-text"
-                                : product.isVisible && product.linkCount === 0
-                                  ? "bg-danger/10 text-danger hover:bg-danger/15"
-                                  : "text-text-muted hover:bg-bg hover:text-text"
-                            }`}
+                                ? uiBtnIcon
+                                : `rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                                    product.isVisible && product.linkCount === 0
+                                      ? "bg-danger/10 text-danger hover:bg-danger/15"
+                                      : "text-text-muted hover:bg-bg hover:text-text"
+                                  }`
+                            }
+                            aria-label={
+                              isExpanded
+                                ? "Close buy links"
+                                : product.linkCount === 0
+                                  ? "Add buy link"
+                                  : "Buy links"
+                            }
+                            title={
+                              isExpanded
+                                ? "Close"
+                                : product.linkCount === 0
+                                  ? "Add buy link"
+                                  : "Buy links"
+                            }
                           >
-                            {isExpanded
-                              ? "Close"
-                              : product.linkCount === 0
-                                ? "Add buy link"
-                                : "Buy links"}
+                            {isExpanded ? (
+                              <Image
+                                src="/close.svg"
+                                alt=""
+                                width={16}
+                                height={16}
+                              />
+                            ) : product.linkCount === 0 ? (
+                              "Add buy link"
+                            ) : (
+                              "Buy links"
+                            )}
                           </button>
                           <button
                             type="button"

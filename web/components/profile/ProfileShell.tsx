@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
+import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
+import { DialogCloseButton } from "@/components/DialogCloseButton";
 import { PhoneFrame } from "@/components/profile/PhoneFrame";
 import { PreviewPublishControl } from "@/components/profile/PreviewPublishControl";
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
@@ -13,7 +16,21 @@ import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { PreviewSkeleton } from "@/components/Skeleton";
 
-const MENU = [
+type UtilityPanel = "settings" | "signature";
+
+type MenuLink = {
+  href: string;
+  label: string;
+  icon: string;
+};
+
+type MenuPanel = {
+  panel: UtilityPanel;
+  label: string;
+  icon: string;
+};
+
+const MENU: Array<MenuLink | MenuPanel> = [
   {
     href: "/profile/links",
     label: "Links",
@@ -40,16 +57,30 @@ const MENU = [
     icon: "/analytics.svg",
   },
   {
-    href: "/profile/signature",
+    panel: "signature",
     label: "Signature",
     icon: "/signature.svg",
   },
   {
-    href: "/profile/settings",
+    panel: "settings",
     label: "Settings",
     icon: "/settings.svg",
   },
 ];
+
+const UTILITY_COPY: Record<
+  UtilityPanel,
+  { title: string; hint: string }
+> = {
+  settings: {
+    title: "Settings",
+    hint: "Password and account.",
+  },
+  signature: {
+    title: "Signature",
+    hint: "Copy an HTML signature for your email client.",
+  },
+};
 
 function sectionTitle(pathname: string) {
   if (
@@ -65,8 +96,6 @@ function sectionTitle(pathname: string) {
     return "Design";
   if (pathname.startsWith("/profile/shop")) return "Shop";
   if (pathname.startsWith("/profile/analytics")) return "Analytics";
-  if (pathname.startsWith("/profile/signature")) return "Signature";
-  if (pathname.startsWith("/profile/settings")) return "Settings";
   return "Links";
 }
 
@@ -92,12 +121,6 @@ function sectionHint(pathname: string) {
   if (pathname.startsWith("/profile/analytics")) {
     return "Views and clicks from your published page.";
   }
-  if (pathname.startsWith("/profile/signature")) {
-    return "Copy an HTML signature for your email client.";
-  }
-  if (pathname.startsWith("/profile/settings")) {
-    return "Password and account.";
-  }
   return "Edits update the live preview.";
 }
 
@@ -118,22 +141,49 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Settings & Signature are utility screens — later we show them as a modal, not with the phone preview. */
-function isUtilityModal(pathname: string) {
-  return (
-    pathname.startsWith("/profile/settings") ||
-    pathname.startsWith("/profile/signature")
-  );
+function isMenuPanel(item: MenuLink | MenuPanel): item is MenuPanel {
+  return "panel" in item;
 }
 
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { profile, links, loading, error, setProfile } = useProfile();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [utilityPanel, setUtilityPanel] = useState<UtilityPanel | null>(null);
 
   const title = sectionTitle(pathname);
   const hint = sectionHint(pathname);
-  const utilityModal = isUtilityModal(pathname);
+
+  // Bookmarks / refresh on old /profile/settings|signature URLs → open modal over Links
+  useEffect(() => {
+    if (pathname.startsWith("/profile/settings")) {
+      setUtilityPanel("settings");
+      router.replace("/profile/links");
+      return;
+    }
+    if (pathname.startsWith("/profile/signature")) {
+      setUtilityPanel("signature");
+      router.replace("/profile/links");
+    }
+  }, [pathname, router]);
+
+  useEffect(() => {
+    if (!utilityPanel) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setUtilityPanel(null);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [utilityPanel]);
 
   const hasAvatar = Boolean(
     profile?.avatarUrl && profile.avatarUrl.startsWith("http"),
@@ -164,6 +214,8 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
     </>
   );
 
+  const utilityCopy = utilityPanel ? UTILITY_COPY[utilityPanel] : null;
+
   return (
     <div className="flex h-full flex-col bg-bg lg:flex-row">
       {/* Left — fixed column */}
@@ -181,15 +233,13 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               LinkHub
             </span>
           </Link>
-          {!utilityModal ? (
-            <button
-              type="button"
-              className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-text-inverse lg:hidden"
-              onClick={() => setPreviewOpen(true)}
-            >
-              Preview
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-text-inverse lg:hidden"
+            onClick={() => setPreviewOpen(true)}
+          >
+            Preview
+          </button>
         </div>
 
         <nav
@@ -197,11 +247,45 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
           aria-label="Profile"
         >
           {MENU.map((item) => {
+            if (isMenuPanel(item)) {
+              const active = utilityPanel === item.panel;
+              return (
+                <button
+                  key={item.panel}
+                  type="button"
+                  onClick={() => setUtilityPanel(item.panel)}
+                  className={
+                    active
+                      ? "flex shrink-0 items-center gap-2.5 rounded-lg bg-brand-muted px-3 py-2 text-left text-text lg:py-2"
+                      : "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-text-muted transition-colors hover:bg-bg hover:text-text lg:py-2"
+                  }
+                >
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={16}
+                    height={16}
+                    className={active ? "opacity-100" : "opacity-70"}
+                  />
+                  <span
+                    className={
+                      active
+                        ? "text-[13px] font-semibold tracking-tight"
+                        : "text-[13px] font-medium tracking-tight"
+                    }
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            }
+
             const active = isActive(pathname, item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setUtilityPanel(null)}
                 className={
                   active
                     ? "flex shrink-0 items-center gap-2.5 rounded-lg bg-brand-muted px-3 py-2 text-text lg:py-2"
@@ -234,14 +318,8 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Center — only this column scrolls */}
-      <main
-        className={
-          utilityModal
-            ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg-elevated"
-            : "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg-elevated lg:border-r lg:border-border"
-        }
-      >
+      {/* Center editor — always stays mounted so it shows under the modal */}
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg-elevated lg:border-r lg:border-border">
         <header className="shrink-0 border-b border-border px-5 py-5 sm:px-8">
           <div className="mx-auto flex w-full max-w-xl items-start justify-between gap-3">
             <div className="min-w-0">
@@ -250,21 +328,19 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
               </h1>
               <p className="mt-1.5 text-sm text-text-muted">{hint}</p>
             </div>
-            {!utilityModal ? (
-              <button
-                type="button"
-                className="hidden shrink-0 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-text md:inline-flex lg:hidden"
-                onClick={() => setPreviewOpen(true)}
-              >
-                Preview
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="hidden shrink-0 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-text md:inline-flex lg:hidden"
+              onClick={() => setPreviewOpen(true)}
+            >
+              Preview
+            </button>
           </div>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8">
           <div className="mx-auto w-full max-w-xl">{children}</div>
-          {gettingStarted && !utilityModal ? (
+          {gettingStarted ? (
             <div className="mx-auto mt-8 w-full max-w-xl lg:hidden">
               {gettingStarted}
             </div>
@@ -272,36 +348,80 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      {/* Right — phone preview (hidden on Settings / Signature) */}
-      {!utilityModal ? (
-        <aside className="hidden h-full min-w-0 shrink-0 flex-col overflow-hidden bg-[linear-gradient(165deg,#e6e9ef_0%,#f0f2f5_45%,#f3f4f6_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
-          <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-text">Live preview</p>
-              <p className="mt-0.5 text-xs text-text-muted">
-                Updates as you edit
-              </p>
+      {/* Right — phone preview */}
+      <aside className="hidden h-full min-w-0 shrink-0 flex-col overflow-hidden bg-[linear-gradient(165deg,#e6e9ef_0%,#f0f2f5_45%,#f3f4f6_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
+        <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-text">Live preview</p>
+            <p className="mt-0.5 text-xs text-text-muted">
+              Updates as you edit
+            </p>
+          </div>
+          {profile ? (
+            <PreviewPublishControl
+              profile={profile}
+              onProfileChange={setProfile}
+            />
+          ) : null}
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 pb-6 pt-1">
+          <PhoneFrame>{preview}</PhoneFrame>
+          {profile ? (
+            <PreviewShareActions
+              username={profile.username}
+              status={profile.status}
+            />
+          ) : null}
+        </div>
+      </aside>
+
+      {/* Utility modal — overlays current page (Shop, Links, …) */}
+      {utilityPanel && utilityCopy ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="presentation"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-text/40"
+            aria-label="Close dialog"
+            onClick={() => setUtilityPanel(null)}
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="utility-modal-title"
+            className="relative z-10 flex max-h-[min(90dvh,40rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_16px_40px_-20px_rgba(18,20,26,0.35)]"
+          >
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
+              <div className="min-w-0">
+                <h2
+                  id="utility-modal-title"
+                  className="font-display text-lg font-semibold tracking-tight text-text"
+                >
+                  {utilityCopy.title}
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  {utilityCopy.hint}
+                </p>
+              </div>
+              <DialogCloseButton onClick={() => setUtilityPanel(null)} />
             </div>
-            {profile ? (
-              <PreviewPublishControl
-                profile={profile}
-                onProfileChange={setProfile}
-              />
-            ) : null}
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+              {utilityPanel === "settings" ? <SettingsPanel /> : null}
+              {utilityPanel === "signature" && profile ? (
+                <EmailSignaturePanel profile={profile} />
+              ) : null}
+              {utilityPanel === "signature" && !profile ? (
+                <p className="text-sm text-text-muted">Loading profile…</p>
+              ) : null}
+            </div>
           </div>
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 pb-6 pt-1">
-            <PhoneFrame>{preview}</PhoneFrame>
-            {profile ? (
-              <PreviewShareActions
-                username={profile.username}
-                status={profile.status}
-              />
-            ) : null}
-          </div>
-        </aside>
+        </div>
       ) : null}
 
-      {!utilityModal && previewOpen ? (
+      {previewOpen ? (
         <div className="fixed inset-0 z-50 flex flex-col bg-bg lg:hidden">
           <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
             <p className="shrink-0 text-sm font-semibold text-text">Preview</p>
@@ -312,13 +432,10 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
                   onProfileChange={setProfile}
                 />
               ) : null}
-              <button
-                type="button"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-text-muted hover:text-text"
+              <DialogCloseButton
+                label="Close preview"
                 onClick={() => setPreviewOpen(false)}
-              >
-                Close
-              </button>
+              />
             </div>
           </div>
           <div className="flex flex-1 flex-col items-center gap-5 overflow-y-auto px-4 py-6">

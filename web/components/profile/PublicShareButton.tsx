@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { DialogCloseButton } from "@/components/DialogCloseButton";
 import { trackProfileShare } from "@/lib/track-share";
 
 type Props = {
@@ -126,14 +127,11 @@ export function PublicShareButton({ username, displayName }: Props) {
                   Copy the link or share from your device.
                 </p>
               </div>
-              <button
+              <DialogCloseButton
                 ref={closeRef}
-                type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-2 py-1 text-sm text-text-muted hover:bg-bg hover:text-text"
-              >
-                Close
-              </button>
+                label="Close share dialog"
+              />
             </div>
 
             <div className="mt-4 flex gap-2">

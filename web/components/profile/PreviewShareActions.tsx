@@ -5,9 +5,10 @@ import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ShareQr } from "@/components/dashboard/ShareQr";
+import { DialogCloseButton } from "@/components/DialogCloseButton";
 import { trackProfileShare } from "@/lib/track-share";
 import type { ProfileStatus } from "@/lib/types";
-import { uiBtnGhost, uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
+import { uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
 
 type Props = {
   username: string;
@@ -122,14 +123,11 @@ export function PreviewShareActions({ username, status }: Props) {
                   Copy your link or scan the QR code.
                 </p>
               </div>
-              <button
+              <DialogCloseButton
                 ref={closeRef}
-                type="button"
                 onClick={() => setOpen(false)}
-                className={uiBtnGhost}
-              >
-                Close
-              </button>
+                label="Close share dialog"
+              />
             </div>
 
             <div className="mt-4 flex gap-2">
