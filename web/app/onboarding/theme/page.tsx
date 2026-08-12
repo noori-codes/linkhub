@@ -83,8 +83,8 @@ export default function OnboardingThemePage() {
   }, [themesQuery.data, selectedId]);
 
   async function goNext(token: string) {
-    await setOnboardingStep(token, "links");
-    router.push("/onboarding/links");
+    await setOnboardingStep(token, "tags");
+    router.push("/onboarding/tags");
   }
 
   async function applyAndContinue(themeId: string | null) {
@@ -145,7 +145,7 @@ export default function OnboardingThemePage() {
       }
       await goNext(token);
     } catch {
-      router.push("/onboarding/links");
+      router.push("/onboarding/tags");
     } finally {
       setLoading(false);
     }

@@ -26,12 +26,12 @@ export const ONBOARDING_WIZARD_STEPS: Array<{
   },
   {
     id: "socials",
-    label: "Socials",
+    label: "Platforms",
     href: "/onboarding/socials",
     apiStep: "socials",
   },
-  { id: "theme", label: "Theme", href: "/onboarding/theme", apiStep: "theme" },
   { id: "links", label: "Links", href: "/onboarding/links", apiStep: "links" },
+  { id: "theme", label: "Theme", href: "/onboarding/theme", apiStep: "theme" },
   { id: "tags", label: "Tags", href: "/onboarding/tags", apiStep: "tags" },
 ];
 

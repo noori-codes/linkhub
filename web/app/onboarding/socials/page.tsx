@@ -1,6 +1,5 @@
 "use client";
 
-import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -8,61 +7,23 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
+import { PlatformPicker } from "@/components/onboarding/PlatformPicker";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
+  readSelectedPlatforms,
+  writeSelectedPlatforms,
+} from "@/lib/link-platforms";
+import {
   onboardingFormClass,
-  onboardingInputClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
 } from "@/lib/onboarding";
 
-type SocialField = {
-  platform: string;
-  label: string;
-  placeholder: string;
-  title: string;
-};
-
-const SOCIALS: SocialField[] = [
-  {
-    platform: "instagram",
-    label: "Instagram",
-    placeholder: "https://instagram.com/you",
-    title: "Instagram",
-  },
-  {
-    platform: "x",
-    label: "X / Twitter",
-    placeholder: "https://x.com/you",
-    title: "X",
-  },
-  {
-    platform: "github",
-    label: "GitHub",
-    placeholder: "https://github.com/you",
-    title: "GitHub",
-  },
-  {
-    platform: "linkedin",
-    label: "LinkedIn",
-    placeholder: "https://linkedin.com/in/you",
-    title: "LinkedIn",
-  },
-  {
-    platform: "website",
-    label: "Website",
-    placeholder: "https://yoursite.com",
-    title: "Website",
-  },
-];
-
 export default function OnboardingSocialsPage() {
   const router = useRouter();
-  const [urls, setUrls] = useState<Record<string, string>>(() =>
-    Object.fromEntries(SOCIALS.map((s) => [s.platform, ""])),
-  );
+  const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
@@ -84,6 +45,7 @@ export default function OnboardingSocialsPage() {
           router.replace("/onboarding");
           return;
         }
+        setSelected(readSelectedPlatforms());
         setReady(true);
       } catch {
         setError("Cannot reach API. Is the backend running?");
@@ -94,39 +56,13 @@ export default function OnboardingSocialsPage() {
     void ensureProfile();
   }, [router]);
 
-  async function goNext(token: string) {
-    await setOnboardingStep(token, "theme");
-    router.push("/onboarding/theme");
+  async function goNext(token: string, platforms: string[]) {
+    writeSelectedPlatforms(platforms);
+    await setOnboardingStep(token, "links");
+    router.push("/onboarding/links");
   }
 
-  async function createSocialLinks(token: string) {
-    for (const social of SOCIALS) {
-      const url = urls[social.platform]?.trim();
-      if (!url) continue;
-
-      const res = await fetch(`${CLIENT_API_BASE}/api/v1/links`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: social.title,
-          url,
-          type: "social",
-          platform: social.platform,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = (await res.json()) as { message?: string };
-        throw new Error(data.message || `Could not add ${social.label}`);
-      }
-    }
-  }
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function onContinue() {
     if (loading) return;
 
     const token = getToken();
@@ -135,18 +71,18 @@ export default function OnboardingSocialsPage() {
       return;
     }
 
+    if (selected.length === 0) {
+      setError("Pick at least one platform, or skip for now.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      await createSocialLinks(token);
-      await goNext(token);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Cannot reach API. Is the backend running?",
-      );
+      await goNext(token, selected);
+    } catch {
+      setError("Cannot reach API. Is the backend running?");
     } finally {
       setLoading(false);
     }
@@ -160,9 +96,9 @@ export default function OnboardingSocialsPage() {
     }
     setLoading(true);
     try {
-      await goNext(token);
+      await goNext(token, []);
     } catch {
-      router.push("/onboarding/theme");
+      router.push("/onboarding/links");
     } finally {
       setLoading(false);
     }
@@ -171,8 +107,9 @@ export default function OnboardingSocialsPage() {
   return (
     <OnboardingShell
       step="socials"
-      title="Add your socials"
-      description="Paste profiles you want on your page. You can add more later in Links."
+      wide
+      title="Choose your platforms"
+      description="Tap the apps you use. On the next step you'll paste your profile links."
       footer={
         <OnboardingSkipFooter
           onSkip={() => void onSkip()}
@@ -183,27 +120,18 @@ export default function OnboardingSocialsPage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <form onSubmit={onSubmit} className={onboardingFormClass}>
-          {SOCIALS.map((social) => (
-            <label
-              key={social.platform}
-              className="flex flex-col gap-1.5 text-left text-sm"
-            >
-              <span className="font-medium text-text">{social.label}</span>
-              <input
-                type="url"
-                value={urls[social.platform] ?? ""}
-                onChange={(e) =>
-                  setUrls((prev) => ({
-                    ...prev,
-                    [social.platform]: e.target.value,
-                  }))
-                }
-                placeholder={social.placeholder}
-                className={onboardingInputClass}
-              />
-            </label>
-          ))}
+        <div className={onboardingFormClass}>
+          <PlatformPicker
+            selected={selected}
+            onChange={setSelected}
+            disabled={loading}
+          />
+
+          {selected.length > 0 ? (
+            <p className="text-center text-xs text-text-muted">
+              {selected.length} selected
+            </p>
+          ) : null}
 
           {error ? (
             <p className="text-sm text-danger" role="alert">
@@ -212,13 +140,14 @@ export default function OnboardingSocialsPage() {
           ) : null}
 
           <button
-            type="submit"
+            type="button"
             disabled={loading}
+            onClick={() => void onContinue()}
             className={onboardingPrimaryBtnClass}
           >
             {loading ? "Saving…" : "Continue"}
           </button>
-        </form>
+        </div>
       )}
     </OnboardingShell>
   );
