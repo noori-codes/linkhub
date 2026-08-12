@@ -12,7 +12,7 @@ import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
   resumeOnboardingHref,
@@ -97,7 +97,7 @@ export default function LoginPage() {
         </p>
       }
     >
-      <form onSubmit={onSubmit} className={onboardingCardClass}>
+      <form onSubmit={onSubmit} className={onboardingFormClass}>
         {error ? (
           <FormAlert variant="error" title="Couldn’t log in">
             {error}
@@ -120,25 +120,27 @@ export default function LoginPage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="font-medium text-text">Password</span>
+        <div className="flex flex-col gap-1.5 text-left text-sm">
+          <label htmlFor="login-password" className="font-medium text-text">
+            Password
+          </label>
           <PasswordInput
+            id="login-password"
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
           />
-        </label>
-
-        <p className="-mt-1 text-right text-sm">
-          <Link
-            href="/forgot-password"
-            className="text-text-muted hover:text-brand"
-          >
-            Forgot password?
-          </Link>
-        </p>
+          <p className="text-right">
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-text-muted hover:text-brand"
+            >
+              Forgot password?
+            </Link>
+          </p>
+        </div>
 
         <button
           type="submit"

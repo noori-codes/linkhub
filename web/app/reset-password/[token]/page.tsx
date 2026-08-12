@@ -11,7 +11,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { saveToken } from "@/lib/auth";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingPrimaryBtnClass,
 } from "@/lib/onboarding";
 
@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
         </p>
       }
     >
-      <form onSubmit={onSubmit} className={onboardingCardClass}>
+      <form onSubmit={onSubmit} className={onboardingFormClass}>
         {error ? (
           <FormAlert variant="error" title="Couldn’t update password">
             {error}

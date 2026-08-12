@@ -12,7 +12,7 @@ import { getToken, saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
@@ -129,7 +129,7 @@ export default function SignupPage() {
         </p>
       }
     >
-      <form onSubmit={onSubmit} className={onboardingCardClass}>
+      <form onSubmit={onSubmit} className={onboardingFormClass}>
         {error ? (
           <FormAlert variant="error" title="Something went wrong">
             {error}

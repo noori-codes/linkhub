@@ -81,21 +81,18 @@ export default function VerifyEmailPage() {
         </p>
       }
     >
-      <div className="rounded-xl border border-border bg-surface p-5 text-left">
-        {status === "loading" ? (
-          <p className="text-sm text-text-muted">{message}</p>
-        ) : null}
-        {status === "success" ? (
-          <p className="text-sm text-success" role="status">
-            {message}
-          </p>
-        ) : null}
-        {status === "error" ? (
-          <p className="text-sm text-danger" role="alert">
-            {message}
-          </p>
-        ) : null}
-      </div>
+      <p
+        className={`text-sm ${
+          status === "success"
+            ? "text-success"
+            : status === "error"
+              ? "text-danger"
+              : "text-text-muted"
+        }`}
+        role={status === "error" ? "alert" : status === "success" ? "status" : undefined}
+      >
+        {message}
+      </p>
     </AuthShell>
   );
 }

@@ -8,6 +8,11 @@ import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
+import {
+  onboardingFormClass,
+  onboardingInputClass,
+  onboardingPrimaryBtnClass,
+} from "@/lib/onboarding";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -63,10 +68,7 @@ export default function ForgotPasswordPage() {
         </p>
       }
     >
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
-      >
+      <form onSubmit={onSubmit} className={onboardingFormClass}>
         {error ? (
           <FormAlert variant="error" title="Couldn’t send reset link">
             {error}
@@ -80,7 +82,7 @@ export default function ForgotPasswordPage() {
         ) : null}
 
         <label className="flex flex-col gap-1.5 text-left text-sm">
-          <span className="text-text-muted">Email</span>
+          <span className="font-medium text-text">Email</span>
           <input
             type="email"
             required
@@ -91,7 +93,7 @@ export default function ForgotPasswordPage() {
             inputMode="email"
             value={email}
             onChange={(e) => setEmail(normalizeEmailInput(e.target.value))}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
+            className={onboardingInputClass}
           />
         </label>
 
@@ -110,7 +112,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-brand-hover disabled:opacity-60"
+          className={onboardingPrimaryBtnClass}
         >
           {loading ? "Sending…" : "Send reset link"}
         </button>
