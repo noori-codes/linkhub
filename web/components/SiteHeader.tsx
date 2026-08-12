@@ -2,22 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import { clearToken, getToken } from "@/lib/auth";
+import { useClientAuth } from "@/lib/useClientAuth";
 import { uiBtnGhost, uiBtnPrimary } from "@/lib/ui";
 
 export function SiteHeader() {
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setLoggedIn(Boolean(getToken()));
-  }, []);
-
-  function logout() {
-    clearToken();
-    setLoggedIn(false);
-  }
+  const { ready, loggedIn, logout } = useClientAuth();
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-surface/80 px-5 backdrop-blur-sm sm:px-8">
@@ -35,7 +25,18 @@ export function SiteHeader() {
       </Link>
 
       <nav className="flex items-center gap-1 sm:gap-1.5" aria-label="Account">
-        {loggedIn ? (
+        {!ready ? (
+          <>
+            <div
+              className="h-8 w-14 animate-pulse rounded-lg bg-border/70"
+              aria-hidden
+            />
+            <div
+              className="h-8 w-[4.5rem] animate-pulse rounded-lg bg-border/70"
+              aria-hidden
+            />
+          </>
+        ) : loggedIn ? (
           <>
             <Link
               href="/profile"

@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import { getToken } from "@/lib/auth";
+import { useClientAuth } from "@/lib/useClientAuth";
 
 export default function HomeAuthActions() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { ready, loggedIn } = useClientAuth();
 
-  useEffect(() => {
-    setLoggedIn(Boolean(getToken()));
-  }, []);
+  if (!ready) {
+    return (
+      <div
+        className="h-11 w-32 animate-pulse rounded-md bg-border/70"
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
