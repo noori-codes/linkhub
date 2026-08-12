@@ -8,6 +8,7 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { uiBtnPrimary, uiInput } from "@/lib/ui";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
 
@@ -159,11 +160,11 @@ export function PhotosEditor() {
         >
           <div className="relative h-36 w-full bg-[linear-gradient(135deg,#dfe4ec,#eef0f4)] sm:h-44">
             {hasCover ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <SafeRemoteImage
                 src={coverUrl}
                 alt=""
                 className="h-full w-full object-cover"
+                loading="eager"
               />
             ) : null}
             {/* Label stays top-right so the overlapping avatar never covers it */}
@@ -190,11 +191,11 @@ export function PhotosEditor() {
             aria-label={hasAvatar ? "Replace avatar" : "Upload avatar"}
           >
             {hasAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <SafeRemoteImage
                 src={avatarUrl}
                 alt=""
                 className="h-full w-full object-cover"
+                loading="eager"
               />
             ) : (
               <span className="text-2xl font-semibold text-text-muted">

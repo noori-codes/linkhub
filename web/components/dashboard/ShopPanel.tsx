@@ -10,6 +10,7 @@ import { CLIENT_API_BASE } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
 import { CollectionsSection } from "@/components/dashboard/CollectionsSection";
 import { EmptyState } from "@/components/EmptyState";
+import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { Loader } from "@/components/Loader";
 import {
   fetchMyProducts,
@@ -661,8 +662,7 @@ export function ShopPanel() {
                           className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border bg-bg transition-colors hover:border-brand/40 disabled:opacity-50"
                         >
                           {productImageSrc(product.imageUrl) ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <SafeRemoteImage
                               src={product.imageUrl}
                               alt=""
                               className="h-full w-full object-cover"
@@ -947,11 +947,11 @@ export function ShopPanel() {
                       className="relative h-28 w-28 overflow-hidden rounded-xl border border-dashed border-border bg-surface transition-colors hover:border-brand/40"
                     >
                       {productImagePreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <SafeRemoteImage
                           src={productImagePreview}
                           alt=""
                           className="h-full w-full object-cover"
+                          loading="eager"
                         />
                       ) : (
                         <span className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center text-[11px] text-text-muted">

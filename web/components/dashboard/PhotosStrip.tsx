@@ -1,3 +1,4 @@
+import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import type { PublicProfile } from "@/lib/types";
 
 type Props = {
@@ -29,8 +30,7 @@ export function PhotosStrip({ profile }: Props) {
           {shots.map((shot) => (
             <li key={shot.label} className="flex flex-col gap-1.5">
               <div className="aspect-square overflow-hidden rounded-md border border-border bg-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <SafeRemoteImage
                   src={shot.src}
                   alt={shot.label}
                   className="h-full w-full object-cover"

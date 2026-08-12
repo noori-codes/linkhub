@@ -75,8 +75,19 @@ export function PublicProfileView({
         <div className="shrink-0">
           <div className="relative h-[4.75rem] w-full">
             {cover ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={cover} alt="" className="h-full w-full object-cover" />
+              <SafeRemoteImage
+                src={cover}
+                alt=""
+                className="h-full w-full object-cover"
+                loading="eager"
+                fallback={
+                  <div
+                    aria-hidden
+                    className="h-full w-full"
+                    style={coverFallbackStyle}
+                  />
+                }
+              />
             ) : (
               <div aria-hidden className="h-full w-full" style={coverFallbackStyle} />
             )}
@@ -537,11 +548,20 @@ export function PublicProfileView({
         <aside className="relative flex flex-col lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:overflow-hidden">
           <div className="relative h-44 shrink-0 sm:h-52 lg:absolute lg:inset-0 lg:h-full">
             {cover ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <SafeRemoteImage
                 src={cover}
                 alt=""
                 className="h-full w-full object-cover"
+                loading="eager"
+                fallback={
+                  <div
+                    aria-hidden
+                    className="h-full w-full"
+                    style={{
+                      background: `linear-gradient(160deg, color-mix(in srgb, ${tokens.buttonColor} 55%, #000) 0%, color-mix(in srgb, ${tokens.buttonColor} 30%, ${tokens.backgroundColor}) 50%, ${tokens.backgroundColor} 100%)`,
+                    }}
+                  />
+                }
               />
             ) : (
               <div
