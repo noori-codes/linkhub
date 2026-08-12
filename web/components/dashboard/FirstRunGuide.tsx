@@ -74,13 +74,19 @@ export function FirstRunGuide({
   const doneCount = steps.filter((s) => s.done).length;
   const allDone = doneCount === steps.length;
   const prevDoneCount = useRef<number | null>(null);
+  const tracking = useRef(false);
 
   useEffect(() => {
-    const prev = prevDoneCount.current;
+    // Snapshot the baseline on first stable render — don't treat hydration as progress.
+    if (!tracking.current) {
+      tracking.current = true;
+      prevDoneCount.current = doneCount;
+      return;
+    }
+
+    const prev = prevDoneCount.current ?? doneCount;
     prevDoneCount.current = doneCount;
 
-    // Only celebrate the moment the last step flips to done (not on reload)
-    if (prev === null) return;
     if (prev < steps.length && doneCount === steps.length) {
       fireCelebration();
     }

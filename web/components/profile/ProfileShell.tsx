@@ -192,7 +192,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const isPublished = profile?.status === "published";
 
   const gettingStarted =
-    profile != null ? (
+    !loading && profile != null ? (
       <FirstRunGuide
         hasAvatar={hasAvatar}
         hasLinks={hasLinks}
