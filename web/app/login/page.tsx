@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
+import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
 import { saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -97,6 +98,12 @@ export default function LoginPage() {
       }
     >
       <form onSubmit={onSubmit} className={onboardingCardClass}>
+        {error ? (
+          <FormAlert variant="error" title="Couldn’t log in">
+            {error}
+          </FormAlert>
+        ) : null}
+
         <label className="flex flex-col gap-1.5 text-left text-sm">
           <span className="font-medium text-text">Email</span>
           <input
@@ -132,12 +139,6 @@ export default function LoginPage() {
             Forgot password?
           </Link>
         </p>
-
-        {error ? (
-          <p className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
 
         <button
           type="submit"

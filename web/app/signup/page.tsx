@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
+import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
 import { getToken, saveToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -129,6 +130,12 @@ export default function SignupPage() {
       }
     >
       <form onSubmit={onSubmit} className={onboardingCardClass}>
+        {error ? (
+          <FormAlert variant="error" title="Something went wrong">
+            {error}
+          </FormAlert>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5 text-left text-sm">
             <span className="font-medium text-text">First name</span>
@@ -215,12 +222,6 @@ export default function SignupPage() {
             autoComplete="new-password"
           />
         </label>
-
-        {error ? (
-          <p className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
 
         <button
           type="submit"

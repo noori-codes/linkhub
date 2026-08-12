@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { AuthShell } from "@/components/AuthShell";
+import { FormAlert } from "@/components/FormAlert";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 
@@ -66,6 +67,18 @@ export default function ForgotPasswordPage() {
         onSubmit={onSubmit}
         className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
       >
+        {error ? (
+          <FormAlert variant="error" title="Couldn’t send reset link">
+            {error}
+          </FormAlert>
+        ) : null}
+
+        {message ? (
+          <FormAlert variant="success" title="Check your email">
+            {message}
+          </FormAlert>
+        ) : null}
+
         <label className="flex flex-col gap-1.5 text-left text-sm">
           <span className="text-text-muted">Email</span>
           <input
@@ -81,18 +94,6 @@ export default function ForgotPasswordPage() {
             className="rounded-md border border-border bg-bg px-3 py-2 text-text outline-none focus:border-brand"
           />
         </label>
-
-        {error ? (
-          <p className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        {message ? (
-          <p className="text-sm text-success" role="status">
-            {message}
-          </p>
-        ) : null}
 
         {resetURL ? (
           <p className="text-sm text-text-muted">
