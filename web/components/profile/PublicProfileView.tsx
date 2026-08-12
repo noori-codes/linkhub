@@ -44,7 +44,7 @@ type Props = {
 const densityStyles = {
   compact: {
     cover: "h-28",
-    heroPad: "px-4 pb-3",
+    heroPad: "px-4 pb-5",
     avatarWrap: "mb-2 h-16 w-16 border-[3px] text-sm",
     avatarOverlap: "-mt-8",
     name: "text-[15px] font-semibold leading-tight tracking-tight",
@@ -52,7 +52,8 @@ const densityStyles = {
     bio: "mt-1.5 max-w-[15rem] text-[12px] leading-snug",
     tags: "mt-2 gap-1",
     tag: "rounded-full px-2.5 py-0.5 text-[9px] font-medium",
-    contentPad: "px-4 pb-7 pt-3",
+    heroDivider: "mx-4 mt-2",
+    contentPad: "px-4 pb-7 pt-5",
     sectionGap: "gap-2",
     sectionTitle: "text-[13px] font-semibold tracking-tight",
     sectionHint: "mt-0.5 text-[10px]",
@@ -73,7 +74,7 @@ const densityStyles = {
   },
   comfortable: {
     cover: "h-44 sm:h-48",
-    heroPad: "px-6 pb-6 sm:px-8",
+    heroPad: "px-6 pb-8 sm:px-8",
     avatarWrap:
       "mb-3 h-24 w-24 border-4 text-2xl sm:h-28 sm:w-28 sm:text-3xl",
     avatarOverlap: "-mt-12 sm:-mt-14",
@@ -82,7 +83,8 @@ const densityStyles = {
     bio: "mt-3 max-w-md text-sm leading-relaxed sm:text-[15px]",
     tags: "mt-3 gap-1.5",
     tag: "rounded-full px-3 py-1 text-xs font-medium",
-    contentPad: "px-5 pb-10 pt-5 sm:px-8 sm:pb-12 sm:pt-6",
+    heroDivider: "mx-5 mt-4 sm:mx-8",
+    contentPad: "px-5 pb-10 pt-8 sm:px-8 sm:pb-12 sm:pt-10",
     sectionGap: "gap-3",
     sectionTitle: "text-lg font-semibold tracking-tight sm:text-xl",
     sectionHint: "mt-1 text-sm",
@@ -102,6 +104,28 @@ const densityStyles = {
     footerText: "text-[11px]",
   },
 } as const;
+
+function linksSectionHint(
+  visibleCount: number,
+  variant: "page" | "preview",
+): string | null {
+  if (visibleCount === 0) {
+    return variant === "page" ? "Nothing published yet" : "No visible links yet";
+  }
+  // Simple profiles — links speak for themselves.
+  if (visibleCount <= 4) return null;
+  return variant === "page"
+    ? "Open a destination in a new tab"
+    : "Your visible links";
+}
+
+function shouldShowShopDescription(
+  description: string | undefined,
+  username: string,
+) {
+  if (!description?.trim()) return false;
+  return description.trim() !== `Picks from @${username}`;
+}
 
 export function PublicProfileView({
   profile,
@@ -145,6 +169,8 @@ export function PublicProfileView({
     variant === "page"
       ? buildShopSections(products, collections, profile.username)
       : [];
+
+  const linksHint = linksSectionHint(visible.length, variant);
 
   const shellClass =
     variant === "page"
@@ -242,29 +268,28 @@ export function PublicProfileView({
       </div>
 
       <div
-        className="mx-4 shrink-0 border-t"
+        className={`shrink-0 border-t ${d.heroDivider}`}
         style={{ borderColor: "var(--profile-border)" }}
       />
 
       {/* Links */}
       <div className={`flex min-h-0 flex-1 flex-col ${d.contentPad}`}>
         <section aria-label="Links">
-          <div className={d.sectionHeaderMb}>
+          <div className={linksHint ? d.sectionHeaderMb : "mb-3"}>
             <h2
               className={`font-display ${d.sectionTitle}`}
               style={{ color: "var(--profile-text)", fontFamily: tokens.fontFamily }}
             >
               Links
             </h2>
-            <p className={d.sectionHint} style={{ color: "var(--profile-text-muted)" }}>
-              {visible.length > 0
-                ? variant === "page"
-                  ? "Open a destination in a new tab"
-                  : "Your visible links"
-                : variant === "page"
-                  ? "Nothing published yet"
-                  : "No visible links yet"}
-            </p>
+            {linksHint ? (
+              <p
+                className={d.sectionHint}
+                style={{ color: "var(--profile-text-muted)" }}
+              >
+                {linksHint}
+              </p>
+            ) : null}
           </div>
 
           <div className={`flex flex-col ${d.sectionGap}`}>
@@ -332,7 +357,10 @@ export function PublicProfileView({
                   >
                     {section.title}
                   </h2>
-                  {section.description ? (
+                  {shouldShowShopDescription(
+                    section.description,
+                    profile.username,
+                  ) ? (
                     <p
                       className={d.shopHint}
                       style={{ color: "var(--profile-text-muted)" }}

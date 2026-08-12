@@ -78,7 +78,7 @@ export function PublicShareButton({ username, displayName }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed top-4 right-4 z-40 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/95 px-3.5 py-2 text-sm font-semibold text-text shadow-md backdrop-blur-sm hover:border-brand/40 lg:top-6 lg:right-6"
+        className="fixed bottom-6 right-4 z-40 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/95 px-3.5 py-2 text-sm font-semibold text-text shadow-md backdrop-blur-sm hover:border-brand/40 sm:bottom-auto sm:top-4 lg:top-6 lg:right-6"
         aria-haspopup="dialog"
       >
         <svg
