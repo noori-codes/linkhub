@@ -12,7 +12,7 @@ import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
@@ -143,7 +143,7 @@ export default function OnboardingAboutPage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <form onSubmit={onSubmit} className={onboardingCardClass}>
+        <form onSubmit={onSubmit} className={onboardingFormClass}>
           <label className="flex flex-col gap-1.5 text-left text-sm">
             <span className="font-medium text-text">Display name</span>
             <input

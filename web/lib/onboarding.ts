@@ -9,13 +9,15 @@ export type OnboardingStepId =
   | "links"
   | "tags";
 
-export const ONBOARDING_STEPS: Array<{
-  id: OnboardingStepId;
+/** Username is collected on signup; wizard starts at About. */
+export type OnboardingWizardStepId = Exclude<OnboardingStepId, "profile">;
+
+export const ONBOARDING_WIZARD_STEPS: Array<{
+  id: OnboardingWizardStepId;
   label: string;
   href: string;
   apiStep: "profile" | "socials" | "theme" | "links" | "tags" | "done";
 }> = [
-  { id: "profile", label: "Username", href: "/onboarding", apiStep: "profile" },
   {
     id: "about",
     label: "About",
@@ -33,13 +35,18 @@ export const ONBOARDING_STEPS: Array<{
   { id: "tags", label: "Tags", href: "/onboarding/tags", apiStep: "tags" },
 ];
 
-export function stepIndex(id: OnboardingStepId) {
-  return ONBOARDING_STEPS.findIndex((s) => s.id === id);
+export function wizardStepIndex(id: OnboardingWizardStepId) {
+  return ONBOARDING_WIZARD_STEPS.findIndex((s) => s.id === id);
 }
 
-export function nextStep(id: OnboardingStepId) {
-  const i = stepIndex(id);
-  return i >= 0 ? ONBOARDING_STEPS[i + 1] : undefined;
+export function nextWizardStep(id: OnboardingWizardStepId) {
+  const i = wizardStepIndex(id);
+  return i >= 0 ? ONBOARDING_WIZARD_STEPS[i + 1] : undefined;
+}
+
+export function prevWizardStep(id: OnboardingWizardStepId) {
+  const i = wizardStepIndex(id);
+  return i > 0 ? ONBOARDING_WIZARD_STEPS[i - 1] : undefined;
 }
 
 export async function setOnboardingStep(
@@ -129,7 +136,9 @@ export const onboardingInputClass = uiInput;
 
 export const onboardingPrimaryBtnClass = uiBtnPrimaryBlock;
 
-export const onboardingCardClass = `flex flex-col gap-4 ${uiCard}`;
+export const onboardingFormClass = "flex flex-col gap-4";
+
+export const onboardingCardClass = `${onboardingFormClass} ${uiCard}`;
 
 export function resumeOnboardingHref(
   apiStep: string | undefined,

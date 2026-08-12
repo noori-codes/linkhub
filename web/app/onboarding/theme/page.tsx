@@ -13,7 +13,7 @@ import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
 } from "@/lib/onboarding";
@@ -168,7 +168,7 @@ export default function OnboardingThemePage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <div className={onboardingCardClass}>
+        <div className={onboardingFormClass}>
           {themesQuery.isLoading ? (
             <Loader label="Loading themes…" className="py-8" />
           ) : themesQuery.isError ? (

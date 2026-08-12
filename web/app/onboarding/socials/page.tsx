@@ -12,7 +12,7 @@ import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
@@ -183,7 +183,7 @@ export default function OnboardingSocialsPage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <form onSubmit={onSubmit} className={onboardingCardClass}>
+        <form onSubmit={onSubmit} className={onboardingFormClass}>
           {SOCIALS.map((social) => (
             <label
               key={social.platform}

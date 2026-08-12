@@ -86,7 +86,6 @@ export default function OnboardingPage() {
 
   return (
     <OnboardingShell
-      step="profile"
       title="Claim your username"
       description="This becomes your public URL. You can change display name and bio next."
       footer={

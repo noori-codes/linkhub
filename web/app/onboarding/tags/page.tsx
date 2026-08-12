@@ -13,7 +13,7 @@ import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
   completeOnboarding,
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
 } from "@/lib/onboarding";
@@ -161,7 +161,7 @@ export default function OnboardingTagsPage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <form onSubmit={onSubmit} className={onboardingCardClass}>
+        <form onSubmit={onSubmit} className={onboardingFormClass}>
           <div className="flex flex-wrap gap-1.5">
             {SUGGESTED_TAGS.map((tag) => {
               const selected = tags.some(

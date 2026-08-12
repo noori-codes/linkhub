@@ -29,15 +29,14 @@ export function FinishLaterButton() {
   }
 
   return (
-    <p className="mt-8 text-center text-xs text-text-muted">
-      Want to finish later?{" "}
+    <p className="mt-5 text-center text-sm text-text-muted">
       <button
         type="button"
         disabled={busy}
         onClick={() => void onClick()}
         className="font-medium text-brand hover:text-brand-hover disabled:opacity-60"
       >
-        {busy ? "Opening…" : "Skip to dashboard"}
+        {busy ? "Opening dashboard…" : "Finish setup later"}
       </button>
     </p>
   );

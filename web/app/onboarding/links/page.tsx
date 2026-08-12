@@ -12,7 +12,7 @@ import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
-  onboardingCardClass,
+  onboardingFormClass,
   onboardingInputClass,
   onboardingPrimaryBtnClass,
   setOnboardingStep,
@@ -165,7 +165,7 @@ export default function OnboardingLinksPage() {
       {!ready ? (
         <Loader label="Loading…" className="py-12" />
       ) : (
-        <form onSubmit={onSubmit} className={onboardingCardClass}>
+        <form onSubmit={onSubmit} className={onboardingFormClass}>
           {links.map((link, index) => (
             <div key={index} className="flex flex-col gap-2">
               <p className="text-xs font-medium tracking-wide text-text-muted uppercase">
