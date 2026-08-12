@@ -2,19 +2,10 @@
 
 import Link from "next/link";
 
-import { useClientAuth } from "@/lib/useClientAuth";
+import { useClientAuth } from "@/components/ClientAuthProvider";
 
 export default function HomeAuthActions() {
-  const { ready, loggedIn } = useClientAuth();
-
-  if (!ready) {
-    return (
-      <div
-        className="h-11 w-32 animate-pulse rounded-md bg-border/70"
-        aria-hidden
-      />
-    );
-  }
+  const { loggedIn } = useClientAuth();
 
   return (
     <div className="flex flex-wrap items-center gap-3">

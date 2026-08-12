@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { useClientAuth } from "@/lib/useClientAuth";
+import { useClientAuth } from "@/components/ClientAuthProvider";
 import { uiBtnGhost, uiBtnPrimary } from "@/lib/ui";
 
 export function SiteHeader() {
@@ -32,7 +32,7 @@ export function SiteHeader() {
               aria-hidden
             />
             <div
-              className="h-8 w-[4.5rem] animate-pulse rounded-lg bg-border/70"
+              className="h-8 w-18 animate-pulse rounded-lg bg-border/70"
               aria-hidden
             />
           </>

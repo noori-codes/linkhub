@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ClientAuthGate } from "@/components/ClientAuthGate";
 import HomeAuthActions from "@/components/HomeAuthActions";
 import { LandingProfilePreview } from "@/components/LandingProfilePreview";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -11,7 +12,8 @@ export default function Home() {
   const productUrl = `${getAppHost()}/u/you`;
 
   return (
-    <main className="flex flex-1 flex-col">
+    <ClientAuthGate>
+      <main className="flex flex-1 flex-col">
       <SiteHeader />
 
       <section className="grid flex-1 lg:min-h-[calc(100svh-3.5rem)] lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -62,5 +64,6 @@ export default function Home() {
 
       <SiteFooter />
     </main>
+    </ClientAuthGate>
   );
 }
