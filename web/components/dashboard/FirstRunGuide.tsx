@@ -1,7 +1,8 @@
 "use client";
 
 import confetti from "canvas-confetti";
-import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   hasAvatar: boolean;
@@ -14,7 +15,11 @@ type Step = {
   done: boolean;
   label: string;
   hint: string;
+  href?: string;
+  actionLabel?: string;
 };
+
+const DISMISS_KEY = "linkhub_getting_started_dismissed";
 
 /** Avoid double-firing when the guide is mounted twice (sidebar + mobile). */
 let celebrationLocked = false;
@@ -50,34 +55,50 @@ export function FirstRunGuide({
   hasLinks,
   isPublished,
 }: Props) {
+  const [dismissed, setDismissed] = useState(false);
+
   const steps: Step[] = [
     {
       id: "avatar",
       done: hasAvatar,
       label: "Add an avatar",
-      hint: "Open Profile and upload a photo.",
+      hint: "Upload a photo so your page feels personal.",
+      href: "/profile/about",
+      actionLabel: "Open Profile",
     },
     {
       id: "link",
       done: hasLinks,
       label: "Add your first link",
-      hint: "Open Links and add one.",
+      hint: "Add at least one visible link for visitors.",
+      href: "/profile/links",
+      actionLabel: "Open Links",
     },
     {
       id: "publish",
       done: isPublished,
       label: "Publish your page",
-      hint: "Use Publish at the top of the preview.",
+      hint: "Hit Publish in the preview when you're ready to go live.",
+      actionLabel: "Publish above",
     },
   ];
 
   const doneCount = steps.filter((s) => s.done).length;
   const allDone = doneCount === steps.length;
+  const currentIndex = steps.findIndex((s) => !s.done);
+  const current = currentIndex >= 0 ? steps[currentIndex]! : steps[steps.length - 1]!;
+  const stepNumber = currentIndex >= 0 ? currentIndex + 1 : steps.length;
+  const progressPct = allDone ? 100 : ((stepNumber - 1) / steps.length) * 100;
+
   const prevDoneCount = useRef<number | null>(null);
   const tracking = useRef(false);
 
   useEffect(() => {
-    // Snapshot the baseline on first stable render — don't treat hydration as progress.
+    if (typeof window === "undefined") return;
+    setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
+  }, []);
+
+  useEffect(() => {
     if (!tracking.current) {
       tracking.current = true;
       prevDoneCount.current = doneCount;
@@ -92,73 +113,93 @@ export function FirstRunGuide({
     }
   }, [doneCount, steps.length]);
 
-  if (allDone) {
+  function dismiss() {
+    localStorage.setItem(DISMISS_KEY, "1");
+    setDismissed(true);
+  }
+
+  if (dismissed) {
     return null;
   }
 
-  const nextId = steps.find((s) => !s.done)?.id;
+  if (allDone) {
+    return (
+      <section
+        className="rounded-xl border border-brand/30 bg-brand-muted px-3.5 py-3.5"
+        aria-label="Getting started complete"
+      >
+        <div className="flex items-start gap-3">
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-text-inverse"
+            aria-hidden
+          >
+            ✓
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-text">You&apos;re all set</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-text-muted">
+              Your page is live and ready to share.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={dismiss}
+          className="mt-3 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-text transition-colors hover:border-brand/40"
+        >
+          Done
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section
-      className="rounded-xl border border-brand/40 bg-brand-muted px-3.5 py-3.5"
+      className="rounded-xl border border-brand/30 bg-brand-muted px-3.5 py-3.5"
       aria-label="Getting started"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-text">Getting started</p>
+        <p className="text-[11px] font-semibold tracking-wide text-text-muted uppercase">
+          Step {stepNumber} of {steps.length}
+        </p>
         <p className="text-xs tabular-nums text-text-muted">
-          {doneCount}/{steps.length}
+          {doneCount}/{steps.length} done
         </p>
       </div>
 
       <div
         className="mt-2.5 h-1 overflow-hidden rounded-full bg-border/60"
-        aria-hidden
+        role="progressbar"
+        aria-valuenow={stepNumber}
+        aria-valuemin={1}
+        aria-valuemax={steps.length}
+        aria-label="Getting started progress"
       >
         <div
-          className="h-full rounded-full bg-brand transition-[width] duration-300"
-          style={{ width: `${(doneCount / steps.length) * 100}%` }}
+          className="h-full rounded-full bg-brand transition-[width] duration-300 ease-out"
+          style={{ width: `${progressPct}%` }}
         />
       </div>
 
-      <ol className="mt-3 flex flex-col gap-2">
-        {steps.map((step, index) => {
-          const isNext = step.id === nextId;
-          return (
-            <li key={step.id} className="flex gap-2.5 text-sm">
-              <span
-                className={
-                  step.done
-                    ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-brand text-xs font-medium text-text-inverse"
-                    : isNext
-                      ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-brand bg-surface text-xs font-medium text-brand"
-                      : "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border text-xs text-text-muted"
-                }
-                aria-hidden
-              >
-                {step.done ? "✓" : index + 1}
-              </span>
-              <div className="min-w-0">
-                <p
-                  className={
-                    step.done
-                      ? "text-text-muted line-through decoration-border"
-                      : isNext
-                        ? "font-medium text-text"
-                        : "text-text-muted"
-                  }
-                >
-                  {step.label}
-                </p>
-                {isNext ? (
-                  <p className="mt-0.5 text-xs leading-snug text-text-muted">
-                    {step.hint}
-                  </p>
-                ) : null}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-3">
+        <p className="text-sm font-semibold text-text">{current.label}</p>
+        <p className="mt-1 text-xs leading-relaxed text-text-muted">
+          {current.hint}
+        </p>
+
+        {current.href ? (
+          <Link
+            href={current.href}
+            className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-text-inverse transition-colors hover:bg-brand-hover"
+          >
+            {current.actionLabel}
+          </Link>
+        ) : (
+          <p className="mt-3 text-center text-xs font-medium text-brand">
+            {current.actionLabel}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
