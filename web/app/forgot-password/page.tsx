@@ -18,14 +18,12 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [resetURL, setResetURL] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setMessage("");
-    setResetURL("");
     setLoading(true);
 
     try {
@@ -35,10 +33,7 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email: normalizeEmailInput(email) }),
       });
 
-      const data = (await res.json()) as {
-        message?: string;
-        resetURL?: string;
-      };
+      const data = (await res.json()) as { message?: string };
 
       if (!res.ok) {
         setError(data.message || "Could not start password reset");
@@ -46,9 +41,6 @@ export default function ForgotPasswordPage() {
       }
 
       setMessage(data.message || "Check your email for a reset link.");
-      if (data.resetURL) {
-        setResetURL(data.resetURL);
-      }
     } catch {
       setError("Cannot reach API. Is the backend running?");
     } finally {
@@ -96,18 +88,6 @@ export default function ForgotPasswordPage() {
             className={onboardingInputClass}
           />
         </label>
-
-        {resetURL ? (
-          <p className="text-sm text-text-muted">
-            Dev link:{" "}
-            <a
-              href={resetURL}
-              className="break-all text-brand hover:text-brand-hover"
-            >
-              {resetURL}
-            </a>
-          </p>
-        ) : null}
 
         <button
           type="submit"

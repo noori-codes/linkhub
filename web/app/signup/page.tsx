@@ -81,7 +81,6 @@ export default function SignupPage() {
         const signupData = (await signupRes.json()) as {
           token?: string;
           message?: string;
-          verifyURL?: string;
         };
 
         if (!signupRes.ok) {
@@ -97,14 +96,6 @@ export default function SignupPage() {
         beginAuthSession(queryClient, signupData.token);
         token = signupData.token;
         setAccountCreated(true);
-
-        if (signupData.verifyURL) {
-          try {
-            sessionStorage.setItem("linkhub_verifyURL", signupData.verifyURL);
-          } catch {
-            /* ignore */
-          }
-        }
       }
 
       const ok = await createProfile(token!);

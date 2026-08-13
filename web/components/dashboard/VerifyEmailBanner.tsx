@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -11,31 +10,8 @@ type Props = {
   email: string;
 };
 
-function toSameOriginVerifyPath(verifyURL: string): string | null {
-  try {
-    // API returns http://127.0.0.1:3001/verify-email/<token>
-    // Stay on THIS origin (localhost vs 127.0.0.1 are different localStorage!)
-    const path = new URL(verifyURL).pathname;
-    if (path.startsWith("/verify-email/")) return path;
-  } catch {
-    /* ignore bad URLs */
-  }
-  return null;
-}
 export function VerifyEmailBanner({ email }: Props) {
-  const [devPath, setDevPath] = useState("");
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem("linkhub_verifyURL");
-      if (!stored) return;
-      const path = toSameOriginVerifyPath(stored);
-      if (path) setDevPath(path);
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   async function onResend() {
     if (sending) return;
@@ -57,10 +33,7 @@ export function VerifyEmailBanner({ email }: Props) {
         },
       );
 
-      const data = (await res.json()) as {
-        message?: string;
-        verifyURL?: string;
-      };
+      const data = (await res.json()) as { message?: string };
 
       if (!res.ok) {
         toast.error(data.message || "Could not resend verification email");
@@ -68,16 +41,6 @@ export function VerifyEmailBanner({ email }: Props) {
       }
 
       toast.success(data.message || "Verification email sent");
-
-      if (data.verifyURL) {
-        try {
-          sessionStorage.setItem("linkhub_verifyURL", data.verifyURL);
-          const path = toSameOriginVerifyPath(data.verifyURL);
-          if (path) setDevPath(path);
-        } catch {
-          /* ignore */
-        }
-      }
     } catch {
       toast.error("Cannot reach API. Is the backend running?");
     } finally {
@@ -98,7 +61,7 @@ export function VerifyEmailBanner({ email }: Props) {
         You can keep editing in draft. Publishing requires a confirmed email.
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <div className="mt-3">
         <button
           type="button"
           onClick={() => void onResend()}
@@ -107,14 +70,6 @@ export function VerifyEmailBanner({ email }: Props) {
         >
           {sending ? "Sending…" : "Resend verify email"}
         </button>
-        {devPath ? (
-          <Link
-            href={devPath}
-            className="text-xs text-brand hover:text-brand-hover"
-          >
-            Dev: open verify link
-          </Link>
-        ) : null}
       </div>
     </div>
   );
