@@ -1,17 +1,21 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { AuthShell } from "@/components/AuthShell";
+import { notifyEmailVerified } from "@/lib/auth-session";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { queryKeys } from "@/lib/dashboard-queries";
 
 type Status = "loading" | "success" | "error";
 
 export default function VerifyEmailPage() {
   const params = useParams<{ token: string }>();
   const token = params.token;
+  const queryClient = useQueryClient();
 
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("Confirming your email…");
@@ -43,6 +47,8 @@ export default function VerifyEmailPage() {
 
         setStatus("success");
         setMessage(data.message || "Email verified.");
+        void queryClient.invalidateQueries({ queryKey: queryKeys.userMe });
+        notifyEmailVerified();
       } catch {
         if (cancelled) return;
         setStatus("error");

@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { subscribeEmailVerified } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
 import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
@@ -25,20 +26,40 @@ export function PreviewPublishControl({ profile, onProfileChange }: Props) {
   });
 
   const isPublished = profile.status === "published";
-  const emailVerified = meQuery.data?.emailVerified ?? true;
+
+  useEffect(() => {
+    return subscribeEmailVerified(() => {
+      void meQuery.refetch();
+    });
+  }, [meQuery]);
+
+  // Browser back/forward cache can restore a stale dashboard after verify-email.
+  useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (event.persisted) {
+        void meQuery.refetch();
+      }
+    }
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, [meQuery]);
 
   async function togglePublish() {
     if (saving) return;
-
-    if (!isPublished && !emailVerified) {
-      toast.error("First confirm your email before you can publish.");
-      return;
-    }
 
     const token = getToken();
     if (!token) {
       router.replace("/login");
       return;
+    }
+
+    if (!isPublished) {
+      const { data: me } = await meQuery.refetch();
+      if (!me?.emailVerified) {
+        toast.error("First confirm your email before you can publish.");
+        return;
+      }
     }
 
     const nextStatus = isPublished ? "draft" : "published";
@@ -88,7 +109,7 @@ export function PreviewPublishControl({ profile, onProfileChange }: Props) {
       <button
         type="button"
         onClick={() => void togglePublish()}
-        disabled={saving}
+        disabled={saving || meQuery.isLoading}
         className={
           isPublished
             ? "rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text hover:border-brand/40 disabled:opacity-50"
