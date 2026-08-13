@@ -1,5 +1,6 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import type { QueryClient } from "@tanstack/react-query";
 import type {
   AccountUser,
   AnalyticsSummary,
@@ -22,6 +23,16 @@ export const queryKeys = {
   productLinks: (productId: string) =>
     ["products", productId, "links"] as const,
 };
+
+/** Drop cached dashboard data when the signed-in user changes. */
+export function clearDashboardCache(queryClient: QueryClient) {
+  queryClient.removeQueries({ queryKey: queryKeys.profileMe });
+  queryClient.removeQueries({ queryKey: queryKeys.linksMe });
+  queryClient.removeQueries({ queryKey: queryKeys.userMe });
+  queryClient.removeQueries({ queryKey: queryKeys.analyticsMe });
+  queryClient.removeQueries({ queryKey: queryKeys.productsMe });
+  queryClient.removeQueries({ queryKey: queryKeys.collectionsMe });
+}
 
 export class HttpError extends Error {
   status: number;

@@ -11,7 +11,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { clearToken } from "@/lib/auth";
+import { endAuthSession } from "@/lib/auth-session";
 import {
   fetchMyLinks,
   fetchMyProfile,
@@ -54,7 +54,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     if (!err) return;
 
     if (err instanceof HttpError && err.status === 401) {
-      clearToken();
+      endAuthSession(queryClient);
       router.replace("/login");
       return;
     }
@@ -62,7 +62,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     if (err instanceof HttpError && err.status === 404) {
       router.replace("/onboarding");
     }
-  }, [profileQuery.error, router]);
+  }, [profileQuery.error, queryClient, router]);
 
   const setProfile = useCallback(
     (profile: PublicProfile) => {

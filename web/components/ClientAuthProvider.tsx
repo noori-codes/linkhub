@@ -9,8 +9,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { clearToken, getToken } from "@/lib/auth";
+import { endAuthSession, subscribeAuthChanges } from "@/lib/auth-session";
+import { getToken } from "@/lib/auth";
 
 type ClientAuthContextValue = {
   ready: boolean;
@@ -21,18 +23,21 @@ type ClientAuthContextValue = {
 const ClientAuthContext = createContext<ClientAuthContextValue | null>(null);
 
 export function ClientAuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [ready, setReady] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    setLoggedIn(Boolean(getToken()));
+    const sync = () => setLoggedIn(Boolean(getToken()));
+    sync();
     setReady(true);
+    return subscribeAuthChanges(sync);
   }, []);
 
   const logout = useCallback(() => {
-    clearToken();
+    endAuthSession(queryClient);
     setLoggedIn(false);
-  }, []);
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({ ready, loggedIn, logout }),

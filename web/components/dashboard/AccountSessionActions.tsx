@@ -2,18 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import { clearToken, getToken } from "@/lib/auth";
+import { endAuthSession } from "@/lib/auth-session";
+import { getToken } from "@/lib/auth";
 import { uiBtnSecondary } from "@/lib/ui";
 
 export function AccountSessionActions() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
 
   function onLogout() {
-    clearToken();
+    endAuthSession(queryClient);
     toast.success("Logged out");
     router.replace("/login");
   }
@@ -49,7 +52,7 @@ export function AccountSessionActions() {
         return;
       }
 
-      clearToken();
+      endAuthSession(queryClient);
       toast.success("Account deleted");
       router.replace("/");
     } catch {

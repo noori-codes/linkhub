@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { SortableLinkList } from "@/components/SortableLinkList";
@@ -35,6 +35,12 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
   const linksBeforeDrag = useRef<PublicLink[]>([]);
   const linksRef = useRef(links);
   linksRef.current = links;
+
+  const initialLinksKey = initialLinks.map((link) => link._id).join("|");
+
+  useEffect(() => {
+    setLinks(initialLinks);
+  }, [initialLinks, initialLinksKey]);
 
   function commitLinks(next: PublicLink[]) {
     linksRef.current = next;

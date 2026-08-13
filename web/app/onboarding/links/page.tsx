@@ -114,7 +114,12 @@ export default function OnboardingLinksPage() {
 
   async function createLinks(
     token: string,
-    items: Array<{ title: string; url: string; type: string; platform: string }>,
+    items: Array<{
+      title: string;
+      url: string;
+      type: string;
+      platform: string;
+    }>,
   ) {
     for (const item of items) {
       const res = await fetch(`${CLIENT_API_BASE}/api/v1/links`, {
@@ -205,10 +210,7 @@ export default function OnboardingLinksPage() {
       title="Add your links"
       description="Paste your profile URL for each platform. Leave blank any you want to skip."
       footer={
-        <OnboardingSkipFooter
-          onSkip={() => void onSkip()}
-          disabled={loading}
-        />
+        <OnboardingSkipFooter onSkip={() => void onSkip()} disabled={loading} />
       }
     >
       {!ready ? (
@@ -373,7 +375,9 @@ function CustomLinksSection({
         type="button"
         disabled={disabled || links.length >= 3}
         onClick={() =>
-          onChange(links.length >= 3 ? links : [...links, { title: "", url: "" }])
+          onChange(
+            links.length >= 3 ? links : [...links, { title: "", url: "" }],
+          )
         }
         className="text-left text-sm font-medium text-brand hover:text-brand-hover disabled:opacity-60"
       >

@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import Link from "next/link";
 import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
-import { saveToken } from "@/lib/auth";
+import { beginAuthSession } from "@/lib/auth-session";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
@@ -20,6 +21,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -44,7 +46,7 @@ export default function LoginPage() {
         return;
       }
 
-      saveToken(data.token);
+      beginAuthSession(queryClient, data.token);
       try {
         const meRes = await fetch(`${CLIENT_API_BASE}/api/v1/users/me`, {
           headers: { Authorization: `Bearer ${data.token}` },

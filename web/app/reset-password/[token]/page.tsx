@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -9,7 +10,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
 import { CLIENT_API_BASE } from "@/lib/client-api";
-import { saveToken } from "@/lib/auth";
+import { beginAuthSession } from "@/lib/auth-session";
 import {
   onboardingFormClass,
   onboardingPrimaryBtnClass,
@@ -17,6 +18,7 @@ import {
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const params = useParams<{ token: string }>();
   const token = params.token;
 
@@ -62,7 +64,7 @@ export default function ResetPasswordPage() {
       }
 
       if (data.token) {
-        saveToken(data.token);
+        beginAuthSession(queryClient, data.token);
       }
 
       router.push("/profile");

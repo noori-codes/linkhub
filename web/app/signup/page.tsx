@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +9,8 @@ import Link from "next/link";
 import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
-import { getToken, saveToken } from "@/lib/auth";
+import { beginAuthSession } from "@/lib/auth-session";
+import { getToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
@@ -20,6 +22,7 @@ import {
 
 export default function SignupPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -91,7 +94,7 @@ export default function SignupPage() {
           return;
         }
 
-        saveToken(signupData.token);
+        beginAuthSession(queryClient, signupData.token);
         token = signupData.token;
         setAccountCreated(true);
 
