@@ -44,7 +44,7 @@ const MENU: Array<MenuLink | MenuPanel> = [
   {
     href: "/profile/avatar",
     label: "Design",
-    icon: "/avatar.svg",
+    icon: "/design.svg",
   },
   {
     href: "/profile/shop",
