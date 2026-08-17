@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
-import { Loader } from "@/components/Loader";
+import { ListSkeleton } from "@/components/Skeleton";
 import { notifyEmailVerified } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -130,7 +130,7 @@ export default function VerifyEmailPage() {
       }
     >
       {status === "loading" ? (
-        <Loader label="Confirming your email…" size="sm" className="py-4" />
+        <ListSkeleton rows={2} rowClassName="h-10 w-full rounded-xl" />
       ) : null}
 
       {status === "success" ? (

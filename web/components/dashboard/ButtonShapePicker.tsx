@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
+import { Skeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { BUTTON_SHAPES, resolveButtonShape } from "@/lib/theme";
@@ -15,7 +16,27 @@ export function ButtonShapePicker() {
   const { profile, setProfile } = useProfile();
   const [saving, setSaving] = useState<ButtonShape | null>(null);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-5">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-text">Button shape</h2>
+          <p className="mt-1 text-xs text-text-muted">
+            Corners for link buttons on your public page
+          </p>
+        </div>
+        <div
+          className="grid grid-cols-3 gap-2.5"
+          role="status"
+          aria-label="Loading button shapes"
+        >
+          <Skeleton className="h-[4.75rem] w-full rounded-xl" />
+          <Skeleton className="h-[4.75rem] w-full rounded-xl" />
+          <Skeleton className="h-[4.75rem] w-full rounded-xl" />
+        </div>
+      </section>
+    );
+  }
 
   const selected = resolveButtonShape(profile);
 

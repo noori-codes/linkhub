@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AccountDetailsForm } from "@/components/dashboard/AccountDetailsForm";
 import { AccountSessionActions } from "@/components/dashboard/AccountSessionActions";
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
-import { Loader } from "@/components/Loader";
+import { SettingsSkeleton } from "@/components/Skeleton";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
 
@@ -31,7 +31,7 @@ export function SettingsPanel() {
   const me = meQuery.data;
 
   if (!profile || meQuery.isLoading) {
-    return <Loader label="Loading…" className="py-12" />;
+    return <SettingsSkeleton />;
   }
 
   return (

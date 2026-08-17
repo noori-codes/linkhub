@@ -17,7 +17,7 @@ import { PreviewPublishControl } from "@/components/profile/PreviewPublishContro
 import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
-import { PreviewSkeleton } from "@/components/Skeleton";
+import { PreviewSkeleton, FormSkeleton } from "@/components/Skeleton";
 import { subscribeEmailVerified } from "@/lib/auth-session";
 import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
 
@@ -457,7 +457,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
                 <EmailSignaturePanel profile={profile} />
               ) : null}
               {utilityPanel === "signature" && !profile ? (
-                <p className="text-sm text-text-muted">Loading profile…</p>
+                <FormSkeleton fields={4} />
               ) : null}
             </div>
           </div>

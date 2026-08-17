@@ -1,13 +1,14 @@
 "use client";
 
 import { LinksPanel } from "@/components/dashboard/LinksPanel";
-import { Loader } from "@/components/Loader";
 import { useProfile } from "@/components/profile/ProfileProvider";
+import { LinksSkeleton } from "@/components/Skeleton";
+
 export default function ProfileLinksPage() {
   const { links, setLinks, loading, profile } = useProfile();
 
   if (loading) {
-    return <Loader label="Loading links…" className="py-12" />;
+    return <LinksSkeleton />;
   }
 
   return (

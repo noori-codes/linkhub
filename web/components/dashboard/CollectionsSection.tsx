@@ -9,7 +9,7 @@ import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import { EmptyState } from "@/components/EmptyState";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
-import { Loader } from "@/components/Loader";
+import { ListSkeleton } from "@/components/Skeleton";
 import {
   fetchMyCollections,
   HttpError,
@@ -286,7 +286,7 @@ export function CollectionsSection({ products }: Props) {
         title="Collections"
         description="Group products into sections on your public shop."
       >
-        <Loader label="Loading collections…" size="sm" className="py-6" />
+        <ListSkeleton rows={2} />
       </SettingsCard>
     );
   }

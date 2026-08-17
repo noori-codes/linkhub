@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
-import { Loader } from "@/components/Loader";
+import { FormSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { uiInput } from "@/lib/ui";
@@ -365,7 +365,7 @@ export function ProfileEditor() {
   }
 
   if (!profile) {
-    return <Loader label="Loading…" className="py-12" />;
+    return <FormSkeleton fields={4} />;
   }
 
   const usernameHasError =

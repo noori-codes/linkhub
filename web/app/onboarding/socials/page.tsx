@@ -8,7 +8,7 @@ import {
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
 import { PlatformPicker } from "@/components/onboarding/PlatformPicker";
-import { Loader } from "@/components/Loader";
+import { ListSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
@@ -118,7 +118,7 @@ export default function OnboardingSocialsPage() {
       }
     >
       {!ready ? (
-        <Loader label="Loading…" className="py-12" />
+        <ListSkeleton rows={6} rowClassName="h-12 w-full rounded-xl" />
       ) : (
         <div className={onboardingFormClass}>
           <PlatformPicker

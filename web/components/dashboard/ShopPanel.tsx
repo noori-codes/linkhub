@@ -11,7 +11,7 @@ import { clearToken, getToken } from "@/lib/auth";
 import { CollectionsSection } from "@/components/dashboard/CollectionsSection";
 import { EmptyState } from "@/components/EmptyState";
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
-import { Loader } from "@/components/Loader";
+import { ShopSkeleton, ListSkeleton } from "@/components/Skeleton";
 import {
   fetchMyProducts,
   fetchProductLinks,
@@ -551,7 +551,7 @@ export function ShopPanel() {
   }
 
   if (productsQuery.isLoading) {
-    return <Loader label="Loading shop…" className="py-12" />;
+    return <ShopSkeleton />;
   }
 
   if (productsQuery.isError) {
@@ -1159,7 +1159,7 @@ function ProductLinksSection({
       </p>
 
       {linksQuery.isLoading ? (
-        <Loader label="Loading links…" size="sm" className="py-4" />
+        <ListSkeleton rows={2} rowClassName="h-10 w-full rounded-xl" />
       ) : null}
 
       {linksQuery.isError ? (

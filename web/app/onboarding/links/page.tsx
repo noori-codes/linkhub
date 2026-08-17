@@ -10,7 +10,7 @@ import {
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
 import { PlatformIconBadge } from "@/components/onboarding/PlatformIconBadge";
-import { Loader } from "@/components/Loader";
+import { ListSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
@@ -214,7 +214,7 @@ export default function OnboardingLinksPage() {
       }
     >
       {!ready ? (
-        <Loader label="Loading…" className="py-12" />
+        <ListSkeleton rows={5} />
       ) : platformIds.length === 0 ? (
         <form onSubmit={onSubmit} className={onboardingFormClass}>
           <EmptyPlatformsHint />

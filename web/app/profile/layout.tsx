@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { ProfileProvider } from "@/components/profile/ProfileProvider";
 import { ProfileShell } from "@/components/profile/ProfileShell";
-import { Loader } from "@/components/Loader";
+import { DashboardShellSkeleton } from "@/components/Skeleton";
 
 export default function ProfileLayout({
   children,
@@ -12,13 +12,7 @@ export default function ProfileLayout({
   return (
     <div className="h-dvh overflow-hidden">
       <ProfileProvider>
-        <Suspense
-          fallback={
-            <div className="flex h-full items-center justify-center bg-bg">
-              <Loader label="Loading…" />
-            </div>
-          }
-        >
+        <Suspense fallback={<DashboardShellSkeleton />}>
           <ProfileShell>{children}</ProfileShell>
         </Suspense>
       </ProfileProvider>

@@ -8,7 +8,7 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
-import { Loader } from "@/components/Loader";
+import { ThemeGridSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
@@ -166,11 +166,11 @@ export default function OnboardingThemePage() {
       }
     >
       {!ready ? (
-        <Loader label="Loading…" className="py-12" />
+        <ThemeGridSkeleton />
       ) : (
         <div className={onboardingFormClass}>
           {themesQuery.isLoading ? (
-            <Loader label="Loading themes…" className="py-8" />
+            <ThemeGridSkeleton />
           ) : themesQuery.isError ? (
             <p className="text-sm text-danger">
               {themesQuery.error instanceof Error

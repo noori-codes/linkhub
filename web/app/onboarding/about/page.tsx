@@ -8,7 +8,7 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
-import { Loader } from "@/components/Loader";
+import { FormSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
@@ -141,7 +141,7 @@ export default function OnboardingAboutPage() {
       }
     >
       {!ready ? (
-        <Loader label="Loading…" className="py-12" />
+        <FormSkeleton fields={2} bordered={false} />
       ) : (
         <form onSubmit={onSubmit} className={onboardingFormClass}>
           <label className="flex flex-col gap-1.5 text-left text-sm">

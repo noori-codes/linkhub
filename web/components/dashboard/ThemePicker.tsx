@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
-import { Loader } from "@/components/Loader";
+import { ThemeGridSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
@@ -37,7 +37,17 @@ export function ThemePicker() {
   });
 
   if (!profile) {
-    return null;
+    return (
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-5">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-text">Theme</h2>
+          <p className="mt-1 text-xs text-text-muted">
+            Colors and type for your public page — preview updates live
+          </p>
+        </div>
+        <ThemeGridSkeleton />
+      </section>
+    );
   }
 
   const selectedId = themeIdOf(profile);
@@ -91,7 +101,7 @@ export function ThemePicker() {
       </div>
 
       {themesQuery.isLoading ? (
-        <Loader label="Loading themes…" className="py-8" />
+        <ThemeGridSkeleton />
       ) : themesQuery.isError ? (
         <p className="text-sm text-danger">
           {themesQuery.error instanceof Error

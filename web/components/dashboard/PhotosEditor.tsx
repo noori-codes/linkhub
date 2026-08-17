@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { ImageCropDialog, type CropKind } from "@/components/dashboard/ImageCropDialog";
 import { useProfile } from "@/components/profile/ProfileProvider";
-import { Loader } from "@/components/Loader";
+import { PhotosSkeleton } from "@/components/Skeleton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { imageObjectKey, isRemoteImageUrl } from "@/lib/image-url";
@@ -41,7 +41,7 @@ export function PhotosEditor() {
   }, [cropSession?.src]);
 
   if (!profile) {
-    return <Loader label="Loading…" className="py-12" />;
+    return <PhotosSkeleton />;
   }
 
   const displayAvatarUrl = isRemoteImageUrl(profile.avatarUrl)
