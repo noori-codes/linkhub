@@ -194,6 +194,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const gettingStarted =
     !loading && profile != null ? (
       <FirstRunGuide
+        userId={profile._id}
         hasAvatar={hasAvatar}
         hasLinks={hasLinks}
         isPublished={isPublished}

@@ -33,6 +33,12 @@ export function subscribeEmailVerified(onVerified: () => void) {
 export function beginAuthSession(queryClient: QueryClient, token: string) {
   clearDashboardCache(queryClient);
   saveToken(token);
+  try {
+    // Legacy key was global — hid the guide for every new account on this browser.
+    localStorage.removeItem("linkhub_getting_started_dismissed");
+  } catch {
+    /* ignore */
+  }
   notifyAuthChanged();
 }
 

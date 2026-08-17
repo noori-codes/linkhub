@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
+  userId: string;
   hasAvatar: boolean;
   hasLinks: boolean;
   isPublished: boolean;
@@ -19,7 +20,11 @@ type Step = {
   actionLabel?: string;
 };
 
-const DISMISS_KEY = "linkhub_getting_started_dismissed";
+const LEGACY_DISMISS_KEY = "linkhub_getting_started_dismissed";
+
+function dismissKey(userId: string) {
+  return `linkhub_getting_started_dismissed_${userId}`;
+}
 
 /** Avoid double-firing when the guide is mounted twice (sidebar + mobile). */
 let celebrationLocked = false;
@@ -51,11 +56,12 @@ function fireCelebration() {
 }
 
 export function FirstRunGuide({
+  userId,
   hasAvatar,
   hasLinks,
   isPublished,
 }: Props) {
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState<boolean | null>(null);
 
   const steps: Step[] = [
     {
@@ -94,9 +100,14 @@ export function FirstRunGuide({
   const tracking = useRef(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
-  }, []);
+    if (typeof window === "undefined" || !userId) return;
+    try {
+      localStorage.removeItem(LEGACY_DISMISS_KEY);
+      setDismissed(localStorage.getItem(dismissKey(userId)) === "1");
+    } catch {
+      setDismissed(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (!tracking.current) {
@@ -114,8 +125,12 @@ export function FirstRunGuide({
   }, [doneCount, steps.length]);
 
   function dismiss() {
-    localStorage.setItem(DISMISS_KEY, "1");
+    localStorage.setItem(dismissKey(userId), "1");
     setDismissed(true);
+  }
+
+  if (dismissed === null) {
+    return null;
   }
 
   if (dismissed) {
