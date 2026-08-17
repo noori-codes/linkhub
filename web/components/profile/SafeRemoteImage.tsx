@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { Skeleton } from "@/components/Skeleton";
+import { imageObjectKey } from "@/lib/image-url";
 
 type Props = {
   src: string;
@@ -12,7 +13,7 @@ type Props = {
   loading?: "eager" | "lazy";
 };
 
-function SafeRemoteImageInner({
+export function SafeRemoteImage({
   src,
   alt,
   className = "",
@@ -20,16 +21,24 @@ function SafeRemoteImageInner({
   loading = "lazy",
 }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const objectKeyRef = useRef("");
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  // Cached images may finish before onLoad is attached.
+  const objectKey = imageObjectKey(src);
+
   useLayoutEffect(() => {
+    if (objectKeyRef.current !== objectKey) {
+      objectKeyRef.current = objectKey;
+      setLoaded(false);
+      setFailed(false);
+    }
+
     const img = imgRef.current;
     if (img?.complete && img.naturalWidth > 0) {
       setLoaded(true);
     }
-  }, [src]);
+  }, [src, objectKey]);
 
   if (failed) {
     return fallback;
@@ -38,10 +47,7 @@ function SafeRemoteImageInner({
   return (
     <div className="relative h-full w-full overflow-hidden">
       {!loaded ? (
-        <Skeleton
-          aria-hidden
-          className="absolute inset-0 rounded-none"
-        />
+        <Skeleton aria-hidden className="absolute inset-0 rounded-none" />
       ) : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -58,9 +64,4 @@ function SafeRemoteImageInner({
       />
     </div>
   );
-}
-
-export function SafeRemoteImage(props: Props) {
-  // Remount when src changes so loading state resets without an effect.
-  return <SafeRemoteImageInner key={props.src} {...props} />;
 }

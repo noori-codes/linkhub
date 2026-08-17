@@ -9,6 +9,7 @@ import { useProfile } from "@/components/profile/ProfileProvider";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
+import { imageObjectKey, isRemoteImageUrl } from "@/lib/image-url";
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { uiBtnPrimary, uiInput } from "@/lib/ui";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
@@ -21,8 +22,7 @@ export function PhotosEditor() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [coverUrl, setCoverUrl] = useState("");
+  const [urlDraft, setUrlDraft] = useState({ avatar: "", cover: "" });
   const [showUrlFields, setShowUrlFields] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -40,16 +40,31 @@ export function PhotosEditor() {
     };
   }, [cropSession?.src]);
 
-  useEffect(() => {
-    if (!profile) return;
-    setAvatarUrl(
-      profile.avatarUrl?.startsWith("http") ? profile.avatarUrl : "",
-    );
-    setCoverUrl(profile.coverUrl?.startsWith("http") ? profile.coverUrl : "");
-  }, [profile]);
-
   if (!profile) {
     return <Loader label="Loading…" className="py-12" />;
+  }
+
+  const displayAvatarUrl = isRemoteImageUrl(profile.avatarUrl)
+    ? profile.avatarUrl ?? ""
+    : "";
+  const displayCoverUrl = isRemoteImageUrl(profile.coverUrl)
+    ? profile.coverUrl ?? ""
+    : "";
+
+  function openUrlFields() {
+    setUrlDraft({
+      avatar: displayAvatarUrl,
+      cover: displayCoverUrl,
+    });
+    setShowUrlFields(true);
+  }
+
+  function toggleUrlFields() {
+    if (showUrlFields) {
+      setShowUrlFields(false);
+      return;
+    }
+    openUrlFields();
   }
 
   function openCropEditor(kind: CropKind, file: File) {
@@ -74,6 +89,8 @@ export function PhotosEditor() {
   }
 
   async function uploadImage(kind: CropKind, file: File) {
+    if (!profile) return;
+
     const token = getToken();
     if (!token) {
       router.replace("/login");
@@ -107,13 +124,33 @@ export function PhotosEditor() {
         return;
       }
 
-      setProfile(data.data.profile);
-      if (kind === "avatar" && data.data.avatarUrl) {
-        setAvatarUrl(data.data.avatarUrl);
+      const updated = data.data.profile;
+      const merged: PublicProfile = {
+        ...updated,
+        avatarUrl:
+          kind === "avatar"
+            ? (data.data.avatarUrl ?? updated.avatarUrl)
+            : profile.avatarUrl &&
+                imageObjectKey(profile.avatarUrl) ===
+                  imageObjectKey(updated.avatarUrl ?? "")
+              ? profile.avatarUrl
+              : updated.avatarUrl,
+        coverUrl:
+          kind === "cover"
+            ? (data.data.coverUrl ?? updated.coverUrl)
+            : profile.coverUrl &&
+                imageObjectKey(profile.coverUrl) ===
+                  imageObjectKey(updated.coverUrl ?? "")
+              ? profile.coverUrl
+              : updated.coverUrl,
+      };
+
+      setProfile(merged);
+
+      if (kind === "avatar") {
         toast.success("Avatar uploaded");
       }
-      if (kind === "cover" && data.data.coverUrl) {
-        setCoverUrl(data.data.coverUrl);
+      if (kind === "cover") {
         toast.success("Cover uploaded");
       }
 
@@ -145,8 +182,8 @@ export function PhotosEditor() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          avatarUrl: avatarUrl.trim(),
-          coverUrl: coverUrl.trim(),
+          avatarUrl: urlDraft.avatar.trim(),
+          coverUrl: urlDraft.cover.trim(),
         }),
       });
 
@@ -160,6 +197,14 @@ export function PhotosEditor() {
       }
 
       setProfile(data.data.profile);
+      setUrlDraft({
+        avatar: isRemoteImageUrl(data.data.profile.avatarUrl)
+          ? data.data.profile.avatarUrl!
+          : "",
+        cover: isRemoteImageUrl(data.data.profile.coverUrl)
+          ? data.data.profile.coverUrl!
+          : "",
+      });
       toast.success("Photo URLs saved");
     } catch {
       toast.error("Cannot reach API. Is the backend running?");
@@ -170,8 +215,8 @@ export function PhotosEditor() {
 
   const busy =
     uploadingAvatar || uploadingCover || saving || cropSession !== null;
-  const hasAvatar = Boolean(avatarUrl.startsWith("http"));
-  const hasCover = Boolean(coverUrl.startsWith("http"));
+  const hasAvatar = Boolean(displayAvatarUrl);
+  const hasCover = Boolean(displayCoverUrl);
   const initials = (profile.displayName || profile.username || "?")
     .split(" ")
     .filter(Boolean)
@@ -195,7 +240,7 @@ export function PhotosEditor() {
           >
             {hasCover ? (
               <SafeRemoteImage
-                src={coverUrl}
+                src={displayCoverUrl}
                 alt=""
                 className="h-full w-full object-cover"
                 loading="eager"
@@ -226,7 +271,7 @@ export function PhotosEditor() {
           >
             {hasAvatar ? (
               <SafeRemoteImage
-                src={avatarUrl}
+                src={displayAvatarUrl}
                 alt=""
                 className="h-full w-full object-cover"
                 loading="eager"
@@ -278,7 +323,7 @@ export function PhotosEditor() {
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(18,20,26,0.04)] sm:p-5">
         <button
           type="button"
-          onClick={() => setShowUrlFields((open) => !open)}
+          onClick={toggleUrlFields}
           className="flex w-full items-center justify-between gap-3 text-left"
         >
           <div>
@@ -303,8 +348,10 @@ export function PhotosEditor() {
               <span className="font-medium text-text">Avatar URL</span>
               <input
                 type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
+                value={urlDraft.avatar}
+                onChange={(e) =>
+                  setUrlDraft((draft) => ({ ...draft, avatar: e.target.value }))
+                }
                 placeholder="https://…"
                 className={inputClass}
               />
@@ -313,8 +360,10 @@ export function PhotosEditor() {
               <span className="font-medium text-text">Cover URL</span>
               <input
                 type="url"
-                value={coverUrl}
-                onChange={(e) => setCoverUrl(e.target.value)}
+                value={urlDraft.cover}
+                onChange={(e) =>
+                  setUrlDraft((draft) => ({ ...draft, cover: e.target.value }))
+                }
                 placeholder="https://…"
                 className={inputClass}
               />
