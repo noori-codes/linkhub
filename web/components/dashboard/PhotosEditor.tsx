@@ -158,7 +158,10 @@ export function PhotosEditor() {
           onClick={() => coverInputRef.current?.click()}
           className="group relative block w-full text-left disabled:opacity-60"
         >
-          <div className="relative h-36 w-full bg-[linear-gradient(135deg,#dfe4ec,#eef0f4)] sm:h-44">
+          <div
+            className="relative h-36 w-full bg-[linear-gradient(135deg,#dfe4ec,#eef0f4)] sm:h-44"
+            style={{ cursor: "pointer" }}
+          >
             {hasCover ? (
               <SafeRemoteImage
                 src={coverUrl}
@@ -188,7 +191,7 @@ export function PhotosEditor() {
             disabled={busy}
             onClick={() => avatarInputRef.current?.click()}
             className="group relative -mt-10 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg shadow-md transition-transform hover:scale-[1.02] disabled:opacity-60 sm:-mt-12 sm:h-24 sm:w-24"
-            aria-label={hasAvatar ? "Replace avatar" : "Upload avatar"}
+            aria-label={hasAvatar ? "Change avatar" : "Upload avatar"}
           >
             {hasAvatar ? (
               <SafeRemoteImage
@@ -202,30 +205,19 @@ export function PhotosEditor() {
                 {initials || "?"}
               </span>
             )}
-            <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <span
+              className="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100"
+              style={{ cursor: "pointer" }}
+            >
               {uploadingAvatar ? "…" : "Edit"}
             </span>
           </button>
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 pb-1 pt-3">
-            <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-text">Profile photo</h2>
-              <p className="mt-0.5 text-xs text-text-muted">
-                Square crop works best · max 2 MB
-              </p>
-            </div>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => avatarInputRef.current?.click()}
-              className={uiBtnPrimary}
-            >
-              {uploadingAvatar
-                ? "Uploading…"
-                : hasAvatar
-                  ? "Replace"
-                  : "Upload"}
-            </button>
+          <div className="min-w-0 flex-1 pb-1 pt-3">
+            <h2 className="text-sm font-semibold text-text">Profile photo</h2>
+            <p className="mt-0.5 text-xs text-text-muted">
+              Click the photo to upload · square crop works best · max 2 MB
+            </p>
           </div>
         </div>
 
@@ -296,11 +288,7 @@ export function PhotosEditor() {
                 className={inputClass}
               />
             </label>
-            <button
-              type="submit"
-              disabled={busy}
-              className={uiBtnPrimary}
-            >
+            <button type="submit" disabled={busy} className={uiBtnPrimary}>
               {saving ? "Saving…" : "Save URLs"}
             </button>
           </form>
