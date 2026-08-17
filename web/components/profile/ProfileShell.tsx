@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { EmailSignaturePanel } from "@/components/dashboard/EmailSignaturePanel";
 import { FirstRunGuide } from "@/components/dashboard/FirstRunGuide";
 import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
+import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { DialogCloseButton } from "@/components/DialogCloseButton";
 import { PhoneFrame } from "@/components/profile/PhoneFrame";
 import { PreviewPublishControl } from "@/components/profile/PreviewPublishControl";
@@ -15,6 +18,8 @@ import { PreviewShareActions } from "@/components/profile/PreviewShareActions";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { PreviewSkeleton } from "@/components/Skeleton";
+import { subscribeEmailVerified } from "@/lib/auth-session";
+import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
 
 type UtilityPanel = "settings" | "signature";
 
@@ -148,9 +153,31 @@ function isMenuPanel(item: MenuLink | MenuPanel): item is MenuPanel {
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { profile, links, loading, error, setProfile } = useProfile();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [utilityPanel, setUtilityPanel] = useState<UtilityPanel | null>(null);
+
+  const meQuery = useQuery({
+    queryKey: queryKeys.userMe,
+    queryFn: fetchMyUser,
+  });
+
+  useEffect(() => {
+    return subscribeEmailVerified(() => {
+      void meQuery.refetch();
+      toast.success("Email verified — you can publish your page now.");
+    });
+  }, [meQuery]);
+
+  useEffect(() => {
+    if (searchParams.get("verified") !== "1") return;
+    toast.success("Email verified — you can publish your page now.");
+    router.replace(pathname);
+  }, [searchParams, pathname, router]);
+
+  const me = meQuery.data;
+  const showVerifyBanner = Boolean(me && !me.emailVerified);
 
   const title = sectionTitle(pathname);
   const hint = sectionHint(pathname);
@@ -218,7 +245,12 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
   const utilityCopy = utilityPanel ? UTILITY_COPY[utilityPanel] : null;
 
   return (
-    <div className="flex h-full flex-col bg-bg lg:flex-row">
+    <div className="flex h-full flex-col bg-bg">
+      {showVerifyBanner ? (
+        <VerifyEmailBanner email={me!.email} variant="top" />
+      ) : null}
+
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
       {/* Left — fixed column */}
       <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface lg:h-full lg:w-[13.5rem] lg:overflow-hidden lg:border-b-0 lg:border-r xl:w-60">
         <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-4 lg:px-3">
@@ -460,6 +492,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

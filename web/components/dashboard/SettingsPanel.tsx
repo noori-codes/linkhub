@@ -6,7 +6,6 @@ import { useState } from "react";
 import { AccountDetailsForm } from "@/components/dashboard/AccountDetailsForm";
 import { AccountSessionActions } from "@/components/dashboard/AccountSessionActions";
 import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
-import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { Loader } from "@/components/Loader";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
@@ -63,9 +62,6 @@ export function SettingsPanel() {
       <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-5">
         {tab === "account" ? (
           <div className="flex flex-col gap-4">
-            {me && !me.emailVerified ? (
-              <VerifyEmailBanner email={me.email} />
-            ) : null}
             {me ? (
               <AccountDetailsForm
                 user={me}

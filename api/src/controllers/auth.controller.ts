@@ -97,7 +97,13 @@ export const signup = catchAsync(
       // Soft verify: signup still succeeds if email isn't configured
     }
 
-    createSendToken(newUser, 201, req, res);
+    createSendToken(
+      newUser,
+      201,
+      req,
+      res,
+      process.env.NODE_ENV === "development" ? { verifyURL } : {},
+    );
   },
 );
 
@@ -252,8 +258,19 @@ export const forgotPassword = catchAsync(
       res.status(200).json({
         status: "success",
         message: "Password reset token sent to email.",
+        ...(process.env.NODE_ENV === "development" ? { resetURL } : {}),
       });
     } catch {
+      if (process.env.NODE_ENV === "development") {
+        res.status(200).json({
+          status: "success",
+          message:
+            "Email could not be sent (dev). Use the resetURL to continue.",
+          resetURL,
+        });
+        return;
+      }
+
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
 
@@ -373,8 +390,19 @@ export const resendVerifyEmail = catchAsync(
       res.status(200).json({
         status: "success",
         message: "Verification email sent.",
+        ...(process.env.NODE_ENV === "development" ? { verifyURL } : {}),
       });
     } catch {
+      if (process.env.NODE_ENV === "development") {
+        res.status(200).json({
+          status: "success",
+          message:
+            "Email could not be sent (dev). Use the verifyURL to continue.",
+          verifyURL,
+        });
+        return;
+      }
+
       user.emailVerifyToken = undefined;
       user.emailVerifyExpires = undefined;
       await user.save({ validateBeforeSave: false });
