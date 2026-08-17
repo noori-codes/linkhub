@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { ImageCropDialog, type CropKind } from "@/components/dashboard/ImageCropDialog";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { Loader } from "@/components/Loader";
 import { CLIENT_API_BASE } from "@/lib/client-api";
@@ -26,6 +27,18 @@ export function PhotosEditor() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [cropSession, setCropSession] = useState<{
+    kind: CropKind;
+    src: string;
+  } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cropSession?.src.startsWith("blob:")) {
+        URL.revokeObjectURL(cropSession.src);
+      }
+    };
+  }, [cropSession?.src]);
 
   useEffect(() => {
     if (!profile) return;
@@ -39,7 +52,28 @@ export function PhotosEditor() {
     return <Loader label="Loading…" className="py-12" />;
   }
 
-  async function uploadImage(kind: "avatar" | "cover", file: File) {
+  function openCropEditor(kind: CropKind, file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+
+    const src = URL.createObjectURL(file);
+    setCropSession({ kind, src });
+  }
+
+  function closeCropEditor() {
+    setCropSession((current) => {
+      if (current?.src.startsWith("blob:")) {
+        URL.revokeObjectURL(current.src);
+      }
+      return null;
+    });
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  }
+
+  async function uploadImage(kind: CropKind, file: File) {
     const token = getToken();
     if (!token) {
       router.replace("/login");
@@ -82,16 +116,12 @@ export function PhotosEditor() {
         setCoverUrl(data.data.coverUrl);
         toast.success("Cover uploaded");
       }
+
+      closeCropEditor();
     } catch {
       toast.error("Cannot reach API. Is the backend running?");
     } finally {
       setUploading(false);
-      if (kind === "avatar" && avatarInputRef.current) {
-        avatarInputRef.current.value = "";
-      }
-      if (kind === "cover" && coverInputRef.current) {
-        coverInputRef.current.value = "";
-      }
     }
   }
 
@@ -138,7 +168,8 @@ export function PhotosEditor() {
     }
   }
 
-  const busy = uploadingAvatar || uploadingCover || saving;
+  const busy =
+    uploadingAvatar || uploadingCover || saving || cropSession !== null;
   const hasAvatar = Boolean(avatarUrl.startsWith("http"));
   const hasCover = Boolean(coverUrl.startsWith("http"));
   const initials = (profile.displayName || profile.username || "?")
@@ -216,7 +247,7 @@ export function PhotosEditor() {
           <div className="min-w-0 flex-1 pb-1 pt-3">
             <h2 className="text-sm font-semibold text-text">Profile photo</h2>
             <p className="mt-0.5 text-xs text-text-muted">
-              Click the photo to upload · square crop works best · max 2 MB
+              Click the photo to upload · drag and zoom to crop · max 2 MB
             </p>
           </div>
         </div>
@@ -228,7 +259,7 @@ export function PhotosEditor() {
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) void uploadImage("avatar", file);
+            if (file) openCropEditor("avatar", file);
           }}
         />
         <input
@@ -238,7 +269,7 @@ export function PhotosEditor() {
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) void uploadImage("cover", file);
+            if (file) openCropEditor("cover", file);
           }}
         />
       </section>
@@ -294,6 +325,16 @@ export function PhotosEditor() {
           </form>
         ) : null}
       </section>
+
+      {cropSession ? (
+        <ImageCropDialog
+          kind={cropSession.kind}
+          imageSrc={cropSession.src}
+          onCancel={closeCropEditor}
+          onConfirm={(file) => uploadImage(cropSession.kind, file)}
+          busy={uploadingAvatar || uploadingCover}
+        />
+      ) : null}
     </div>
   );
 }
