@@ -17,14 +17,15 @@ import collectionRouter from "./routes/collection.routes.js";
 
 const app: Application = express();
 
-// Allow the Next.js app (port 3001) to call this API from the browser
+const corsOrigins = [
+  "http://localhost:3001",
+  "http://127.0.0.1:3001",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-      "http://192.168.0.111:3001",
-    ],
+    origin: corsOrigins,
     credentials: true,
   }),
 );
