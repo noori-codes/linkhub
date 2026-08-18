@@ -18,7 +18,7 @@ export function SiteFooter() {
               LinkHub
             </p>
             <p className="mt-1 max-w-xs text-sm text-text-muted">
-              Your bio and links on one public page.
+              Your links, look, and shop on one public page.
             </p>
           </div>
         </div>

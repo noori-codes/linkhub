@@ -320,17 +320,19 @@ export function LandingSkeleton() {
         <Skeleton className="h-7 w-7 rounded-md" />
         <Skeleton className="ml-2.5 h-4 w-20" />
       </div>
-      <section className="grid flex-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <div className="flex flex-col justify-center px-6 py-14 sm:px-10 lg:px-14">
-          <Skeleton className="h-16 w-56 max-w-full sm:h-20" />
-          <Skeleton className="mt-4 h-6 w-80 max-w-full" />
-          <Skeleton className="mt-4 h-4 w-72 max-w-full" />
-          <div className="mt-9 flex gap-3">
-            <Skeleton className="h-11 w-28 rounded-xl" />
+      <section className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+        <div className="flex flex-col justify-center px-6 py-16 sm:px-10 lg:px-14">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="mt-5 h-12 w-full max-w-md sm:h-14" />
+          <Skeleton className="mt-3 h-12 w-72 max-w-full" />
+          <Skeleton className="mt-5 h-4 w-80 max-w-full" />
+          <div className="mt-8 flex gap-3">
             <Skeleton className="h-11 w-32 rounded-xl" />
+            <Skeleton className="h-11 w-28 rounded-xl" />
           </div>
         </div>
-        <div className="hidden items-center justify-center border-l border-border lg:flex">
+        <div className="hidden flex-col items-center justify-center border-l border-border bg-bg-elevated lg:flex">
+          <Skeleton className="mb-4 h-3 w-28" />
           <PhoneFrame>
             <PreviewSkeleton />
           </PhoneFrame>

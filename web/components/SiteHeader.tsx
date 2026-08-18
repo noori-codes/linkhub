@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useClientAuth } from "@/components/ClientAuthProvider";
+import { LANDING_DEMO_USERNAME } from "@/lib/demo";
 import { uiBtnGhost, uiBtnPrimary } from "@/lib/ui";
 
 export function SiteHeader() {
@@ -25,6 +26,12 @@ export function SiteHeader() {
       </Link>
 
       <nav className="flex items-center gap-1 sm:gap-1.5" aria-label="Account">
+        <Link
+          href={`/u/${LANDING_DEMO_USERNAME}`}
+          className={`${uiBtnGhost} hidden sm:inline-flex`}
+        >
+          Sample
+        </Link>
         {!ready ? (
           <>
             <div

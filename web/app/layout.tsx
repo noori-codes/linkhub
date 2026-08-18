@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "LinkHub",
+    default: "LinkHub — one public page for your links",
     template: "%s · LinkHub",
   },
   description:
-    "Your identity and links in one place — between a profile and a link page.",
+    "Draft privately, then publish a page for your links, design, and shop — one URL for everything you share.",
   icons: {
     icon: "/linkhub-mark.png",
   },
