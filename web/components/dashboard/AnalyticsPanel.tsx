@@ -5,6 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
+import {
+  ActivityChart,
+  MixDonut,
+  TopLinksChart,
+} from "@/components/dashboard/AnalyticsCharts";
 import { EmptyState } from "@/components/EmptyState";
 import { AnalyticsSkeleton } from "@/components/Skeleton";
 import { clearToken } from "@/lib/auth";
@@ -200,6 +205,7 @@ export function AnalyticsPanel() {
   }
 
   const { summary, topLinks } = data;
+  const daily = data.daily ?? [];
   const visibleGroups = showAllGroups ? groups : groups.slice(0, 5);
 
   return (
@@ -233,15 +239,27 @@ export function AnalyticsPanel() {
               {summary.shares ?? 0}
             </dd>
           </div>
-          <div className="col-span-2 rounded-xl bg-bg px-4 py-4 sm:col-span-3">
-            <dt className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
-              Recorded click events
-            </dt>
-            <dd className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-text">
-              {summary.eventCount}
-            </dd>
-          </div>
         </dl>
+      </SettingsCard>
+
+      <SettingsCard
+        title="Last 14 days"
+        description="How visits and clicks moved over time."
+      >
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_10.5rem] lg:items-center">
+          {daily.length > 0 ? (
+            <ActivityChart daily={daily} />
+          ) : (
+            <p className="text-sm text-text-muted">
+              Activity over time will show here after visitors open your page.
+            </p>
+          )}
+          <MixDonut
+            views={summary.profileViews}
+            clicks={summary.eventCount}
+            shares={summary.shares ?? 0}
+          />
+        </div>
       </SettingsCard>
 
       <SettingsCard
@@ -255,27 +273,7 @@ export function AnalyticsPanel() {
             className="py-6"
           />
         ) : (
-          <ul className="flex flex-col gap-2">
-            {topLinks.map((link, index) => (
-              <li
-                key={link._id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border px-3.5 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-text">
-                    <span className="mr-2 text-text-muted">{index + 1}.</span>
-                    {link.title}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-text-muted">
-                    {link.url}
-                  </p>
-                </div>
-                <p className="shrink-0 text-sm font-semibold text-text">
-                  {link.clickCount}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <TopLinksChart links={topLinks} />
         )}
       </SettingsCard>
 

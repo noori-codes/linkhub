@@ -76,8 +76,12 @@ export function AnalyticsSkeleton() {
           <Skeleton className="h-18 w-full rounded-xl" />
           <Skeleton className="h-18 w-full rounded-xl" />
           <Skeleton className="h-18 w-full rounded-xl" />
-          <Skeleton className="col-span-2 h-18 w-full rounded-xl sm:col-span-3" />
         </div>
+      </section>
+      <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="mt-2 h-3 w-52" />
+        <Skeleton className="mt-4 h-48 w-full rounded-xl" />
       </section>
       <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
         <Skeleton className="h-4 w-20" />

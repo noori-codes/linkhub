@@ -117,6 +117,12 @@ export interface AnalyticsSummary {
     linkCount: number;
     eventCount: number;
   };
+  daily: Array<{
+    date: string;
+    views: number;
+    clicks: number;
+    shares: number;
+  }>;
   topLinks: Array<{
     _id: string;
     title: string;

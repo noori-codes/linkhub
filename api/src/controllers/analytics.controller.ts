@@ -95,7 +95,12 @@ export const getMyAnalytics = catchAsync(
       );
     }
 
-    const [links, recentEvents, clickEventCount, profileViews, shares] =
+    const DAY_COUNT = 14;
+    const rangeStart = new Date();
+    rangeStart.setUTCHours(0, 0, 0, 0);
+    rangeStart.setUTCDate(rangeStart.getUTCDate() - (DAY_COUNT - 1));
+
+    const [links, recentEvents, clickEventCount, profileViews, shares, dailyRaw] =
       await Promise.all([
         Link.find({ profile: profile._id })
           .select("title url clickCount isVisible")
@@ -120,6 +125,31 @@ export const getMyAnalytics = catchAsync(
           profile: profile._id,
           type: "share",
         }),
+        AnalyticsEvent.aggregate<{
+          _id: { date: string; type: string };
+          count: number;
+        }>([
+          {
+            $match: {
+              profile: profile._id,
+              createdAt: { $gte: rangeStart },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                date: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: "$createdAt",
+                  },
+                },
+                type: "$type",
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
       ]);
 
     const totalClicks = links.reduce(
@@ -157,6 +187,30 @@ export const getMyAnalytics = catchAsync(
       };
     });
 
+    const byDay = new Map<string, { views: number; clicks: number; shares: number }>();
+    for (let i = 0; i < DAY_COUNT; i += 1) {
+      const day = new Date(rangeStart);
+      day.setUTCDate(rangeStart.getUTCDate() + i);
+      byDay.set(day.toISOString().slice(0, 10), {
+        views: 0,
+        clicks: 0,
+        shares: 0,
+      });
+    }
+
+    for (const row of dailyRaw) {
+      const bucket = byDay.get(row._id.date);
+      if (!bucket) continue;
+      if (row._id.type === "profile_view") bucket.views += row.count;
+      else if (row._id.type === "share") bucket.shares += row.count;
+      else bucket.clicks += row.count;
+    }
+
+    const daily = Array.from(byDay.entries()).map(([date, counts]) => ({
+      date,
+      ...counts,
+    }));
+
     res.status(200).json({
       status: "success",
       data: {
@@ -167,6 +221,7 @@ export const getMyAnalytics = catchAsync(
           linkCount: links.length,
           eventCount: clickEventCount,
         },
+        daily,
         topLinks,
         recentClicks,
       },
