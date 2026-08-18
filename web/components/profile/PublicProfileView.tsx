@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { PublicShareButton } from "@/components/profile/PublicShareButton";
+import { PublicProfileStage } from "@/components/profile/PublicProfileStage";
 import { CLIENT_API_BASE } from "@/lib/client-api";
 import { isDemoUsername } from "@/lib/demo";
 import { buildShopSections } from "@/lib/shop-sections";
@@ -181,7 +182,7 @@ export function PublicProfileView({
 
   const shellClass =
     variant === "page"
-      ? "mx-auto flex min-h-full w-full max-w-lg flex-col"
+      ? "mx-auto flex min-h-full w-full max-w-lg flex-col lg:max-w-none"
       : "flex min-h-full flex-col";
 
   const body = (
@@ -549,8 +550,21 @@ export function PublicProfileView({
   return (
     <>
       <PublicShareButton username={profile.username} displayName={name} />
-      <div className="flex min-h-full flex-1 flex-col bg-[var(--profile-bg)]">
-        {body}
+      <div
+        className="flex min-h-full flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,28rem)]"
+        style={themeStyle}
+      >
+        <PublicProfileStage
+          profile={profile}
+          name={name}
+          cover={cover ?? null}
+          tokens={tokens}
+          isDemo={isDemo}
+          coverFallbackStyle={coverFallbackStyle}
+        />
+        <div className="flex min-h-full flex-1 flex-col lg:max-h-dvh lg:overflow-y-auto lg:border-l lg:border-[var(--profile-border)] lg:shadow-[-28px_0_48px_-28px_rgba(18,20,26,0.28)]">
+          {body}
+        </div>
       </div>
     </>
   );
