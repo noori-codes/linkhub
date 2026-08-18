@@ -82,7 +82,6 @@ Copy the MinIO block from [`api/.env.example`](api/.env.example) into `api/.env`
 |----------|----------|--------|
 | `NEXT_PUBLIC_API_URL` | no | Default `http://127.0.0.1:3000` (browser) |
 | `API_URL` | no | Server-side fetch to API; falls back to `NEXT_PUBLIC_API_URL` then `http://127.0.0.1:3000` |
-| `NEXT_PUBLIC_DEMO_USERNAME` | no | Published username for the landing hero preview |
 | `NEXT_PUBLIC_APP_HOST` | no | Host shown in marketing URL chips (default `linkhub.app`) |
 
 CORS on the API allows `localhost:3001` / `127.0.0.1:3001`. Update [`api/src/app.ts`](api/src/app.ts) if you use another origin.

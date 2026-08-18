@@ -41,7 +41,7 @@ export default function Home() {
                 href={`/u/${LANDING_DEMO_USERNAME}`}
                 className="text-sm font-medium text-text-muted transition-colors hover:text-brand"
               >
-                See a live page →
+                See a sample page →
               </Link>
             </div>
           </div>

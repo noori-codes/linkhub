@@ -6,6 +6,7 @@ import Theme from "../models/theme.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { findDefaultTheme } from "../utils/findDefaultTheme.js";
+import { isReservedUsername } from "../utils/reservedUsernames.js";
 import {
   canonicalizeOurObjectUrl,
   signedProfileJson,
@@ -36,6 +37,13 @@ export const createProfile = catchAsync(
     } else {
       const defaultTheme = await findDefaultTheme();
       themeId = defaultTheme?._id;
+    }
+
+    if (
+      typeof req.body.username === "string" &&
+      isReservedUsername(req.body.username)
+    ) {
+      return next(new AppError("That username is reserved.", 400));
     }
 
     const profile = await Profile.create({
@@ -121,8 +129,10 @@ export const checkUsernameAvailability = catchAsync(
 
     const existing = await Profile.findOne({ username }).select("user");
 
+    const reserved = isReservedUsername(username);
     const available =
-      !existing || existing.user.toString() === req.user._id.toString();
+      !reserved &&
+      (!existing || existing.user.toString() === req.user._id.toString());
 
     res.status(200).json({
       status: "success",
@@ -174,6 +184,10 @@ export const updateMyProfile = catchAsync(
     }
     if (typeof updates.coverUrl === "string") {
       updates.coverUrl = canonicalizeOurObjectUrl(updates.coverUrl);
+    }
+
+    if (typeof updates.username === "string" && isReservedUsername(updates.username)) {
+      return next(new AppError("That username is reserved.", 400));
     }
 
     if (updates.buttonShape !== undefined) {

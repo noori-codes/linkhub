@@ -9,6 +9,11 @@ import {
   getPublicProducts,
   getPublicProfile,
 } from "@/lib/api";
+import {
+  DEMO_LINKS,
+  DEMO_PROFILE,
+  isDemoUsername,
+} from "@/lib/demo";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -18,6 +23,14 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { username } = await params;
+
+  if (isDemoUsername(username)) {
+    return {
+      title: `${DEMO_PROFILE.displayName} · LinkHub`,
+      description: DEMO_PROFILE.bio,
+    };
+  }
+
   const profile = await getPublicProfile(username);
 
   if (!profile) {
@@ -34,6 +47,18 @@ export async function generateMetadata({
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
+
+  if (isDemoUsername(username)) {
+    return (
+      <main className="flex min-h-full flex-1 flex-col">
+        <PublicProfileView
+          profile={DEMO_PROFILE}
+          links={DEMO_LINKS}
+          variant="page"
+        />
+      </main>
+    );
+  }
 
   const [profile, links, products, collections] = await Promise.all([
     getPublicProfile(username),

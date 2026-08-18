@@ -1,9 +1,12 @@
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { isDemoUsername } from "@/lib/demo";
 
 export function trackProfileShare(
   username: string,
   method: "copy" | "native" | "qr" | "open" = "copy",
 ) {
+  if (isDemoUsername(username)) return;
+
   void fetch(
     `${CLIENT_API_BASE}/api/v1/analytics/u/${encodeURIComponent(username)}/share`,
     {

@@ -67,20 +67,3 @@ export async function getPublicCollections(username: string) {
   return json?.data.collections ?? [];
 }
 
-export async function getLandingDemo(username: string): Promise<{
-  profile: PublicProfile;
-  links: PublicLink[];
-} | null> {
-  try {
-    const [profile, links] = await Promise.all([
-      getPublicProfile(username),
-      getPublicLinks(username),
-    ]);
-
-    if (!profile) return null;
-
-    return { profile, links };
-  } catch {
-    return null;
-  }
-}

@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
 import { PublicShareButton } from "@/components/profile/PublicShareButton";
 import { CLIENT_API_BASE } from "@/lib/client-api";
+import { isDemoUsername } from "@/lib/demo";
 import { buildShopSections } from "@/lib/shop-sections";
 import { resolveButtonShape, resolveThemeTokens, themeStyleVars } from "@/lib/theme";
 import type {
@@ -22,9 +23,12 @@ function initials(name: string) {
     .join("");
 }
 
-function isRemote(url: string | undefined) {
+function isDisplayableImage(url: string | undefined) {
   return Boolean(
-    url && (url.startsWith("http://") || url.startsWith("https://")),
+    url &&
+      (url.startsWith("http://") ||
+        url.startsWith("https://") ||
+        url.startsWith("/")),
   );
 }
 
@@ -139,8 +143,8 @@ export function PublicProfileView({
   const d = densityStyles[density];
 
   const name = profile.displayName || profile.username;
-  const avatar = isRemote(profile.avatarUrl) ? profile.avatarUrl : null;
-  const cover = isRemote(profile.coverUrl) ? profile.coverUrl : null;
+  const avatar = isDisplayableImage(profile.avatarUrl) ? profile.avatarUrl : null;
+  const cover = isDisplayableImage(profile.coverUrl) ? profile.coverUrl : null;
   const tokens = resolveThemeTokens(profile);
   const buttonShape = resolveButtonShape(profile);
   const themeStyle = themeStyleVars(tokens, buttonShape);
@@ -148,11 +152,14 @@ export function PublicProfileView({
     variant === "preview"
       ? links.filter((link) => link.isVisible)
       : links;
+  const isDemo = isDemoUsername(profile.username);
 
-  const trackedHref = (link: PublicLink) =>
-    variant === "page"
+  const trackedHref = (link: PublicLink) => {
+    if (isDemo) return link.url;
+    return variant === "page"
       ? `${CLIENT_API_BASE}/api/v1/links/r/${link._id}`
       : link.url;
+  };
 
   const coverFallbackStyle: CSSProperties = {
     background: `linear-gradient(155deg, color-mix(in srgb, ${tokens.buttonColor} 35%, ${tokens.backgroundColor}) 0%, ${tokens.backgroundColor} 100%)`,
@@ -240,6 +247,16 @@ export function PublicProfileView({
           <p className={d.username} style={{ color: "var(--profile-text-muted)" }}>
             @{profile.username}
           </p>
+          {isDemo ? (
+            <p
+              className={`mt-1 font-semibold uppercase tracking-wide ${
+                density === "compact" ? "text-[9px]" : "text-[11px]"
+              }`}
+              style={{ color: "var(--profile-text-muted)" }}
+            >
+              Sample profile
+            </p>
+          ) : null}
 
           {profile.bio ? (
             <p className={d.bio} style={{ color: "var(--profile-text-muted)" }}>
@@ -322,8 +339,8 @@ export function PublicProfileView({
                   <a
                     key={link._id}
                     href={trackedHref(link)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={isDemo ? undefined : "_blank"}
+                    rel={isDemo ? undefined : "noopener noreferrer"}
                     className={linkClass}
                     style={linkButtonStyle}
                   >
@@ -389,7 +406,7 @@ export function PublicProfileView({
                           className="relative aspect-square w-full overflow-hidden"
                           style={{ backgroundColor: tokens.backgroundColor }}
                         >
-                          {isRemote(product.imageUrl) ? (
+                          {isDisplayableImage(product.imageUrl) ? (
                             <SafeRemoteImage
                               src={product.imageUrl}
                               alt=""
