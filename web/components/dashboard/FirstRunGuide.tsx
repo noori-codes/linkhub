@@ -124,48 +124,18 @@ export function FirstRunGuide({
     }
   }, [doneCount, steps.length]);
 
-  function dismiss() {
-    localStorage.setItem(dismissKey(userId), "1");
+  useEffect(() => {
+    if (!userId || dismissed === null || dismissed || !allDone) return;
+    try {
+      localStorage.setItem(dismissKey(userId), "1");
+    } catch {
+      /* ignore */
+    }
     setDismissed(true);
-  }
+  }, [allDone, dismissed, userId]);
 
-  if (dismissed === null) {
+  if (dismissed === null || dismissed || allDone) {
     return null;
-  }
-
-  if (dismissed) {
-    return null;
-  }
-
-  if (allDone) {
-    return (
-      <section
-        className="rounded-xl border border-brand/30 bg-brand-muted px-3.5 py-3.5"
-        aria-label="Getting started complete"
-      >
-        <div className="flex items-start gap-3">
-          <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-text-inverse"
-            aria-hidden
-          >
-            ✓
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-text">You&apos;re all set</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-text-muted">
-              Your page is live and ready to share.
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={dismiss}
-          className="mt-3 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-text transition-colors hover:border-brand/40"
-        >
-          Done
-        </button>
-      </section>
-    );
   }
 
   return (
