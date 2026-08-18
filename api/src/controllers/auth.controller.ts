@@ -8,6 +8,7 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { config } from "../config/config.js";
 import Email from "../config/email.js";
+import { getFrontendUrl } from "../utils/frontendUrl.js";
 
 interface JwtPayload {
   id: string;
@@ -88,7 +89,7 @@ export const signup = catchAsync(
     const verifyToken = newUser.createEmailVerifyToken();
     await newUser.save({ validateBeforeSave: false });
 
-    const frontendUrl = process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+    const frontendUrl = getFrontendUrl();
     const verifyURL = `${frontendUrl}/verify-email/${verifyToken}`;
 
     try {
@@ -249,7 +250,7 @@ export const forgotPassword = catchAsync(
 
     // Link must open the Next.js UI — not the PATCH API route
     const frontendUrl =
-      process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+      getFrontendUrl();
     const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
 
     try {
@@ -381,7 +382,7 @@ export const resendVerifyEmail = catchAsync(
     const verifyToken = user.createEmailVerifyToken();
     await user.save({ validateBeforeSave: false });
 
-    const frontendUrl = process.env.FRONTEND_URL ?? "http://127.0.0.1:3001";
+    const frontendUrl = getFrontendUrl();
     const verifyURL = `${frontendUrl}/verify-email/${verifyToken}`;
 
     try {

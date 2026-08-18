@@ -14,18 +14,13 @@ import analyticsRouter from "./routes/analytics.routes.js";
 import productRouter from "./routes/product.routes.js";
 import themeRouter from "./routes/theme.routes.js";
 import collectionRouter from "./routes/collection.routes.js";
+import { getCorsOrigins } from "./utils/frontendUrl.js";
 
 const app: Application = express();
 
-const corsOrigins = [
-  "http://localhost:3001",
-  "http://127.0.0.1:3001",
-  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
-];
-
 app.use(
   cors({
-    origin: corsOrigins,
+    origin: getCorsOrigins(),
     credentials: true,
   }),
 );
