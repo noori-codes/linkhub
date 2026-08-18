@@ -8,7 +8,7 @@ import {
   OnboardingShell,
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
   onboardingCardClass,
@@ -78,7 +78,7 @@ export default function OnboardingPage() {
       await setOnboardingStep(token, "profile");
       router.push("/onboarding/about");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

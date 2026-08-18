@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { endAuthSession } from "@/lib/auth-session";
+import { NETWORK_ERROR } from "@/lib/client-api";
 import {
   fetchMyLinks,
   fetchMyProfile,
@@ -95,7 +96,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const networkError =
     profileQuery.isError &&
     !(profileQuery.error instanceof HttpError) &&
-    "Cannot reach API. Is the backend running?";
+    NETWORK_ERROR;
 
   const value = useMemo(
     () => ({

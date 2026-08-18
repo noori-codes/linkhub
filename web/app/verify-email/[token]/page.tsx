@@ -10,7 +10,7 @@ import { FormAlert } from "@/components/FormAlert";
 import { ListSkeleton } from "@/components/Skeleton";
 import { notifyEmailVerified } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { queryKeys } from "@/lib/dashboard-queries";
 import { uiBtnPrimaryBlock } from "@/lib/ui";
 
@@ -73,7 +73,7 @@ export default function VerifyEmailPage() {
       } catch {
         if (cancelled) return;
         setStatus("error");
-        setMessage("Cannot reach API. Is the backend running?");
+        setMessage(NETWORK_ERROR);
       }
     }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 
 type Props = {
@@ -116,7 +116,7 @@ export function VerifyEmailBanner({ email, variant = "card" }: Props) {
         if (path) setDevPath(path);
       }
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSending(false);
     }

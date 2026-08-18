@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { ThemeGridSkeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
 import { themeIdOf } from "@/lib/theme";
@@ -85,7 +85,7 @@ export function ThemePicker() {
       setProfile(data.data.profile);
       toast.success(`${theme.name} theme applied`);
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSavingId(null);
     }

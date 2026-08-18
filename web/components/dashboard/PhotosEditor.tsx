@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ImageCropDialog, type CropKind } from "@/components/dashboard/ImageCropDialog";
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { PhotosSkeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { imageObjectKey, isRemoteImageUrl } from "@/lib/image-url";
 import { SafeRemoteImage } from "@/components/profile/SafeRemoteImage";
@@ -156,7 +156,7 @@ export function PhotosEditor() {
 
       closeCropEditor();
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setUploading(false);
     }
@@ -207,7 +207,7 @@ export function PhotosEditor() {
       });
       toast.success("Photo URLs saved");
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSaving(false);
     }

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { Skeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { BUTTON_SHAPES, resolveButtonShape } from "@/lib/theme";
 import type { ApiSuccess, ButtonShape, PublicProfile } from "@/lib/types";
@@ -73,7 +73,7 @@ export function ButtonShapePicker() {
       setProfile(data.data.profile);
       toast.success(`${BUTTON_SHAPES.find((s) => s.id === shape)?.label} buttons`);
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSaving(null);
     }

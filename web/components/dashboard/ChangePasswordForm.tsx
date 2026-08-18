@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { PasswordInput } from "@/components/PasswordInput";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken, saveToken } from "@/lib/auth";
 import { uiBtnPrimary } from "@/lib/ui";
 
@@ -69,7 +69,7 @@ export function ChangePasswordForm() {
       setPasswordConfirm("");
       toast.success("Password updated");
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSaving(false);
     }

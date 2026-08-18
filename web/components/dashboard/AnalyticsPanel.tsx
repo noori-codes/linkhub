@@ -13,6 +13,7 @@ import {
 import { EmptyState } from "@/components/EmptyState";
 import { AnalyticsSkeleton } from "@/components/Skeleton";
 import { clearToken } from "@/lib/auth";
+import { NETWORK_ERROR } from "@/lib/client-api";
 import {
   fetchMyAnalytics,
   HttpError,
@@ -186,7 +187,7 @@ export function AnalyticsPanel() {
     const message =
       error instanceof HttpError
         ? error.message
-        : "Cannot reach API. Is the backend running?";
+        : NETWORK_ERROR;
 
     return (
       <p className="text-sm text-danger" role="alert">

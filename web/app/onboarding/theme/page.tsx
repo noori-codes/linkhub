@@ -9,7 +9,7 @@ import {
   OnboardingSkipFooter,
 } from "@/components/onboarding/OnboardingShell";
 import { ThemeGridSkeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/dashboard-queries";
 import {
@@ -66,7 +66,7 @@ export default function OnboardingThemePage() {
         }
         setReady(true);
       } catch {
-        setError("Cannot reach API. Is the backend running?");
+        setError(NETWORK_ERROR);
         setReady(true);
       }
     }
@@ -115,7 +115,7 @@ export default function OnboardingThemePage() {
       }
       await goNext(token);
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

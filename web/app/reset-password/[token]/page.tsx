@@ -9,7 +9,7 @@ import Link from "next/link";
 import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { beginAuthSession } from "@/lib/auth-session";
 import {
   onboardingFormClass,
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
 
       router.push("/profile");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

@@ -19,9 +19,7 @@ async function getJson<T>(path: string): Promise<T | null> {
       cache: "no-store",
     });
   } catch {
-    throw new Error(
-      `Cannot reach API at ${API_BASE}${path}. Start the backend with: cd api && yarn dev`,
-    );
+    throw new Error("This page couldn’t load. Please try again.");
   }
 
   if (res.status === 404) {

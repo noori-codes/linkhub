@@ -11,7 +11,7 @@ import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
 import { beginAuthSession } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
   onboardingFormClass,
@@ -113,7 +113,7 @@ export default function SignupPage() {
       await setOnboardingStep(token!, "profile");
       router.push("/onboarding/about");
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { SettingsCard } from "@/components/dashboard/SettingsCard";
 import { EmptyState } from "@/components/EmptyState";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { ListSkeleton } from "@/components/Skeleton";
 import {
@@ -163,7 +163,7 @@ export function CollectionsSection({ products }: Props) {
       const message =
         err instanceof HttpError
           ? err.message
-          : "Cannot reach API. Is the backend running?";
+          : NETWORK_ERROR;
       setFormError(message);
     },
   });
@@ -209,7 +209,7 @@ export function CollectionsSection({ products }: Props) {
       const message =
         err instanceof HttpError
           ? err.message
-          : "Cannot reach API. Is the backend running?";
+          : NETWORK_ERROR;
       toast.error(message);
     },
   });
@@ -246,7 +246,7 @@ export function CollectionsSection({ products }: Props) {
       toast.error(
         err instanceof HttpError
           ? err.message
-          : "Cannot reach API. Is the backend running?",
+          : NETWORK_ERROR,
       );
     },
   });
@@ -295,7 +295,7 @@ export function CollectionsSection({ products }: Props) {
     const message =
       collectionsQuery.error instanceof HttpError
         ? collectionsQuery.error.message
-        : "Cannot reach API. Is the backend running?";
+        : NETWORK_ERROR;
     return (
       <SettingsCard
         title="Collections"

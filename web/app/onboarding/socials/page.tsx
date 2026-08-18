@@ -9,7 +9,7 @@ import {
 } from "@/components/onboarding/OnboardingShell";
 import { PlatformPicker } from "@/components/onboarding/PlatformPicker";
 import { ListSkeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import {
   readSelectedPlatforms,
@@ -48,7 +48,7 @@ export default function OnboardingSocialsPage() {
         setSelected(readSelectedPlatforms());
         setReady(true);
       } catch {
-        setError("Cannot reach API. Is the backend running?");
+        setError(NETWORK_ERROR);
         setReady(true);
       }
     }
@@ -82,7 +82,7 @@ export default function OnboardingSocialsPage() {
     try {
       await goNext(token, selected);
     } catch {
-      setError("Cannot reach API. Is the backend running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

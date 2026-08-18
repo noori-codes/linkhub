@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { clearToken, getToken } from "@/lib/auth";
 import { CollectionsSection } from "@/components/dashboard/CollectionsSection";
 import { EmptyState } from "@/components/EmptyState";
@@ -185,7 +185,7 @@ export function ShopPanel() {
     } catch (err) {
       const message =
         err instanceof TypeError
-          ? "Cannot reach API. Is the backend running?"
+          ? NETWORK_ERROR
           : err instanceof Error
             ? err.message
             : "Could not import from that link";
@@ -533,7 +533,7 @@ export function ShopPanel() {
       toast.success("Product photo uploaded");
       await queryClient.invalidateQueries({ queryKey: queryKeys.productsMe });
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setUploadingImageId(null);
       if (imageInputRef.current) imageInputRef.current.value = "";
@@ -558,7 +558,7 @@ export function ShopPanel() {
     const message =
       productsQuery.error instanceof HttpError
         ? productsQuery.error.message
-        : "Cannot reach API. Is the backend running?";
+        : NETWORK_ERROR;
     return (
       <p className="text-sm text-danger" role="alert">
         {message}

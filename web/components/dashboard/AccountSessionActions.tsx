@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { endAuthSession } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
 import { uiBtnSecondary } from "@/lib/ui";
@@ -56,7 +56,7 @@ export function AccountSessionActions() {
       toast.success("Account deleted");
       router.replace("/");
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setDeleting(false);
     }

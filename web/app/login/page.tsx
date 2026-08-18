@@ -10,7 +10,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/FormAlert";
 import { PasswordInput } from "@/components/PasswordInput";
 import { beginAuthSession } from "@/lib/auth-session";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { normalizeEmailInput } from "@/lib/email";
 import {
   onboardingFormClass,
@@ -80,7 +80,7 @@ export default function LoginPage() {
 
       router.push("/profile");
     } catch {
-      setError("Cannot reach API. Is `cd api && yarn dev` running?");
+      setError(NETWORK_ERROR);
     } finally {
       setLoading(false);
     }

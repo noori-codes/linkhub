@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { uiBtnPrimary, uiInput } from "@/lib/ui";
 import type { AccountUser, ApiSuccess } from "@/lib/types";
@@ -57,7 +57,7 @@ export function AccountDetailsForm({ user, onUserChange }: Props) {
       setLastName(data.data.user.lastName);
       toast.success("Account updated");
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSaving(false);
     }

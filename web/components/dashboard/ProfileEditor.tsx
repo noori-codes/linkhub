@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { useProfile } from "@/components/profile/ProfileProvider";
 import { FormSkeleton } from "@/components/Skeleton";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import { uiInput } from "@/lib/ui";
 import type { ApiSuccess, PublicProfile } from "@/lib/types";
@@ -312,7 +312,7 @@ export function ProfileEditor() {
       }
     } catch {
       if (gen !== saveGenRef.current) return;
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     }
   }
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { SortableLinkList } from "@/components/SortableLinkList";
 import { EmptyState } from "@/components/EmptyState";
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { getToken } from "@/lib/auth";
 import type { ApiSuccess, PublicLink } from "@/lib/types";
 import { uiBtnPrimary, uiBtnSecondary, uiInput } from "@/lib/ui";
@@ -94,7 +94,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
       setNewUrl("");
       setShowAddForm(false);
     } catch {
-      setAddError("Cannot reach API. Is the backend running?");
+      setAddError(NETWORK_ERROR);
     } finally {
       setAdding(false);
     }
@@ -134,7 +134,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
         ),
       );
     } catch {
-      setPanelError("Cannot reach API. Is the backend running?");
+      setPanelError(NETWORK_ERROR);
     } finally {
       setTogglingId(null);
     }
@@ -171,7 +171,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
 
       commitLinks(linksRef.current.filter((item) => item._id !== link._id));
     } catch {
-      setPanelError("Cannot reach API. Is the backend running?");
+      setPanelError(NETWORK_ERROR);
     } finally {
       setDeletingId(null);
     }
@@ -229,7 +229,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
       );
       cancelEdit();
     } catch {
-      setPanelError("Cannot reach API. Is the backend running?");
+      setPanelError(NETWORK_ERROR);
     } finally {
       setSavingEdit(false);
     }
@@ -286,7 +286,7 @@ export function LinksPanel({ initialLinks, onLinksChange }: Props) {
       commitLinks(data.data.links);
     } catch {
       commitLinks(before);
-      setPanelError("Cannot reach API. Is the backend running?");
+      setPanelError(NETWORK_ERROR);
     } finally {
       setReordering(false);
     }

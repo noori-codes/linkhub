@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { CLIENT_API_BASE } from "@/lib/client-api";
+import { CLIENT_API_BASE, NETWORK_ERROR } from "@/lib/client-api";
 import { subscribeEmailVerified } from "@/lib/auth-session";
 import { getToken } from "@/lib/auth";
 import { fetchMyUser, queryKeys } from "@/lib/dashboard-queries";
@@ -89,7 +89,7 @@ export function PreviewPublishControl({ profile, onProfileChange }: Props) {
         nextStatus === "published" ? "Page published" : "Page unpublished",
       );
     } catch {
-      toast.error("Cannot reach API. Is the backend running?");
+      toast.error(NETWORK_ERROR);
     } finally {
       setSaving(false);
     }
