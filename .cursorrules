@@ -1,0 +1,15 @@
+# Commit message generation (Source Control sparkle button)
+
+When generating a Git commit message for this repository:
+
+- Use Conventional Commits: a type prefix, then a short summary.
+- Allowed prefixes: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `style:`, `test:`, `perf:`
+- Prefer `refactor:` (not `refact:`).
+- One line only, ~50–72 characters after the prefix when possible.
+- Imperative mood (e.g. "Add", "Fix", "Update"), focus on why / outcome.
+- Do not list every file. Do not write a long body or bullet list.
+- Examples:
+  - `feat: polish dashboard phone preview stage`
+  - `fix: allow CORS from production frontend URL`
+  - `refactor: migrate link reorder to dnd-kit`
+  - `chore: add dnd-kit react dependency`
