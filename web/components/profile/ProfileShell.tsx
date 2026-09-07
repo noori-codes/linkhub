@@ -382,14 +382,11 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Right — phone preview */}
-      <aside className="hidden h-full min-w-0 shrink-0 flex-col overflow-hidden bg-[linear-gradient(165deg,#e6e9ef_0%,#f0f2f5_45%,#f3f4f6_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
-        <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-text">Live preview</p>
-            <p className="mt-0.5 text-xs text-text-muted">
-              Updates as you edit
-            </p>
-          </div>
+      <aside className="hidden h-full min-w-0 shrink-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#eceff3_0%,#f4f5f7_55%,#eef0f3_100%)] lg:flex lg:w-[24rem] xl:w-[26rem]">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black/[0.04] px-5 py-3.5">
+          <p className="min-w-0 text-[13px] font-semibold tracking-tight text-text">
+            Preview
+          </p>
           {profile ? (
             <PreviewPublishControl
               profile={profile}
@@ -397,7 +394,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
             />
           ) : null}
         </div>
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 pb-6 pt-1">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 py-6">
           <PhoneFrame>{preview}</PhoneFrame>
           {profile ? (
             <PreviewShareActions

@@ -100,10 +100,18 @@ export function PreviewPublishControl({ profile, onProfileChange }: Props) {
       <span
         className={
           isPublished
-            ? "rounded-full bg-[#e8f6ee] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-success"
-            : "rounded-full bg-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted"
+            ? "inline-flex items-center gap-1.5 rounded-full bg-[#e8f6ee] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-success"
+            : "inline-flex items-center gap-1.5 rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-text-muted"
         }
       >
+        <span
+          aria-hidden
+          className={
+            isPublished
+              ? "h-1.5 w-1.5 rounded-full bg-success"
+              : "h-1.5 w-1.5 rounded-full bg-text-muted/50"
+          }
+        />
         {isPublished ? "Live" : "Draft"}
       </span>
       <button
@@ -112,8 +120,8 @@ export function PreviewPublishControl({ profile, onProfileChange }: Props) {
         disabled={saving || meQuery.isLoading}
         className={
           isPublished
-            ? "rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text hover:border-brand/40 disabled:opacity-50"
-            : "rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
+            ? "rounded-lg border border-border/80 bg-surface/80 px-2.5 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-border hover:text-text disabled:opacity-50"
+            : "rounded-lg bg-brand px-2.5 py-1.5 text-xs font-semibold text-text-inverse hover:bg-brand-hover disabled:opacity-50"
         }
       >
         {saving ? "Saving…" : isPublished ? "Unpublish" : "Publish"}
