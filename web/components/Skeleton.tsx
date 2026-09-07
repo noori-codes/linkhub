@@ -42,7 +42,7 @@ function SkeletonStack({
 export function PreviewSkeleton() {
   return (
     <div
-      className="flex h-full w-full flex-col items-center px-5 pt-14"
+      className="flex h-full min-h-full w-full flex-col items-center bg-[#eef0f3] px-5 pt-14"
       role="status"
       aria-live="polite"
       aria-busy="true"
