@@ -78,6 +78,18 @@ body {
   background-clip: content-box;
 }
 
+/* Phone demo / dashboard preview — scroll without a visible bar */
+.lh-hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lh-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Quiet panel — border + soft depth, no colored glow */
 .lh-panel {
   border: 1px solid var(--border);
