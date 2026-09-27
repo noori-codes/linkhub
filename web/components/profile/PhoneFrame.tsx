@@ -40,7 +40,7 @@ export function PhoneFrame({ children, className = "" }: Props) {
             <span className="mr-5 h-[7px] w-[7px] rounded-full bg-[#1c2028] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]" />
           </div>
 
-          <div className="lh-hide-scrollbar absolute inset-0 overflow-y-auto overscroll-contain">
+          <div className="absolute inset-0 overflow-hidden overscroll-contain">
             {children}
           </div>
 
